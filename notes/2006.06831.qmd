@@ -1,0 +1,80 @@
+---
+title: "不完全因果知识下的概率化算法追索"
+subtitle: "Amir-Hossein Karimi et al., arXiv:2006.06831 (2020)"
+description: "先证明不知道真实结构方程时算法追索原则上无法保证（Proposition 2），再给出两条概率化出路：GP-SCM 上的贝叶斯反事实分布（梯级 3）与基于子人群干预 CATE 的追索（梯级 2）。"
+date: 2020-06-11
+categories: [因果推断, 算法追索]
+paper-id: 2006.06831
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Amir-Hossein Karimi（MPI IS, Tübingen / MPI-ETH CLS）、Julius von Kügelgen（MPI IS / Cambridge；与前两者同等贡献）、Bernhard Schölkopf（MPI IS）、Isabel Valera（MPI IS / Saarland） |
+| 出处 | arXiv:2006.06831 [cs.LG]；站内 PDF 为 v3（2020-10-23）；NeurIPS 2020 |
+| 日期 | 2020-06-11（v1） |
+| 页数 | 23 页（正文 10 页 + 文献 + 附录 A–F） |
+
+一句话定位：把 Pearl 因果阶梯的梯级 3（反事实）与梯级 2（干预）之差落到「算法追索」这一应用上——先证明反事实式追索对不可检验的结构方程假设脆弱，再以「子人群干预」作为可识别的替代目标。
+
+## 问题与模型
+
+研究问题：被分类器 $h$ 拒绝的个体 $x^F$ 应执行哪些干预动作 $a=\mathrm{do}(X_I=\theta)$，使期望代价最小且预测翻盘？此前工作（Karimi et al. 2020, arXiv:2002.06278）需完整已知结构因果模型（structural causal model, SCM）才能按溯因–行动–预测三步算出单一反事实 $x^{SCF}(a)$ 并解约束优化 (4)。设定：SCM $\mathfrak{M}=(S,P_U)$，$S=\{X_r:=f_r(X_{\mathrm{pa}(r)},U_r)\}$，噪声联合独立（因果充分性，causal sufficiency），因果图 $\mathcal{G}$ 已知且无环；方法一进一步假设加性噪声模型（additive noise model, ANM）$X_r=f_r(X_{\mathrm{pa}(r)})+U_r$，$f_r\sim\mathcal{GP}(0,k_r)$、$U_r\sim\mathcal{N}(0,\sigma_r^2)$。基线 $\mathfrak{M}_{LIN}/\mathfrak{M}_{KRR}$ 是该 ANM 的线性/核岭回归点估计。
+
+## 识别或主要命题
+
+**Example 1（p.4，改编自 Pearl《Causality》Prop. 6.19）**：取 $U_1,U_2\sim\mathrm{Bernoulli}(0.5)$、$U_3\sim\mathrm{Uniform}(\{0,\dots,K\})$，构造 $\mathfrak{M}_A,\mathfrak{M}_B$，仅 $X_1=X_2$ 分支上 $X_3$ 的方程分别用 $U_3$ 与 $K-U_3$。两模型观测与干预分布完全相同（数据上不可区分），但对 $x^F=(1,0,0)$ 做 $X_1=0$ 的反事实分别得 $(0,0,0)$ 与 $(0,0,K)$——结构方程形式不可检验。**Proposition 2（负面结果）**：除非被干预变量的后代集为空，否则只有已知真实结构方程才能保证追索，与数据量无关。Remark 3 补充其逆不成立。方法一：**Definition 4（GP-SCM）** 上，**Proposition 5** 给出噪声后验 $u_r\mid X_{\mathrm{pa}(r)},x_r\sim\mathcal{N}(\sigma_r^2(K+\sigma_r^2I)^{-1}x_r,\ \sigma_r^2I-\sigma_r^2(K+\sigma_r^2I)^{-1})$，**Proposition 6** 给出各后代变量的反事实分布（均为解析高斯），把硬约束 $h(x^{SCF}(a))\geq 0.5$ 换成期望约束 $\mathbb{E}_{X^{SCF}(a)}[h]\geq\mathrm{thresh}(a)$ (8)，阈值取下置信界 $0.5+\gamma_{LCB}\sqrt{\mathrm{Var}[h]}$ (9)。方法二：放弃结构方程假设，**Proposition 7** 证明干预分布可由因果马尔可夫核（causal Markov kernel）分解识别：$p(X_{d(I)}\mid do(X_I=\theta),x^F_{nd(I)})=\prod_{r\in d(I)}p(X_r\mid X_{\mathrm{pa}(r)})\big|_{X_I=\theta,X_{nd(I)}=x^F_{nd(I)}}$ (11)。附录 **Proposition 9** 进一步说明即便图已知，各条件分布也不足以确定结构方程。
+
+## 估计/经验
+
+两种分布均可重参数化，约束经蒙特卡洛近似后用拉格朗日鞍点问题 $\min_\theta\max_\lambda\mathcal{L}(\theta,\lambda)$ (14) 与随机梯度求解；非可微分类器退化为离散暴力枚举。每个条件 $p(x_r\mid x_{\mathrm{pa}(r)})$ 用条件变分自编码器（conditional VAE, CVAE）估计（Remark 8 谨慎指出其「伪反事实」语义）。实验一：与 Fig. 1c 同图的三变量 SCM（线性/非线性 ANM/非加性多峰），$N_{runs}=100$、MC 样本 100、$\gamma_{LCB}=2$（Table 1）：点估计失配时有效性骤降（$\mathfrak{M}_{LIN}$ 在非线性 ANM 上 54%，$\mathfrak{M}_{KRR}$ 在非加性上 70%）；$\mathfrak{M}_{GP}$ 在线性与非线性 ANM 上 100%；非加性 SCM 上仅子人群方法 $\mathrm{CATE}_{CVAE}$ 达 100%（GP 假设被违反时降至 95%），代价是成本略高。实验二：7 变量半合成贷款 SCM（German Credit：$A,G,E,L,D,I,S$；$A,G,D$ 不可行动、$D$ 可变；方程含收入/教育的性别差异，附录 E.1.2），$\gamma_{LCB}=2.5$（Table 2）：线性逻辑回归下 $\mathfrak{M}_{LIN}$ 有效性仅 19%、$\mathfrak{M}_{KRR}$ 41%，$\mathfrak{M}_{GP}/\mathfrak{M}_{CVAE}$ 均 100%；Fig. 2c 显示 $\gamma_{LCB}$ 调节有效性–成本权衡。
+
+## 开放问题
+
+1. **因果图与因果充分性全篇假设已知（作者自认，§8）**：部分已知图或存在隐混杂时需限制到可识别干预子集、或诉诸工具变量/实验数据、多因潜变量、代理变量、因果效应界——文中仅列为未来工作。
+2. **CVAE-SCM 的可辨识性未知（Remark 8 + 附录 C）**：从近似后验 $q_{\varphi_r}$ 采样是否可解释为 (13) 中 SCM 的反事实并不清楚；作者猜测其或为嵌套后非线性模型（Zhang & Hyvärinen 2009）而具可辨识性，仅是猜想。
+3. **干预目标集合的组合爆炸（我识别）**：梯度法只对固定 $I$ 优化 $\theta$，目标集合有 $2^{d'}$ 种；作者建议限 $|I|\leq 3$ 或贪心（脚注 6），无理论保证，大图上「最优动作集」的近似质量未评估。
+4. **子人群追索的语义缺口（我识别）**：梯级 2 目标保证的是条件于 $X_{nd(I)}=x^F_{nd(I)}$ 的子群平均翻盘率，个体异质性未刻画；「相似」仅由非后代取值相等定义，条件维数高时子群可能极小，CVAE 条件密度在该处的估计方差未讨论。
+5. **方法一仍限于加性高斯族（我识别）**：非加性 SCM 上 $\mathfrak{M}_{GP}$ 有效性 95%，模型族错配只能事后由实验暴露，文中无检测错设的诊断量。
+6. **经验验证空白（我识别）**：全部实验为合成三变量与半合成贷款数据，分类器固定且标签由 SCM 生成；无真实部署或人因研究；哪些群体承担更高追索成本的公平性问题留给并行工作（von Kügelgen et al. 2020, 参考文献 [57]）。
+
+## 文献谱系
+
+Pearl（2009）与 Peters, Janzing & Schölkopf（2017，《Elements of Causal Inference》）提供 SCM、三步反事实与 Example 1 / Prop 4.1 的来源。直接前作 Karimi, Schölkopf & Valera（2020, arXiv:2002.06278）：本文要放松的「完整已知 SCM」假设即其设定，$\mathfrak{M}_{LIN}/\mathfrak{M}_{KRR}$ 是其点估计实现。Wachter et al.（2017）的（最近）反事实解释 (2) 与 Ustun et al.（2019）的 actionable recourse 是本文批评的「特征独立可操纵」视角。工具层面：Hoyer et al.（2009）与 Peters & Bühlmann（2014）的 ANM 类、Rasmussen & Williams（2006）的 GP、Sohn et al.（2015）的 CVAE、Abrevaya et al.（2015）的 CATE。后续：von Kügelgen et al.（2020, arXiv:2010.06529）把追索公平化；Karimi et al.（2020, arXiv:2010.04050）综述将其定位为概率化追索基准。
+
+## 明确不覆盖
+
+不学习因果图（全篇假设已知）；不处理隐混杂与部分图（仅展望）；不修改或审计分类器 $h$（即便其歧视性，Broader Impact 中自认）；不处理非可微分类器的梯度法（退化为枚举）；不给 CVAE-SCM 可辨识性理论；不与非因果追索方法（独立特征假设）直接比较（作者论证其口径不可比）。
+
+## 阅读路径
+
+先读 §1 与 §3（Example 1 + Proposition 2 是全文支点：为什么必须概率化）；§4 按 Definition 4 → Proposition 5/6 → 式 (8)–(9) 顺序读，附录 A 证明只用高斯恒等式；§5 抓住 Proposition 7 与 Remark 8（干预分布可识别但「伪反事实」存疑）；§6 拉格朗日与重参数化 (14)–(15)；§7 精读 Table 1 的非加性列与 Table 2 的线性逻辑回归列、Fig. 2c 的 $\gamma_{LCB}$ 权衡；附录 C（Proposition 9 与可辨识性讨论）值得精读。姊妹篇对照：站内总览页已笔记的 arXiv:2002.06278（Karimi et al.，完整 SCM 下的干预化追索，本文的基线与批判对象）与 arXiv:2010.06529（追索公平一脉，本文参考文献 [57] 的并行工作）。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 算法追索 | algorithmic recourse |
+| 反事实解释 | counterfactual explanation |
+| 结构因果模型 | structural causal model (SCM) |
+| 因果充分性 | causal sufficiency |
+| 加性噪声模型 | additive noise model (ANM) |
+| 高斯过程 SCM | Gaussian process SCM (GP-SCM) |
+| 贝叶斯模型平均 | Bayesian model averaging |
+| 反事实分布 | counterfactual distribution |
+| 溯因–行动–预测 | abduction–action–prediction |
+| 条件平均处理效应 | conditional average treatment effect (CATE) |
+| 子人群（式）追索 | subpopulation-based recourse |
+| 因果马尔可夫核 | causal Markov kernel |
+| 条件变分自编码器 | conditional variational autoencoder (CVAE) |
+| 伪反事实 | pseudo-counterfactual |
+| 下置信界 | lower confidence bound (LCB) |
+| 有效性 | validity |
+| 可行动特征 | actionable features |
+| 因果阶梯的梯级 | rung (of the ladder of causation) |
+
+## 来源定位
+
+`papers/2006.06831.pdf`（23 页）。关键内容：Example 1 与 Proposition 2（§3, p.4）；Definition 4 / Proposition 5 / Proposition 6（§4, p.5）与概率化追索问题式 (8)–(9)（p.5–6）；Proposition 7 与 Remark 8（§5, p.6）；拉格朗日与重参数化式 (14)–(15)（§6, p.7）；Table 1（p.8）与 Table 2、$\gamma_{LCB}$ 权衡（§7, p.9；Fig. 2c 见 p.6）；假设与局限讨论（§8, p.9）；Proposition 9 与可辨识性讨论（附录 C, p.18）；GP 证明（附录 A, p.14–15）；German Credit SCM 规格（附录 E.1.2, p.21）。

@@ -1,0 +1,83 @@
+---
+title: "不变条件分布与因果迁移学习"
+subtitle: "Mateo Rojas-Carulla et al., arXiv:1507.05333 (2015)"
+description: "把协变量偏移放松为只对预测变量的某个不变子集成立，证明域泛化中只用该子集回归在对抗意义下最优、任务足够多样时平均意义优于合并池化。给出用 HSIC 检验从数据搜索不变子集的算法，并在酵母基因敲除数据上验证对干预的稳健性。"
+date: 2015-07-19
+categories: [因果推断, 迁移学习]
+paper-id: 1507.05333
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Mateo Rojas-Carulla（MPI 智能系统研究所 / 剑桥大学工程系）、Bernhard Schölkopf（MPI Tübingen）、Richard Turner（剑桥大学工程系）、Jonas Peters（哥本哈根大学，部分工作完成于 MPI Tübingen） |
+| 出处 | arXiv:1507.05333 [stat.ML]；v1 2015-07-19；站内 PDF 为 v4（2018-09-24），定稿发表于 JMLR 19 (2018) 1–34 |
+| 日期 | 2015-07-19 |
+| 页数 | 34 页（正文 27 页 + 附录 A 证明与 B 代码链接） |
+
+一句话定位：把协变量偏移（covariate shift）放松到只对某个预测变量子集成立，用因果机制不变性为域泛化（Domain Generalization, DG）提供可证明的稳健预测，是后来不变预测（ICP）与不变风险最小化（IRM）谱系的早期理论工作。
+
+## 问题与模型
+
+设 $D$ 个训练任务 $P^1,\dots,P^D$，$(X^k,Y^k)\sim P^k$；DG 中测试任务 $T=D+1$ 无标注样本，测试任务有标注（或无标注）样本时为非对称/对称多任务学习（AMTL/SMTL，Table 1 四分类）。目标是以 $\mathbb E_{P^T}(\beta)=\mathbb E(Y^T-\beta^t X^T)^2$（式 2）在测试任务上取小。核心假设：
+
+- **(A1)** 存在不变集（invariant set）$S^*\subseteq\{1,\dots,p\}$ 使 $Y^k|X^k_{S^*}$ 对所有训练任务同分布（式 1）；
+- **(A1')** 不变性延续到测试任务（DG 下不可检验）；
+- **(A2)** 该条件分布线性：$Y^k=\alpha^t X^k_{S^*}+\varepsilon^k$，$\varepsilon^k\perp X^k_{S^*}$ 且各任务同分布。
+
+$S^*=\{1,\dots,p\}$ 时 (A1') 即协变量偏移，故这是其真放松（Figure 1）。估计量 $\beta^{CS(S^*)}$：合并训练任务、只用 $S^*$ 中特征回归，其余维度补零（式 4）。因果动机（§2.3）：若任务是某 SEM 的干预分布且 $Y$ 未被干预，则 $S^*:=\mathrm{PA}_Y$ 满足 (A1)(A1')——机制不随输入分布改变而不变，反因果方向的条件则随域变化；在环境变量 $E$ 的扩展图马尔可夫且忠实时，预测最优的最小不变集含于 $Y$ 的马尔可夫毯（Markov blanket）。
+
+## 识别或主要命题
+
+- **Theorem 1（对抗最优）**：在 (A1)(A2) 下，$\beta^{CS(S^*)}\in\arg\min_\beta\sup_{P^T\in\mathcal P}\mathbb E_{P^T}(\beta)$，$\mathcal P$ 为所有与训练任务服从同一乘积测度且满足 $Y^T|X^T_{S^*}\overset{d}=Y^1|X^1_{S^*}$ 的测试分布——只用不变集的预测在最坏情形最优。
+- **Proposition 2（平均性能）**：模型 $Y^k=\alpha^t X^k_{S^*}+\varepsilon^k$、$Z^k=\gamma^k Y^k+\eta^k$（任务差异仅在 $\gamma^k$）。若 $\gamma^k$ i.i.d. 均值 0、方差 $\Sigma^2$，则 $\mathbb E_{\gamma^T}\mathbb E_{P^T}(\beta^{CS})\ge\mathbb E_{\gamma^T}\mathbb E_{P^T}(\beta^{CS(S^*)})=\sigma^2$（式 6）；均值非零 $\mu$ 时只要 $\Sigma^2\ge P(\mu)$（式 16 的多项式）结论仍成立——任务越多样，池化越吃亏。
+- **Proposition 3（迁移正确性）**：令 $q^k(x_{S^*},x_N,y)=p^k(x_{S^*},y)\,p^T(x_N|x_{S^*},y)$（式 17），则 $Q^k$ 与 $P^k$ 在 $(X_{S^*},Y)$ 边缘一致、$Q^T=P^T$、条件 $q^k(y|x_{S^*},x_N)$ 跨任务相同——于是可把训练任务的 $X^k_N$ 当缺失数据，对观测数据高斯似然（式 8）跑 EM（E 步填补条件均值，M 步加条件协方差修正），合并测试任务标注与全部特征。
+- 附录 **Theorem 4** 把 Theorem 1 推广到连续函数类（预测子取条件期望 $f_{S^*}$，minimax 最优）；**Proposition 5**（附录 A.4）给出测试任务最优系数的解析式（式 19–20），说明为何「朴素拼装协方差」非似然最优。
+
+## 估计/经验
+
+$S^*$ 未知时（§3）：**Algorithm 1** 全子集搜索——对每个 $S$ 回归得残差，检验残差与任务指标 $K$ 的独立性（高斯情形用 Levene 检验；一般情形用 HSIC 做 D 样本检验，$K$ 用平凡核 $d(i,j)=\delta_{ij}$，零分布用 Gamma 近似），$p^*>\delta$ 者被接受，再按验证集误差选 $\hat S$；**Algorithm 2** 贪心搜索与 Lasso 预筛（$\beta^{CS(\hat S_{Lasso})}$）应对大 $p$。合成 DG（Figure 4，100 次重复）：训练任务超过 4 个时全搜索/贪心恢复不变集并胜过池化，超过 5 个时追平用真值的 $\beta^{CS(cau)}$；MTL（Figure 5–6）中 EM 方法有效但需 36000 训练标注 + 50000 测试无标注样本。基因扰动实验（Kemmeren et al. 2014 酵母，$p=6170$ 基因，160 观测 + 1479 单基因敲除）：观测为任务 1、合并干预为任务 2，留出单次敲除作测试点；39 个因果问题中池化已够好，269 个强相关非因果问题中 $\beta^{CS(\hat S_{Lasso})}$ 在所有倍率 $\tau$ 下误差都轻于 $\beta^{CS}$（Figure 10），且与用真值的 $\beta^{CS(cau)}$ 相当。
+
+## 开放问题
+
+1. **(A1') 在 DG 中不可检验**：对抗最优只在满足 (A1') 的分布类内成立；作者自认「没有这类假设就不可能有关于 DG 的非平凡命题」，但测试任务违反时无任何保证，也无诊断手段。
+2. **MTL 方法无理论保证**（摘要与 §2.2 明言）：EM 迁移只验证于合成数据且需海量样本；理想化版本之外各方法差异不显著；朴素协方差拼装甚至常非正定。
+3. **子集搜索无保证**：贪心「一如既往没有理论保证」（§3.3）；全搜索对 $p$ 指数级且对 $2^p$ 个子集的多重检验无校正；HSIC 零分布的 Gamma 近似只有渐近意义；$\hat S$ 满足 (A1') 的概率无控制（对照 ICP 有覆盖保证）。
+4. **信息性准则与稳健性的张力**：按验证误差选集会刻意纳入训练任务中未偏移的非因果特征（Figure 7 右）——若测试干预恰好落在这些特征上，稳健性即失效；作者仅建议改用置信集式的保守选择（引 Heinze-Deml et al. 2018）。
+5. **线性设定 (A2) 的局限**：正文算法均线性；非线性 Theorem 4 只有总体版本，「经特征映射才不变的条件」被列为未做的扩展。
+6. **经验边界**：School 数据集上不优于池化（归因于任务差异不够大，结果未展示）；「任务足够多样」如何度量未定义。后续文献（IRM 一线）进一步表明：不变性的收益取决于环境多样性与不变集是否存在，两者本文均未刻画。
+
+## 文献谱系
+
+前作：Quionero-Candela et al. 2009、Shimodaira 2000、Gretton et al. 2009 等的协变量偏移与重要性再加权——被放松的假设及其黑盒用法（Figure 1）；Ben-David et al. 2010 不可能性定理说明必须加正则条件；层次贝叶斯与参数共享式 MTL（Lawrence & Platt 2004、Evgeniou & Pontil 2004、Argyriou et al. 2007 等）与共同特征学习（Chen et al. 2012 mSDA、Muandet et al. 2013 DICA）——实验基线 $\beta^{MTL}$、$\beta^{mDA}$、$\beta^{DICA}$；Schölkopf et al. 2012（站内 1206.6471）的因果/反因果不对称——机制不变性动机的直接来源，配 Hoover 1990、Janzing & Schölkopf 2010 的机制不变论述；Zhang et al. 2013/2015a/2015b 提供反因果方向上的目标/条件偏移与外生性视角；Peters et al. 2016 ICP——同一不变性假设的因果发现版（取交集、有覆盖保证），本文自定位为其「预测版」并按验证误差选集；Gretton et al. 2007 HSIC 与 Zhang et al. 2011 KCI（站内 1202.3775）提供检验工具；Little & Rubin 1986 支撑缺失数据 EM；Kemmeren et al. 2014 提供基因数据；Heinze-Deml et al. 2018 是其非线性后续。后续：本文是「用不变性换跨域稳健性」范式的理论起点之一，直接通向 IRM（Arjovsky et al. 2019）与因果域泛化文献。
+
+## 明确不覆盖
+
+不做因果发现（只找预测性不变子集，可含非因果特征）；不解决完整协变量偏移问题（不处理支持集重叠与再加权）；MTL 的 EM 方法无保证；固定平方损失与线性 (A2)；不处理 $Y$ 被干预的情形；不对 $\hat S$ 的正确性给出置信陈述。
+
+## 阅读路径
+
+先读 §1.1 Table 1 四种设定与 §1.3 贡献；§2 开头的 (A1)(A1')(A2) 与 Figure 1 是全文支点；§2.1 精读 Theorem 1 与 Proposition 2（配 Figure 2）；§2.2 的缺失数据构造（Proposition 3 与 EM）可快读；§2.3 因果动机一页读完；§3 读 Algorithm 1 与 HSIC D 样本检验；§4.4 基因实验是全文最有说服力的应用，Figure 9–10 必看。姊妹篇对照：站内 1206.6471（因果/反因果学习——方向决定条件分布是否漂移，是 (A1) 的理论前提）；站内 1112.2738（同一因果视角回答何种分布偏移下学习可稳健）；Peters et al. 2016 ICP（arXiv:1505.08036，同一假设的因果发现版，可对照选集准则差异）；站内 1502.02398（同批作者的判向工作，显示「预测而非发现」的立场分野）。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 不变集 / 不变条件分布 | invariant set / invariant conditionals |
+| 域泛化 | Domain Generalization (DG) |
+| 非对称 / 对称多任务学习 | asymmetric / symmetric multi-task learning (AMTL/SMTL) |
+| 合并池化 | pooling the training data |
+| 负迁移 | negative transfer |
+| 对抗（minimax）最优 | optimality in an adversarial setting |
+| D 样本检验 | D-sample test |
+| 马尔可夫毯 | Markov blanket |
+| 因果父集 | causal parents |
+| 干预分布 | intervention distribution |
+| 观测数据似然 / 缺失数据 | observed-data likelihood / missing data |
+| 外生性 | exogeneity |
+
+## 来源定位
+
+`papers/1507.05333.pdf`（34 页）。关键内容：Table 1（p.3）；假设 (A1)(A1')(A2) 与 Figure 1（p.5–6）；Theorem 1（p.6）；Proposition 2 与 Figure 2（p.7–8）；Proposition 3、似然 (8) 与 EM（p.9–11）；§2.3 因果动机（p.12）；Algorithm 1（p.13）、Algorithm 2（p.14）、HSIC D 样本检验（p.15）；Table 2（p.17）；Figure 4 DG 实验（p.19）、Figure 5–6 MTL（p.20–21）、Figure 7–8（p.22–23）；§4.4 基因实验与 Figure 9–10（p.23–26）；结论（p.27）；Theorem 4（p.28）、Proposition 5（p.31）。

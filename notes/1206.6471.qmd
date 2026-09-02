@@ -1,0 +1,95 @@
+---
+title: "因果与反因果学习"
+subtitle: "Schölkopf et al., arXiv:1206.6471 (2012)"
+description: "论证预测方向与因果方向是否一致决定了协变量偏移、半监督学习、迁移学习、概念漂移等场景中哪些方法可行：因果方向下机制与输入独立使半监督学习无效，反因果方向下才可能有效，并以三项基准研究的再分析支持该假设。"
+date: 2012-06-27
+categories: [因果推断, 半监督学习, 分布偏移]
+paper-id: 1206.6471
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Bernhard Schölkopf、Dominik Janzing、Jonas Peters、Eleni Sgouritsa、Kun Zhang（MPI for Intelligent Systems, Tübingen）；Joris Mooij（Radboud University Nijmegen） |
+| 出处 | arXiv:1206.6471（ICML 2012） |
+| 日期 | 2012-06-27 |
+| 页数 | 8 页 |
+
+一句话定位：自陈「不证定理」的纲领性论文，把二元因果方向系统映射到函数估计的各标准场景，提出「额外无标签数据只在反因果预测或存在混杂时才可能改善 $P(Y|X)$」的 SSL 假设并以元分析支持。
+
+## 问题与模型
+
+研究问题：当学习问题的因果方向（$X\to Y$ 还是 $Y\to X$）已知时，$P(Y|X)$ 的估计能否利用额外无标签输入、额外输出、跨数据集样本或分布漂移？
+
+全文通用假设：（a）因果充分性——$E=\varphi(C,N_E)$，$N_C\perp N_E$，无未观测混杂；（b）机制与输入独立（即站内术语表的独立因果机制（Independent Causal Mechanisms, ICM））：$P(E|C)$ 与 $P(C)$ 互不携带信息，脚注 2 指出这与经济学的外生性（exogeneity）同源；它在反方向通常失效——$P(E)$ 与 $P(C|E)$ 共同继承 $P(E|C)$、$P(C)$ 的性质而相依；（c）加性噪声模型（additive noise model, ANM）$E=\varphi(C)+N_E$（式 (1)）——除线性-高斯等例外，一个联合分布在两个方向中至多一个可拟合 ANM，据此判定因果方向；后非线性模型类似。作者同时提醒：不加限制的函数因果模型过富（噪声可随机切换机制 $\varphi_n$），必须靠限制函数类控制 $P(E|C)$ 的复杂度，否则方向不可识别。
+
+## 主要命题
+
+第 2 节「因果预测」（$X$ 为因、$Y$ 为果，图 2），各场景以 Given/Goal/Assumption/Solution 格式穷举：
+
+- 2.1.1 协变量偏移（covariate shift）：$P'(X)\neq P(X)$ 时由机制独立得 $P'(Y|X)=P(Y|X)$；但有限样本下预测规则仍需按 $P'(X)$ 重加权。
+- 2.1.2 半监督学习（semi-supervised learning, SSL）无用：$P(X)$ 不含 $P(Y|X)$ 的信息，额外无标签输入不改变估计。
+- 2.2.2 额外输出可有用：若 $P(Y)=Q*R$ 有唯一卷积分解（如高斯噪声加不可分解的 $P(\varphi(C))$），额外 $y$ 样本可确定 $P(N_Y)$，把学习 $P(Y|X)$ 化简为学习 $\varphi$。
+- 2.3.1 迁移学习（仅噪声变、$\varphi$ 不变）：用 Conditional ANM——两数据集共享 $\varphi$、分别强制残差独立（改造 Mooij et al. 2009）；2.3.2 概念漂移（concept drift，仅 $\varphi$ 变）：在 $P'(X,Y)$ 上重拟合 ANM。
+
+第 3 节「反因果预测」（图 3）：$P(X|Y)$ 才是独立于 $P(Y)$ 的机制，$P(Y|X)$ 对 $P(Y)$ 敏感，故应先建 $P(X|Y)$ 再按贝叶斯规则合成 $P(Y|X)$；示例（图 4）：$X=Y+N_X$、$Y$ 与 $N_X$ 均匀分布时 $E(X|Y)$ 线性，而 $E(Y|X)$ 非线性且形状依赖 $P(Y)$。3.2.1 先验概率偏移（prior probability shift）：$P'(X|Y)=P(X|Y)$，新先验直接重算 $P'(Y|X)$。3.1.2 SSL 可能有用：反因果方向下 $P(X)$ 与 $P(Y|X)$ 相依，聚类假设、低密度分隔（low density separation）等 SSL 标准假设都可解读为联系两者的性质。**SSL 假设：额外输入信息只在反因果或混杂情形才可能改善 $P(Y|X)$ 的估计。**
+
+第 4 节三个模块：定义 1（单射条件分布 injective conditional：不存在 $P(X)\neq P'(X)$ 被映到同一输出分布；例 1：有限值域时当且仅当随机矩阵满秩，需 $|X|\le|Y|$；例 2：后非线性模型）；定位分布变化（比较 $P(E)$、$P'(E)$ 的傅里叶谱零点归属，或噪声为高斯时反卷积，判断是 $P(C)$ 还是 $P(E|C)$ 变了）；估计因果条件分布（$P'(N_E)=P(\varphi(C))^{*-1}*P'(E)$）。
+
+## 经验结果
+
+无新实验，是对三项已有研究的再分析；数据集的因果分类由作者主观完成并附于网页：
+
+- SSL 分类基准（Chapelle et al. 2006，表 21.11/21.13，100 个标签，11 种 SSL 方法对 1-NN 与 SVM）：8 个数据集中唯一的因果类数据集 SecStr（由氨基酸序列预测蛋白质二级结构）上 SSL 无显著改进，多数反因果/混杂数据集有改进（图 5）；作者自陈两个混杂因素：基准为 transductive 设定、SecStr 的结果基于不同方法集。
+- 26 个 UCI 数据集（Guo et al. 2010 表 III/IV，6 个基分类器的 self-training）：3 个因果数据集误差率无显著下降，多个反因果/混杂数据集改进（图 6）。
+- 半监督回归（Brefeld et al. 2006 的 co-RLSR，32 个数据集实为 31 个）：7 个反因果数据集 RMSE 全部下降，9 个因果数据集基本无改进（图 7–8）；Wilcoxon 符号秩检验 $p=0.0156$（反因果，5% 水平拒绝「SSR 无效」）对 $p=0.6523$（因果，不拒绝）。
+
+## 开放问题
+
+1. 核心假设未形式化：「机制与输入独立」只以「互不携带信息」的直觉给出，无定理级的可检验定义；SSL 假设只被元分析支持，没有从假设到结论的演绎论证——作者自陈「本文不证定理」。
+2. 数据集因果分类的主观性：无盲评协议，且明言「只要依赖主要来自 $X\to Y$ 即计入因果类，即使可能存在额外混杂」，分类噪声可能系统性影响结论方向。
+3. 经验证据全是二手再分析：无新数据；UCI 分析无置信区间；transductive 设定与方法集不一致两个混杂因素只是指出而未消除。
+4. 第 4 节模块只有构造思路：反卷积 $P(\varphi(C))^{*-1}*P'(E)$ 的数值病态性与可辨识条件未讨论；Conditional ANM 的示例仅是姊妹篇 1112.2738 中的 toy 实验。
+5. 只覆盖二元、无混杂情形：Storkey (2009) 的样本选择与共同原因场景、Pearl & Bareinboim (2011) 的可迁移性（以条件独立表达不变性，无法覆盖「噪声变而机制不变」）被指出但未纳入框架。
+6. 后续缺口：从有限样本检验「$P(E|C)$ 与 $P(C)$ 独立」长期无标准方法，ICM 的形式化（站内 0804.3678）仍停留在算法信息论与渐近层面。
+
+## 文献谱系
+
+- Pearl (2000)、Spirtes et al. (1993)：因果图与 SCM 框架、因果马尔可夫条件——本文使用的语言；Reichenbach (1956)「一切相依源于因果结构」是动机，Matthews (2000) 的鹳-出生率例子用于区分统计与因果预测。
+- Janzing & Schölkopf (2010)（站内 0804.3678）：算法马尔可夫条件，机制独立假设的直接来源；Lemeire & Dirkx (2007) 是其「极小描述」前驱。
+- Hoyer et al. (2009)、Zhang & Hyvärinen (2009)：ANM 与后非线性可识别性，式 (1) 的依据；Mooij et al. (2009) 的依赖最小化回归是 Conditional ANM 的算法基础；Daniusis et al. (2010) 论证反方向的相依性。
+- Storkey (2009)：数据集偏移的分类学，已覆盖 2.1.1 与 3.2.1 并命名 prior probability shift——本文是向其余场景的推广。
+- Pearl & Bareinboim (2011)：可迁移性，作为表达不变性的另一路径被比较且被指不够一般。
+- Chapelle et al. (2006)、Guo et al. (2010)、Brefeld et al. (2006)：三项元分析的数据来源；Schweikert et al. (2009)（剪接机制跨物种稳定）是机制独立的生物学例证。
+- Schölkopf et al. (2011)（站内 1112.2738）：本文早期版本；后续因果表征学习纲领（Schölkopf et al. 2021）与数据增强的理论分析（von Kügelgen et al. 2021）均以本文的因果/反因果区分为出发点。
+
+## 明确不覆盖
+
+不给定理与证明；不处理多变量图、隐混杂与选择偏差；不处理离散数据与循环结构；不含新实验与算法实现（第 4 节停留在构造层面）；不讨论机制独立假设失效时各结论如何退化。
+
+## 阅读路径
+
+先读第 1 节三条假设，再按 2.1.1→2.1.2→3.2.1→3.1.2 读四个核心场景（迁移/漂移场景可后读），第 4 节重点看定义 1 与反卷积模块，第 5 节只看图 5–8 与两个 p 值。对照：站内 1112.2738（本文前作，含 Conditional ANM 的 toy 实验）；0804.3678（机制独立假设的算法信息论根源）；1202.3775 与 1202.3757（同组同期把 ANM/IFMOC 用于完整图识别的两条技术线）。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 因果/反因果预测 | causal / anticausal prediction |
+| 机制与输入独立 | independence of mechanism and input |
+| 先验概率偏移 | prior probability shift |
+| 概念漂移 | concept drift |
+| 单射条件分布 | injective conditional |
+| 不可分解分布 | indecomposable distribution |
+| 反卷积 | deconvolution |
+| Conditional ANM（共享机制的条件加性噪声模型） | Conditional ANM |
+| 聚类假设 | cluster assumption |
+| 低密度分隔 | low density separation |
+| 外生性 | exogeneity |
+| 直推式/归纳式方法 | transductive / inductive methods |
+
+## 来源定位
+
+来源：`papers/1206.6471.pdf`。关键内容原文编号：式 (1)（ANM）、定义 1 与例 1–2（第 4 节）、图 2/3（两种预测方向的因果图）、图 4（$E(Y|X)$ 依赖 $P(Y)$ 的示例）、图 5（Chapelle 基准）、图 6（UCI self-training）、图 7–8（co-RLSR 回归）；p 值 0.0156/0.6523 见第 5 节正文。

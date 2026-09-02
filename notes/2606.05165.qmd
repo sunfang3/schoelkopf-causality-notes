@@ -1,0 +1,84 @@
+---
+title: "STRIDE：从子集扰动的稀疏恢复中做训练数据归因"
+subtitle: "Rishit Dagli et al., arXiv:2606.05165 (2026)"
+description: "把大模型训练数据归因从参数空间梯度估计改道到激活空间：学习低秩「转向算子」模拟子集重训练的功能效应，再以压缩感知式 Lasso 从 O(k·log(n/k)) 个子集测量中恢复单条训练样本的影响。"
+date: 2026-06-03
+categories: [因果推断, 训练数据归因]
+paper-id: 2606.05165
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Rishit Dagli*、Abir Harrasse*（同等贡献）、Luke Zhang（以上 Jinesis AI Lab, U Toronto & Vector Institute）、Florent Draye（MPI IS Tübingen）、Amirali Abdullah（Thoughtworks / Martian）、Bernhard Schölkopf（MPI IS / ELLIS Institute Tübingen）、Zhijing Jin（Jinesis Lab / EuroSafeAI） |
+| 出处 | arXiv:2606.05165 [cs.LG]，v1 2026-06-03；预印本（项目页 stride-tda.github.io） |
+| 日期 | 2026-06-03 |
+| 页数 | 40 页（正文 10 页 + 文献 + 附录 A–G，pp.12–40） |
+
+一句话定位：把训练数据归因（Training Data Attribution, TDA）的估计对象从「参数怎么变」换成「功能怎么变」——用冻结基模型激活空间上的低秩转向算子（steering operators）模拟「在子集上重训练」的行为效应，把逐样本影响的恢复表述为压缩感知（compressive sensing）问题。
+
+## 问题与模型
+
+研究问题：TDA 的金标准是对「增删数据后重训练」的真实干预——留一法（leave-one-out, LOO）与数据模型（datamodels）——但对 LLM 反复重训练不可行；影响函数类梯度方法要物化数十亿参数的梯度且依赖局部凸性与严格收敛假设；表征相似度方法可扩展但只是启发式相似、无因果根据。能否以重训练级精度恢复预训练级 TDA？
+
+形式化（§3）：$\theta^*(S)=\arg\min_\theta\frac1n\sum_i\ell(z_i;\theta)$，响应 $r(x;S)=\ell(x;\theta^*(S))$，集合函数 $F_x(A)=r(x;A)$，扰动响应 $\delta_x(A)=F_x(S)-F_x(S\setminus A)$（$A=\{z_i\}$ 时即精确 LOO）。**假设 1（可加影响, additive influence）**：存在 $w(x)\in\mathbb{R}^n$ 使 $\delta_x(A)\approx\sum_{z_i\in A}w_i(x)$。于是对 $K$ 个子集与成员矩阵 $M\in\{0,1\}^{K\times n}$（$M_{k,i}=\mathbf{1}[z_i\in A_k]$）得线性系统 $y_x\approx Mw(x)$；$K\ll n$ 时高度欠定，落到压缩感知体制：$w(x)$ 是待恢复的高维稀疏信号。
+
+## 识别或主要命题
+
+- **引理 1（扩展图测量下的稀疏恢复, Lemma 1）**：若 $M$ 是 $(2k,\epsilon)$-扩展图（$\epsilon<1/6$）的邻接阵，则任意 $k$-稀疏 $w$ 可由 $K=O(k\log(n/k))$ 个子集测量经 $\ell_1$ 最小化精确且唯一地恢复；$d=O(\log(n/k))$ 的随机左正则构造以高概率满足扩展性。附录 A 给出完整定理 1 与证明（$\ell_1$ 解的唯一性论证），A.5 声明其应理解为**可识别性结果**：$y_x=Mw(x)+e_x$ 含非可加误差与算子逼近误差，实际用的是带罚形式（Lasso）。最大设定 $K=1000$、$n\approx11.4\mathrm{M}$、$k\approx50$ 时 $k\log(n/k)\approx617<K$；扩展性的直接验证组合上不可行，作者以间接证据支撑：把 $M$ 换成违反扩展域的稠密 Bernoulli(0.5) 阵一致降低 LDS（表 11：286M 上 0.1361 对 0.1581），且 Lasso 活跃集规模有界（表 6）。
+- **转向算子机制**（§4.1, 算法 1）：冻结基模型 $g_\phi$，取第 $\ell$ 层特征 $h_x$，经可训练基网络 $B_\psi(h_x)\in\mathbb{R}^{1\times r}$ 与子集专属转向阵 $a_k\in\mathbb{R}^{r\times C}$ 得转向 logits $\tilde o_k(x)=o_x+B_\psi(h_x)a_k$（式 7）。三损失联合训练：保真（式 8，在子集样本上改善下一词预测）、稳定（式 9，对子集外随机样本与原模型 KL 一致，防全局退化）、线性/LDS 正则（式 10，经随机投影 $\tilde M=MR$ 的岭回归残差，强迫响应可加）。查询时一次批量前向得 $y_{x,k}=\mathrm{Loss}(o_x)-\mathrm{Loss}(\tilde o_k(x))$，再解 $\hat w(x)=\arg\min_w\frac12\|y_x-Mw\|_2^2+\lambda\|w\|_1$（式 11）。
+
+## 估计/经验
+
+全部实验单张 H100-80GB。**预训练归因**（§5.2, 表 1）：Nanochat 286M–1.38B 预训练于 Nemotron-ClimbMix（2.7×10⁹–18.2×10⁹ tokens），$K=256$ 个真值子集、500 个测试查询；STRIDE 的 LDS（Spearman）0.1581/0.1792/0.1598/0.1671 全面超过 RDS、TF-IDF、GTE、LoGRA（0.1139）、AirRep（0.1406，1.38B 上不可行）；耗时 9.9h（阶段一 9.02 + 推理 0.57 + Lasso 0.34），对 LoGRA 52.3h 约 5×、对 AirRep 116.1h 约 12×，峰值显存 8.41GB。**SFT**（§5.3, 表 2）：Qwen2.5-0.5B 于 FLAN 100K（$K$=100, 6520 查询）、Alpaca（51,760, $K$=10）、Tulu（100K, $K$=100）、SafeRLHF（251,963, $K$=5）；STRIDE 在 Alpaca（0.2426）与 Tulu（0.1611）最优，FLAN 与 SafeRLHF 不敌 AirRep。**数据选择**（§5.4, 表 3）：FLAN 100K、66 任务、贪心聚合选 top-1000 微调，unigram F1 49.65 追平最强基线（LoGRA 49.94、AirRep 49.66；随机 42.97）。**污染审计**（§5.5, 表 4）：Qwen2.5-0.5B 于 OpenWebText 注入 MATH 副本（100 份、0.5%–1.5%），泄漏题准确率 81.8%–89.7% 而非泄漏约 11%，证实靶向记忆；LoGRA 极端桶召回 62.1±4.4%，并入 STRIDE 升至 74.2±6.6%（随机约 1.1%，$p<10^{-20}$）；AirRep 召回 91.9% 但对已记忆/未记忆泄漏不加区分（89.8% vs 94.2%），属重复检索对照。**视觉/表格受控验证**（附录 B.6, 图 5–7）：MNIST/FashionMNIST/Parkinsons MLP 与 CIFAR-10 ResNet-9 上以显式重训练为真值，STRIDE 在 MNIST/Parkinsons 的 LDS 最强、CIFAR-10 次于 LoGRA，且验证了影响质量稀疏集中（图 6）与带符号的支持/对抗结构（图 7）。消融（附录 C, 表 11）：去掉保真损失 LDS 崩至 0.012，去稳定损失 0.056，去 LDS 正则 0.096；秩 $r=16$ 与中后层干预最优。定性案例（图 1、4）：OLMo-2-7B 的 $\sqrt2$ 错误证明溯源到训练集中 $\sqrt3$ 证明的结构模仿。
+
+## 开放问题
+
+1. **自认**：效果依赖基模型内部激活的质量与干预层的选择（消融显示层选择造成 0.086→0.158 的巨大差异，但无原则性选层方法）。
+2. **自认**：依赖局部线性与可加影响假设，极端分布偏移或高度非凸的记忆现象下可能失效。
+3. **自认**：扩展到强化学习训练目标仍是开放方向。
+4. **我识别（因果根据间接）**：转向算子训练「不依赖任何重训练检查点」——监督信号是「在子集成员上改善预测」而非真实重训练模型的输出匹配，「模拟重训练」的等价性从未被直接验证；预训练 LDS 绝对值仅 0.16–0.18，距引言承诺的「重训练级」还很远。
+5. **我识别（可加性自我实现）**：LDS 正则主动惩罚非可加残差，方法按构造发现不了样本间交互；而 datamodels/Simfluence 文献已记录非可加贡献，交互效应被假设排除而非被证伪。
+6. **我识别（SFT 违背稀疏先验）**：表 6 显示 SFT 影响稀疏度仅 0.60–0.68、活跃集高达 80,672（SafeRLHF 的 Gini 系数 0.118，近乎均匀），压缩感知前提在该体制下基本不成立——与 AirRep 在 FLAN/SafeRLHF 上胜出相互印证。
+7. **我识别（规模距离）**：定量实验止于 1.38B 参数、$n\approx11.4\mathrm{M}$ 样本；7B–32B 模型仅做定性分析，扩展图恢复保证在多大 $n$、多深模型上仍成立未检验。
+
+## 文献谱系
+
+前作（在本文中的角色）：Koh & Liang 2017（影响函数）——被替换的参数空间范式及其凸性/收敛假设；Ilyas et al. 2022（Datamodels）——LDS 协议、子集重训练金标准与线性数据模型思想的直接来源；TracIn、LESS、EKFAC、DataInf、LoGRA、TRAK、DSDM——梯度族基线，其中 LoGRA 是最强定量对手；RDS/FeatSim/GTE 嵌入相似度与 AirRep（习得打分函数）——表征族基线，AirRep 同时是 SFT 与数据选择实验的协议出处；Data Shapley/Banzhaf、Simfluence——子集与反事实训练模拟器，本文以其「非可加交互」为不覆盖的对照；Candès 等/Donoho（压缩感知）与 Berinde–Indyk 等（扩展图稀疏恢复）——引理 1 的数学底座；低秩激活扰动可复现微调行为的工作 [16,17]——激活空间转向可行性的经验支撑。方法论定位：以「重训练＝干预」的因果语义为锚，与 Schölkopf–Jin–Draye 合作线（2607.18114 激活干预对齐表征、2608.27510 概念定向归因）同属「表征空间因果手术」议程，把该议程从模型内部归因扩展到训练数据归因。后续：为预训练数据审计、污染检测与数据筛选提供了比梯度方法低一个量级成本的工具。
+
+## 明确不覆盖
+
+不估计参数空间量（不做影响函数式的 $\theta$ 扰动分析）；不处理样本间非可加交互（假设 1 与 LDS 正则将其排除）；不做 RLHF/RL 训练目标的归因；不提供完整重训练检查点模拟（算子只在固定一层、低秩子空间内近似）；不声称文本级重复检索能力（该角色让给 AirRep 类编码器）；不做反向问题（从影响分数重构训练动态）；不覆盖多 epoch、数据顺序与课程效应。
+
+## 阅读路径
+
+先读 §1（动机与两阶段总览）与图 1（OLMo 错误证明溯源——最直观的用例）；§3 是形式化核心，假设 1 与式 6 的欠定系统必须吃透；§4 按图 2 三步走（子集测量 → 算子学习 → 查询时 Lasso），三个损失各自的角色在 §4.1 末段有总结；§5 五个实验各答一问，表 1（预训练 LDS 与运行时）与表 4（污染审计）是关键证据；§6 仅三句话的局限要读。附录按需：A 是引理 1 的完整证明与「可识别性 vs 稳定恢复」的澄清（A.5），B.6 的受控视觉实验是全文唯一的真值重训练对照，C 表 11 的消融揭示三损失缺一不可，表 6 的稀疏度诊断暴露 SFT 体制的先验失配。姊妹篇对照：2608.27510（线性探针如何涌现的电路追踪与概念定向归因，站内有笔记——同用「激活空间干预」做归因，但对象是模型内部概念而非训练数据，二者合看即「数据侧 + 模型侧」两条归因轴）；2607.18114（对齐微调如何塑造谄媚等偏差表征——激活干预方法在这些表征分析中的另一用场）。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 训练数据归因 | training data attribution (TDA) |
+| 转向算子 / 激活转向 | steering operator / activation steering |
+| 稀疏恢复 / 压缩感知 | sparse recovery / compressive sensing |
+| 扩展图 | expander graph |
+| 左 d-正则二部图 | left-$d$-regular bipartite graph |
+| 可加影响 | additive influence |
+| 扰动响应 | perturbation response |
+| 留一（重训练）效应 | leave-one-out (LOO) effect |
+| 数据模型 | datamodels |
+| 线性数据建模分数 | Linear Datamodeling Score (LDS) |
+| 影响函数 | influence functions |
+| 保真损失 / 稳定性损失 / 线性正则 | fidelity / stability / linearity (LDS) loss |
+| 基网络 | basis network |
+| 随机投影 / 草图 | random projection / sketch |
+| 岭回归 / Lasso | ridge regression / Lasso |
+| 数据选择 | data selection |
+| 数据污染审计 | data contamination auditing |
+| 尾部修补分数 | Tail-Patch score |
+
+## 来源定位
+
+`papers/2606.05165.pdf`（40 页）。问题形式化与假设 1（§3, pp.4–5, 式 1–6）；转向 logits 与三损失（§4.1, pp.5–6, 式 7–10）；算法 1（§4.1 末, p.7）；Lasso 恢复与引理 1（§4.2, p.6, 式 11 与 Lemma 1）；实验设置（§5.1, p.7）；预训练 LDS 表 1 与扩展性图 3（§5.2, p.8）；SFT 表 2（§5.3, p.8）；数据选择表 3（§5.4, p.8）；污染审计表 4（§5.5, pp.8–9）；定性案例图 1、4（p.2、p.10）；自认局限（§6, p.9）；定理 1 完整证明与 A.5 澄清（附录 A, pp.12–21）；运行时分解表 5（附录 B.1, p.22）；稀疏度诊断表 6 与尾修补表 7（附录 B.2–B.3, p.23）；污染细节表 9–10（附录 B.5, pp.23–24）；受控视觉实验图 5–7（附录 B.6, pp.24–27）；消融表 11（附录 C, p.32）。

@@ -1,0 +1,87 @@
+---
+title: "用可识别功能模型类识别完整因果图"
+subtitle: "Peters et al., arXiv:1202.3757 (2012)"
+description: "定义可识别功能模型类 IFMOC，证明数据生成过程属于 IFMOC 时可从联合分布识别完整因果 DAG（非仅 Markov 等价类），且只需因果最小性这一弱忠实性。"
+date: 2012-02-14
+categories: [因果推断, 因果可识别性]
+paper-id: 1202.3757
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Jonas Peters、Joris M. Mooij（兼 Radboud University Nijmegen）、Dominik Janzing、Bernhard Schölkopf（MPI for Intelligent Systems, Tübingen） |
+| 出处 | arXiv:1202.3757（UAI 2011 的扩展版） |
+| 日期 | 2012-02-14 |
+| 页数 | 10 页 |
+
+一句话定位：把 LiNGAM、非线性/离散 ANM、后非线性等双变量可识别结果抽象为"可识别功能模型类（Identifiable Functional Model Classes, IFMOC）"，并证明首个不限线性关系的多变量全图可识别性定理——若真实过程属于某 IFMOC，则完整因果 DAG 可由联合分布唯一恢复。
+
+## 问题与模型
+
+问题：给定 i.i.d. 样本来自 $P(X_i)_{i\in V}$，推断真实因果 DAG $G_c$。全文假设 $G_c$ 无环、因果充分性（无隐混杂）、无选择偏差。基于条件独立（CIB）的方法（PC 算法）在假设 1（Markov + 忠实性 faithfulness）下只能识别 Markov 等价类（定理 1，已知结果），且忠实性不可检验、CI 检验困难、违背忠实性时无误差保证。本文的替代路线：定义 2（F-FMOC，功能模型）$X_i = f_i(\mathrm{PA}_i, N_i)$，噪声 $(N_i)$ 联合独立，对应图无环；定义 3（双变量可识别集 B）：$(f, P_X, P_{N_Y})\in B$ 且 $Y=f(X,N_Y)$、$N_Y\perp X$ 时不存在 $g\in\mathcal F$ 使 $X=g(Y,N_X)$、$N_X\perp Y$，并要求 $f(X,N_Y)\not\perp X$；定义 4（(B,F)-IFMOC）：固定其他父节点后每个 $f_i$ 作为 $(X_j,N_i)$ 的二元函数仍在 $\mathcal F$ 中，且对满足 $\mathrm{PA}_i\setminus\{j\}\subseteq S\subseteq \mathrm{ND}_i\setminus\{i,j\}$ 的每个 S 存在正概率的 $x_S$ 使相应三元组属于 B。引理 1 汇集四类已知可识别集：(i) 线性 ANM + 非高斯（LiNGAM）；(ii) 模 m 加法离散 ANM；(iii) 非线性 ANM；(iv) 后非线性模型。假设 2（IFMOC 假设）：真实机制属于图为其因果图的 (B,F)-IFMOC。
+
+## 主要命题
+
+定理 2（主定理）：同一联合分布不可能由同一 (B,F)-IFMOC 中对应不同图 $G\neq G'$ 的两个功能模型诱导；推论 1：假设 2 下可从联合分布识别真实因果 DAG $G_c$。证明骨架（第 3 节）：自底向上剥离两图共同的无孩子且同父节点的结点；对剩下的 X，将其 G-父集划分为 Y/Z/W（Z 也是 G'-父、Y 是 G'-子、W 在 G' 中不相邻），反复使用引理 2（条件化保持函数关系：$N\perp(Y,Z,S) \Rightarrow f(Y,Z,N)|_{Z=z,S=s} = f(Y|Z{=}z,S{=}s, z, N)$）、引理 3（噪声独立于非后代）、引理 4（IFMOC 中子不独立于父：对 $\mathrm{PA}_B\setminus\{A\}\subseteq S\subseteq\mathrm{ND}_B$ 有 $B\not\perp A|S$），在"W∪Y 为空"与"取 G'-最年轻结点"两种情形下分别导出与引理 4 矛盾的条件独立。命题 2（附录）：引理 4 蕴含因果最小性（causal minimality），即忠实性的弱形式，故 IFMOC 假设严格弱于忠实性加 Markov；关键事实是式 (1)（$f(X,N_Y)\not\perp X$）保证若 $Y\perp X$ 则必有反向模型，堵住平凡退化。作者还指出：IFMOC 假设违背的三种情形中，仅"过程属于图错误的 IFMOC"导致错误答案，且据 Janzing & Steudel (2010) 的 Kolmogorov 复杂度论证，这种输入与机制的精确匹配被认为不典型。
+
+## 估计与实验
+
+算法 1：逐个识别汇点（sink）——对每个候选变量 i 以其余变量回归拟合噪声 $\hat\varepsilon_i = \mathrm{FittedNoise}(X_{S\setminus\{i\}}, X_i)$，用 HSIC 检验残差与回归子独立（α=5%），多个候选可行时深度优先保留全部分支，最后剔除多余父边，输出所有一致 DAG；无解或多解时输出"我不知道"。回归用线性（IFMOClin）或 GP（IFMOCGP）。实验（各 100 个数据集、样本 400，除数据集 1 为 500 次、n=100–500000）：
+
+- 数据集 1（线性高斯、忠实）：偏相关检验在 n=500000 时仍有超过 10% 的情形把非零（偏）相关误判为零，随 n 下降极慢。
+- 数据集 2（linear/nonlinear 各两种结构）：IFMOCGP 在四个设置分别正确 79/86/76/86（错 2/1/1/8），PC_corr 在非线性设置几乎全错（nonlin1 仅 6/100 正确），PC_HSIC 部分设置未决率高达 100%。
+- 数据集 3（不可检测的非忠实：$X_1\perp X_3$）：两种 PC 均 100% 输出错误 DAG；IFMOClin 89/100 正确且零错误输出。
+- 数据集 4（线性高斯、属 FMOC 不属 IFMOC）：IFMOClin 取最少边图后 94/100 恢复 Markov 等价类（6 次未决），PC_corr 仅 47/100。
+- 数据集 5（既非忠实又非 ANM）：两种 IFMOC 全部输出"不知道"，两种 PC 全部给出错误结果。
+
+## 开放问题
+
+1. 作者自陈的未来工作：与贝叶斯结构学习的关系（能否证明其一致性）；IFMOC 在假设全部满足时有限样本下仍胜过 PC 的现象值得研究；图的一部分满足假设、另一部分不满足的部分识别情形；以及在已知真值的真实数据上的检验与比较。
+2. 理论缺口：定理 2 只排除"同一 (B,F)-IFMOC 内"的两个图，真实过程属 FMOC 但不属 IFMOC（如线性高斯）时只能退回 Markov 等价类；而"属 IFMOC 但图错误"的唯一失效情形仅靠 Janzing & Steudel 的双变量 Kolmogorov 论证作信念支撑，多变量情形的对应定理至今未证。
+3. 假设过强处：因果充分性与无环性全程假设，隐混杂、反馈循环、选择偏差均不覆盖；只适用于非确定性数据（作者明言）。
+4. 经验验证空白：全部实验为模拟数据，且算法复杂度呈组合增长（深度优先多分支、每个汇点候选做一次回归+HSIC），变量数 d 稍大时的可扩展性未评估；α=5% 未做多重校正。
+5. 检验"残差与回归子独立"用无条件 HSIC 而非条件独立检验，回归欠拟合时会系统性给出虚假方向结论；后续 RESIT（Peters et al. 2014）与对 IGCI/ANM 失效模式的研究（如 Mooij et al. 2016 的基准比较）指出此类方法在真实数据上表现远不如模拟中稳健。
+
+## 文献谱系
+
+- Shimizu et al. (2006)：LiNGAM，引理 1(i) 的可识别集来源，也是此前唯一有多变量全图识别结果的线性情形——本文明确以填补其非线性空白为目标。
+- Hoyer et al. (2009)、Peters et al. (2010)、Zhang & Hyvärinen (2009)：非线性 ANM、离散 ANM、后非线性的双变量可识别性，构成引理 1(ii)–(iv)，是 IFMOC 定义的构件；GP 回归实验设置沿用 Hoyer et al.。
+- Pearl (2009)：功能模型（结构方程）框架与其 Theorem 1.4.1（功能模型蕴含 Markov 条件），假设对比的公共基础；也指明功能模型比因果 DAG 支持更多反事实语句。
+- Spirtes et al. (2001)、Meek (1995)：PC 等 CIB 方法及其 Markov+忠实性假设，本文的对照面。
+- Zhang & Spirtes (2007)：忠实性可检验性的分解（邻接忠实/方向忠实），支撑"IFMOC 假设比忠实性更可检验"的论证。
+- Janzing & Steudel (2010)、Lemeire & Dirkx (2006)、Janzing & Schölkopf (2010)：输入与机制独立的算法式信息论论证，为"反向拟合罕见"提供信念依据。
+- Mooij et al. (2009)：回归+残差独立算法的直接基础，本文算法 1 改其为输出全部一致 DAG。
+- Darmois (1951)：任意联合分布都有某方向的函数表示，说明限制函数类的必要性。
+- Gretton et al. (2008)、Fukumizu et al. (2008)：HSIC 与条件依赖核度量，算法的独立检验工具。
+
+## 明确不覆盖
+
+不处理隐变量与混杂（假设因果充分性）；不处理有环/时序因果与选择偏差；不覆盖确定性过程；不给出双变量可识别集 B 的新证明（只汇编）；不涉及变量数大时的计算可扩展性；不做真实数据验证。
+
+## 阅读路径
+
+先读第 1 节引言与 2.3 节（定义 2–4 与引理 1，IFMOC 概念的构造动机），再读定理 2 与假设 2、推论 1；2.4 节（假设对比：忠实性 vs IFMOC、失效情形分析）是理解贡献定位的关键，应精读；第 3 节证明可先接受引理 2–4 后跳读分情形讨论；第 4–5 节算法与实验。姊妹篇对读：arXiv:1202.3775（KCI 检验，同一团队为 CIB 路线修补 CI 检验短板，与本文的 FCM 路线构成 2012 年的两条并行方案）；以及 arXiv:1202.3737（同一框架下检测"直接边 vs 低复杂度隐变量"，放松了本文的因果充分性假设但只处理两变量）。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 可识别功能模型类 | Identifiable Functional Model Classes (IFMOC) |
+| 功能模型 / 结构方程模型 | functional model / structural equation model |
+| 双变量可识别集 | bivariate identifiable set |
+| 忠实性 | faithfulness |
+| 因果最小性 | causal minimality |
+| Markov 等价类 | Markov equivalence class |
+| 加性噪声模型 | additive noise model (ANM) |
+| 后非线性模型 | post-nonlinear model |
+| 汇点 | sink node |
+| 深度优先搜索 | depth-first search |
+| 因果充分性 | causal sufficiency |
+| HSIC（独立性检验） | Hilbert-Schmidt independence criterion |
+
+## 来源定位
+
+来源：`papers/1202.3757.pdf`。关键结果原文编号：定义 2（F-FMOC）、定义 3（B）、定义 4（IFMOC）、引理 1（四类可识别集）、定理 2（主定理）与推论 1、假设 1–2、引理 2–4（证明三支柱）、命题 2（引理 4 ⟹ 因果最小性，附录）、算法 1；实验为数据集 1–5 及 Table 1、Figure 3。

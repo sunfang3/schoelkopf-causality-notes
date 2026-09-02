@@ -1,0 +1,80 @@
+---
+title: "相关数据上学到的解耦表示"
+subtitle: "Frederik Träuble et al., arXiv:2006.07886 (2020)"
+description: "用 4260 个模型的大规模实验证明：训练数据中真实变化因子相互相关时，基于分解先验的无监督解耦方法不足以解开它们，且似然最优性本身偏好纠缠表示；补救靠少量标签事后对齐或弱监督。"
+date: 2020-06-14
+categories: [因果推断, 表示学习]
+paper-id: 2006.07886
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Frederik Träuble（MPI IS, Tübingen）、Elliot Creager（Toronto / Vector）、Niki Kilbertus（Helmholtz AI, München）、Francesco Locatello（Amazon，部分工作完成于 ETH/MPI）、Andrea Dittadi（DTU）、Anirudh Goyal（Mila / Montréal）、Bernhard Schölkopf（MPI IS）、Stefan Bauer（MPI IS / CIFAR） |
+| 出处 | arXiv:2006.07886 [cs.LG]；站内 PDF 为 v3（2021-07-16）；ICML 2021（PMLR 139） |
+| 日期 | 2020-06-14（v1） |
+| 页数 | 19 页（正文 9 页 + 参考文献 + 补充材料） |
+
+一句话定位：把「真实因子统计独立」的理想化假设拿到相关数据上做压力测试——理论上证明相关先验下似然最优的表示必是纠缠的，实验上量化主流方法在何种相关强度下失效，并验证两条补救路径。
+
+## 问题与模型
+
+研究问题：解耦方法几乎都在变化因子（factors of variation, FoV）独立采样的数据上训练评估，即假设 $x\sim\int p^*(x\mid c)p^*(c)dc$ 且 $p^*(c)=\prod_i p^*(c_i)$；但现实因果变量（如脚长与身高，Fig. 1）往往相关。此时 $\beta$-VAE、FactorVAE、DIP-VAE、$\beta$-TCVAE 等学到什么表示、对公平性等下游任务有何后果、如何补救？背景：VAE 的 ELBO (1) 除「KL 靠近分解先验 $p(z)=\prod_i p(z_i)$」外对隐空间不强加结构；无监督解耦被 Locatello et al.（2019b, Theorem 1）证明不可能，故需归纳偏置或弱监督。
+
+## 识别或主要命题
+
+**Proposition 1（p.3，证明附录 A p.13）**：设模型 $p_\theta(x)=\int p_\theta(x\mid z)p(z)dz$，固定先验 $p(z)=\prod_i p(z_i)$ 分解；真实先验 $p^*(c)$ 不分解；存在光滑双射（微分同胚，diffeomorphism）$f^*:\mathcal{C}\to\mathcal{Z}$ 把 $p^*(c)$ 变换为 $p(z)$。则 $p_\theta(x)$ 能达到最优似然 $p^*(x)$ **当且仅当**表示 $z$ 相对真实因子是纠缠的。证明要点：变量替换给出 $\mathrm{D}_{KL}(p^*(x)\|p_\theta(x))=\mathrm{D}_{KL}(p^*(c)\|p_\theta(c))$（式 8），似然最优要求 $p_\theta(c)=p^*(c)$；若 Jacobian $\nabla_c f^*$ 置换对角（本文对「解耦」的定义），则 $p^*(c)$ 也会分解，矛盾。即相关数据上解耦是似然次优的，优化似然下界的算法内生偏纠缠——这是不可能定理在相关数据情形的强化注脚。
+
+## 估计/经验
+
+实验设计（§4.1）：对成对因子注入线性高斯相关 $p(c_1,c_2)\propto\exp(-(c_1-\alpha c_2)^2/2\sigma^2)$，$\sigma\in\{0.2,0.4,0.7,\infty\}$（$\sigma=\infty$ 即常规独立设定）；五个数据集变体 A–E（Table 1）；6 方法 × 6 超参 × 5 种子 = 每设定 180 个模型，共 2880 个无监督模型；弱监督 360 个、额外采样机制 1020 个，总计 4260 个（每模型训练 30 万步）。度量：梯度提升树（GBT）特征重要性构造成对纠缠分数（pairwise entanglement score）；基于互信息的人口均等（demographic parity）变体度量不公平性。结果：(1) 强相关（$\sigma=0.2/0.4$）下两个隐维度同时编码相关因子对——一个沿相关线主轴、一个沿次轴（Fig. 2）；Shapes3D(A) $\sigma=0.2$ 成对纠缠分数 0.38 对未相关对中位数 0.09，$\sigma\geq 0.7$ 基本可解（Table 2）。(2) 不公平分数随相关强度单调上升（Fig. 3）。(3) 尽管纠缠，模型对训练分布零概率的组合（分布外，OOD）仍能有意义地编码与重建，隐空间沿等值线外推出一致网格（Fig. 4）。(4) 补救（§5）：事后用 GBT 定位纠缠维度、线性回归学替换函数，100 个相关因子标签（Shapes3D 全部标签的 <0.02%）即把 0.38 降到 0.17（Table 3）；弱监督 Ada-GVAE（观测对只知差异因子数）常达完美 DCI、不公平大幅下降（Fig. 5）。
+
+## 开放问题
+
+1. **仅线性成对相关（作者自认，脚注 4）**：非线性、高阶相关未覆盖；「线性已捕捉主要效应」的辩护无理论支撑，不能外推到强非线性。
+2. **高分辨率输入与真实下游任务（作者自列，§7）**：结论是否成立于真实图像（Miladinović et al. 2021）与真实任务（Ahmed et al. 2021；Dittadi et al. 2021b）未验证。
+3. **理论与实验之间的链路未闭合（我识别）**：Proposition 1 说「达到最优似然者必纠缠」，但实验未度量所训模型距最优似然多远——纠缠也可能来自优化动力学或正则项；各 $\sigma$ 下的 ELBO/测试似然未报告。
+4. **弱监督在相关数据上无可辨识性理论（我识别）**：Ada-GVAE 的可辨识性论证（Locatello et al. 2020b）假设因子独立；相关越强、对内差异信号越弱，成功边界未被刻画，实证仅在 Shapes3D 三个变体上。
+5. **事后对齐的失效条件（作者自认，§5）**：线性回归替换在分类因子（无自然序，如 object color）或相关泄漏进其他维度时失效，需换 MLP；如何事先判断未说明。
+6. **公平性结论的生态效度（我识别）**：不公平分数把合成 FoV 当作敏感属性，真实数据的相关结构未知且无法受控注入，绝对值无外部参照。
+7. **OOD 外推缺系统度量（作者自列）**：外推能力仅以个例遍历与二维投影可视化展示（Fig. 4），何种条件下归纳偏置+弱监督带来外推被列为开放问题。
+
+## 文献谱系
+
+Locatello et al.（2019b，不可能定理与 disentanglement lib）——本文是其现实化：理论上补强（Prop 1）、实验上量化后果。Locatello et al.（2020b，Ada-GVAE）——弱监督补救所用算法及目标 (4) 的来源；Locatello et al.（2019a）——不公平度量来源。被评测六方法：$\beta$-VAE（Higgins et al. 2017a）、AnnealedVAE、FactorVAE（Kim & Mnih 2018）、DIP-VAE（Kumar et al. 2018）、$\beta$-TCVAE（Chen et al. 2018，其在相关 3DFaces 上的小实验被指用全局指标漏检纠缠）。Schölkopf et al.（2021）与 Peters et al.（2017）——独立因果机制动机；Goyal et al.（2021，RIM）、Leeb et al.（2020）——后续以机制稀疏变化处理相关因子的路线；Rolinek et al.（2019）的「VAE 偏好正交方向」理论是近邻。站内关联：1811.00007（Suter et al., IRS）同属「解耦的因果式验证」——IRS 用 do-算子给解耦以干预语义，本文用数据相关性做压力测试，互补。
+
+## 明确不覆盖
+
+不提出新的解耦训练算法（只评测与两条补救）；不给相关数据下的可辨识性正面理论（唯一理论结果是负面的 Prop 1）；不处理非线性/非成对相关；不做高分辨率或真实标注数据实验；不区分相关的因果来源（直接因果还是混杂，§3 明言两种都算）；不评测非 VAE 类解耦方法；不给事后对齐的统计保证；不处理敏感属性不可干预的公平性（仅引 Kilbertus et al. 2017 为旁注）。
+
+## 阅读路径
+
+先读 §1 与 §3：Prop 1 后「Why not encode train-time correlations?」的三条理由（跨分布泛化、OOD 干预、公平性）是全文价值主张；§4.1 相关注入式与 Table 1 五变体；§4.2 从 Fig 2（主轴/次轴双维度编码）到 Table 2；§4.3 的 Fig 4（纠缠却仍能外推，最反直觉）；§5 的 Table 3（100 标签事后对齐）与 Fig 5（弱监督）；附录 A 证明与附录 B 度量构造值得读。姊妹篇：站内 1811.00007（IRS 干预式解耦验证，与本文相关性压力测试互补）；并与 Locatello et al.（2019b）不可能定理对照，理解「无监督不可能」与「相关数据上似然偏好纠缠」两个负结果的层次。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 解耦 / 解纠缠 | disentanglement |
+| 变化因子 | factors of variation (FoV) |
+| 分解（因子化）先验 | factorized prior |
+| 微分同胚 | diffeomorphism |
+| 成对纠缠分数 | pairwise entanglement score |
+| 梯度提升树 | gradient boosting tree (GBT) |
+| 人口均等 | demographic parity |
+| 不公平分数 | unfairness score |
+| 弱监督 | weak supervision |
+| 快速适应 / 事后对齐 | fast adaptation / post-hoc alignment |
+| 替换函数 | substitution function |
+| 分布外泛化 | out-of-distribution (OOD) generalization |
+| 潜空间遍历 | latent traversal |
+| DCI 分数 | DCI score |
+| 相关强度 | correlation strength ($\sigma$) |
+| 独立因果机制 | independent causal mechanisms |
+| 独立成分分析 | independent component analysis (ICA) |
+
+## 来源定位
+
+`papers/2006.07886.pdf`（19 页）。关键内容：Proposition 1 与纠缠–似然论证（§3, p.3）；相关注入式与五数据集 Table 1（§4.1, p.4）；Ada-GVAE 目标式 (4)（p.4）；Fig. 2 遍历与 GBT 矩阵、Table 2 成对纠缠分数（§4.2, p.5）；不公平 Fig. 3 与 OOD Fig. 4（p.6）；Table 3 事后对齐（§5, p.7）；Fig. 5 弱监督（p.8）；Prop 1 证明（附录 A, p.13）；成对纠缠度量构造（附录 B, p.13–14）；补充表 Table 4（附录 C, p.14）；弱监督附加机制 1020 模型（附录 D.2, p.18）。

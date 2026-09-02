@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN" xml:lang="zh-CN"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="把「实用 Granger 因果分析在隐混杂下失效」转化为严格可识别性问题：假设观测序列 X 与隐藏序列 Z 共同构成一阶 VAR 过程，证明非高斯独立噪声下结构矩阵 B 唯一可识别、X 不影响 Z 时仅凭协方差结构 B 至多 C(2K_X,K_X) 种可能。">
+
+<title>含隐成分向量自回归过程的识别与因果推断 – Schölkopf 因果论文阅读站</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-66b4df7ba86f8287dc76b7fb130027a6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "没有结果",
+    "search-matching-documents-text": "匹配的文档",
+    "search-copy-link-title": "复制搜索链接",
+    "search-hide-matches-text": "隐藏其它匹配结果",
+    "search-more-match-text": "更多匹配结果",
+    "search-more-matches-text": "更多匹配结果",
+    "search-clear-button-title": "清除",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "取消",
+    "search-submit-button-title": "提交",
+    "search-label": "搜索"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Schölkopf 因果论文阅读站</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="搜索"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="展开或折叠导航栏" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">首页</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../schoelkopf-causality-arxiv-2008-2026.html"> 
+<span class="menu-text">全景（按年）</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../glossary.html"> 
+<span class="menu-text">术语表</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../notes.html"> 
+<span class="menu-text">逐篇笔记</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">含隐成分向量自回归过程的识别与因果推断</h1>
+<p class="subtitle lead">Philipp Geiger et al., arXiv:1411.3972 (2014)</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">因果推断</div>
+    <div class="quarto-category">时间序列</div>
+    <div class="quarto-category">隐变量</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    把「实用 Granger 因果分析在隐混杂下失效」转化为严格可识别性问题：假设观测序列 X 与隐藏序列 Z 共同构成一阶 VAR 过程，证明非高斯独立噪声下结构矩阵 B 唯一可识别、X 不影响 Z 时仅凭协方差结构 B 至多 C(2K_X,K_X) 种可能。
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">发布于</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">2014年11月14日</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="导览" class="level2">
+<h2 class="anchored" data-anchor-id="导览">导览</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>作者</td>
+<td>Philipp Geiger、Kun Zhang（MPI for Intelligent Systems, Tübingen；Zhang 兼 USC 信息科学研究所）、Mingming Gong（University of Technology, Sydney）、Dominik Janzing、Bernhard Schölkopf（MPI for Intelligent Systems, Tübingen）</td>
+</tr>
+<tr class="even">
+<td>出处</td>
+<td>arXiv:1411.3972v4 [stat.ML]，ICML 2015 论文的扩展版</td>
+</tr>
+<tr class="odd">
+<td>日期</td>
+<td>v1 2014-11-14；v4 2015-12-22</td>
+</tr>
+<tr class="even">
+<td>页数</td>
+<td>29 页（正文 9 页 + 附录证明与算法细节 20 页）</td>
+</tr>
+</tbody>
+</table>
+<p>一句话定位：时间序列因果发现中第一组「隐混杂下 VAR 结构矩阵何时可识别」的定理——实用 Granger 回归矩阵 <span class="math inline">\(\hat B\)</span> 因隐成分而系统性失真，而真实转移矩阵 <span class="math inline">\(A\)</span> 的可观块 <span class="math inline">\(B\)</span> 在两条互补条件下可（近似）恢复。</p>
+</section>
+<section id="问题与模型" class="level2">
+<h2 class="anchored" data-anchor-id="问题与模型">问题与模型</h2>
+<p>研究问题：实用 Granger 因果分析（practical Granger causal analysis）把「用观测序列 <span class="math inline">\(X\)</span> 的过去回归现在」的矩阵 <span class="math inline">\(B_{pG}=\mathbb E(X_tX_{t-1}^\top)\mathbb E(X_tX_t^\top)^{-1}\)</span>（式 (3)）因果化；存在未测序列 <span class="math inline">\(Z\)</span> 影响 <span class="math inline">\(X\)</span> 时这一解释可系统性出错。§4.3 给出三维反例：<span class="math inline">\(A=\begin{pmatrix}0.9&amp;0&amp;0.5\\0.1&amp;0.1&amp;0.8\\0&amp;0&amp;0.9\end{pmatrix}\)</span>、噪声协方差 <span class="math inline">\(I\)</span>，真实 <span class="math inline">\(X^2_t\)</span> 并不导致 <span class="math inline">\(X^1_{t+1}\)</span>，但 <span class="math inline">\(B_{pG}=\begin{pmatrix}0.89&amp;0.35\\0.08&amp;0.65\end{pmatrix}\)</span> 显示强度 <span class="math inline">\(0.35\)</span> 的伪效应——比真实存在的 <span class="math inline">\(X^1\to X^2\)</span>（强度 <span class="math inline">\(0.1\)</span>）还强。</p>
+<p>模型：<span class="math inline">\(W=(X,Z)^\top\)</span> 是一阶稳定 VAR 过程（式 (1)，<span class="math inline">\(A\)</span> 的谱半径 <span class="math inline">\(&lt;1\)</span>），<span class="math inline">\(A=\begin{pmatrix}B&amp;C\\D&amp;E\end{pmatrix}\)</span>（式 (2)），隐维数 <span class="math inline">\(K_Z\le K_X\)</span>；<span class="math inline">\(B\)</span> 称为 <span class="math inline">\(X\)</span> 的<strong>结构矩阵</strong>，<span class="math inline">\(C\ne0\)</span> 时 <span class="math inline">\(Z\)</span> 是隐混杂（hidden confounder）。对角结构 VAR（A2）：噪声分量 <span class="math inline">\(N^1_0,\dots,N^K_0\)</span> 相互独立。因果解释给两条依据：Granger 理想定义（若 <span class="math inline">\(Z\)</span> 概括宇宙相关部分，则 <span class="math inline">\(B\)</span> 的元素恰为非瞬时直接因果效应）或 Pearl 的 SEM 语义（VAR 方程即结构方程）；文中承认 <span class="math inline">\(K_Z\le K_X\)</span>「可能是相当强的假设」。</p>
+</section>
+<section id="识别或主要命题" class="level2">
+<h2 class="anchored" data-anchor-id="识别或主要命题">识别或主要命题</h2>
+<p>证明工具是广义残差（generalized residual）<span class="math inline">\(R_t(U_1,U_2)=X_t-U_1X_{t-1}-U_2X_{t-2}\)</span> 与矩阵 <span class="math inline">\(M_1=\mathbb E[W_t(X_t^\top,X_{t-1}^\top)]\)</span>。引理 1–4：可选 <span class="math inline">\((U_1,U_2)\)</span> 使 <span class="math inline">\(R_t\)</span> 成为有限个噪声项的线性混合且与 <span class="math inline">\((X_{t-2-j})_{j\ge0}\)</span> 独立；等价刻画是 <span class="math inline">\((U_1,U_2)\begin{pmatrix}B&amp;C\\I&amp;0\end{pmatrix}=(B^2+CD,\ BC+CE)\)</span>（式 (5)），其协方差零形式（式 (6)，<span class="math inline">\(j=0,1\)</span>）可改写为类 Yule–Walker 方程（式 (7)）；<span class="math inline">\(M_1\)</span> 满秩时 (6) 蕴含 (5)（引理 3），<span class="math inline">\(K=K_X\)</span> 或 <span class="math inline">\(C\)</span> 满秩时 (5) 可解（引理 4）。三个主定理：</p>
+<ul>
+<li><strong>Theorem 1</strong>（A1 全部噪声项非高斯 + A2 + G1：<span class="math inline">\(C\)</span> 与 <span class="math inline">\(M_1\)</span> 满秩）：<span class="math inline">\(B\)</span> 由 <span class="math inline">\(X\)</span> 的分布 <span class="math inline">\(\mathbb P_X\)</span> <strong>唯一识别</strong>。证明思路：取满足 (5) 的 <span class="math inline">\((U_1,U_2)\)</span>，则 <span class="math inline">\((R_t,R_{t-1})^\top\)</span> 是 <span class="math inline">\(2K_X\)</span> 个独立非高斯噪声经混合矩阵 <span class="math inline">\(Q=\begin{pmatrix}I&amp;C&amp;(B-U_1)&amp;0\\0&amp;0&amp;I&amp;C&amp;(B-U_1)\end{pmatrix}\)</span> 的线性组合；用超完备 ICA 的可识别性定理（Kagan et al.&nbsp;1973, Thm 10.3.1，文中编号 Theorem 4）知 <span class="math inline">\(Q\)</span> 的列在相差尺度/置换下识别，由其块结构读出 <span class="math inline">\(B-U_1\)</span>，加回 <span class="math inline">\(U_1\)</span>。与前驱 Hoyer et al.&nbsp;(2008) 只能得到有限多解不同，自回归结构把结论升级为唯一性。</li>
+<li><strong>Theorem 2</strong>（同假设）：<span class="math inline">\(C\)</span> 中含至少两个非零元的列在相差（尺度与置换）意义下识别——即哪些 <span class="math inline">\(X\)</span> 分量被同一隐变量混杂可从 <span class="math inline">\(\mathbb P_X\)</span> 读出。</li>
+<li><strong>Theorem 3</strong>（放弃非高斯；A3：<span class="math inline">\(D=0\)</span> 即 <span class="math inline">\(X\)</span> 不影响 <span class="math inline">\(Z\)</span>，加 G1 与 G2：存在满足 (5) 的 <span class="math inline">\(U\)</span> 使 <span class="math inline">\(\det T_U(\alpha)\)</span> 有 <span class="math inline">\(2K_X\)</span> 个互异根，<span class="math inline">\(T_U(Q)=Q^2-U_1Q-U_2\)</span>（式 (8)））：<span class="math inline">\(B\)</span> 仅由 <span class="math inline">\(X\)</span> 的<strong>协方差结构</strong>识别至多 <span class="math inline">\(\binom{2K_X}{K_X}\)</span> 种可能。证明用矩阵多项式右解（solvent）计数（Theorem 5，改写自 Dennis et al.&nbsp;1976）：真 <span class="math inline">\(B\)</span> 是 <span class="math inline">\(T_U(\tilde B)=0\)</span>（式 (9)）的解，而解至多 <span class="math inline">\(\binom{2K_X}{K_X}\)</span> 个。</li>
+<li><strong>Propositions 1–2</strong>：G1、G2 在自然参数化下仅排除 Lebesgue 零测集（通有性），附录 C 以多项式零点集论证。</li>
+</ul>
+</section>
+<section id="估计经验" class="level2">
+<h2 class="anchored" data-anchor-id="估计经验">估计/经验</h2>
+<p>两个算法对应两组条件。<strong>Algorithm 1</strong>（面向 Thm 1–2）：噪声用高斯混合参数化，变分 EM 近似极大似然（模板 Oh et al.&nbsp;2005）；<span class="math inline">\(K_Z\)</span> 与混合数可交叉验证选取。<strong>Algorithm 2</strong>（面向 Thm 3）：用样本自协方差解式 (7) 得 <span class="math inline">\((\hat U_1,\hat U_2)\)</span>，再解矩阵二次方程 (9) 的全部右解输出。模型检验（§7.3）：检验 <span class="math inline">\(R_t(\hat U_1,\hat U_2)\)</span> 与 <span class="math inline">\((X_{t-2-j})_{j=0}^{J}\)</span>（<span class="math inline">\(J=2\)</span>）独立、各分量非高斯（K-S 检验）——只是必要条件。实验：</p>
+<ul>
+<li>合成 1（Alg 1）：<span class="math inline">\(K_X=2,K_Z=1\)</span>，<span class="math inline">\(L\in\{100,500,1000,5000\}\)</span>，各 20 次，超高斯混合噪声；Alg 1 的 RMSE 随 <span class="math inline">\(L\)</span> 增大趋于可忽略水平，practical Granger 误差有远离零的下界（图 1）。</li>
+<li>合成 2（Alg 2）：<span class="math inline">\(K_X=K_Z=1\)</span>（下左元素为零即 <span class="math inline">\(D=0\)</span>），<span class="math inline">\(L=10^1\)</span>–<span class="math inline">\(10^7\)</span>，各 20 次，高斯噪声（Thm 3 不需非高斯）；两个候选渐近含真值，但至少需约 1000 个样本，practical Granger 不收敛到真值（图 2）。</li>
+<li>真实数据：340 个月度观测（1986-01 至 2014-04）的奶酪/黄油/牛奶价格。以三元 practical Granger <span class="math inline">\(A_{fG}\)</span> 为参照真值：Algorithm 1 在 <span class="math inline">\((Y^1,Y^2)\)</span> 加一维隐 <span class="math inline">\(Z\)</span> 上的输出 <span class="math inline">\(\tilde A_{pA}\)</span> 左上 <span class="math inline">\(2\times2\)</span> 块 RMSE <span class="math inline">\(0.0753\)</span>（<span class="math inline">\(B_{pG}\)</span> 为 <span class="math inline">\(0.0662\)</span>），但右上的 <span class="math inline">\(C\)</span> 块不接近 <span class="math inline">\(A_{fG}\)</span> 对应块的倍数——与 Thm 2 预期相反；模型检验在 5% 水平同时拒绝高斯性与独立性，且 Schwarz 准则选出的 VAR 阶为 3、违反一阶假设。作者如实承认方法假设在该数据上很可能不成立。</li>
+</ul>
+</section>
+<section id="开放问题" class="level2">
+<h2 class="anchored" data-anchor-id="开放问题">开放问题</h2>
+<ol type="1">
+<li><strong>估计理论缺口（自陈，脚注 6）</strong>：参数模型下 MLE 的一致性只是猜想（“We conjecture”），变分 EM 是近似无任何保证；合成实验中 Alg 1 的误差被观察到「可能不收敛到零」。</li>
+<li><strong>模型检验不充分 + 真实数据失败（自陈）</strong>：§7.3 明言模型假设原则上无法仅凭 <span class="math inline">\(X\)</span> 检验，所给两个检验只是必要条件；真实数据实验同时违反高斯性、独立性与一阶假设，<span class="math inline">\(C\)</span> 块恢复失败——方法在真实数据上的有效性未获任何正面经验证据。</li>
+<li><strong><span class="math inline">\(K_Z\le K_X\)</span> 假设强（自陈「可能相当强」）</strong>：隐维数超过观测维数时全部定理失效；且 <span class="math inline">\(K_Z\)</span> 需先验已知或靠交叉验证启发，无理论判据。</li>
+<li><strong>Algorithm 2 的候选选择无准则</strong>：输出至多 <span class="math inline">\(\binom{2K_X}{K_X}\)</span> 个候选（<span class="math inline">\(K_X=1\)</span> 时 2 个，<span class="math inline">\(K_X=2\)</span> 时 6 个），实验用「最优候选」的 oracle 口径评误差；无数据驱动的消歧方法，也无有限样本理论。</li>
+<li><strong>模型类窄</strong>：一阶线性 VAR；高阶（真实数据的 SC 阶 3）、非线性、瞬时因果均不覆盖；G1/G2 的通有性只在固定 <span class="math inline">\(K\)</span> 下证明；Theorem 2 对 <span class="math inline">\(C\)</span> 的识别不含单非零元列（恰好单个 <span class="math inline">\(X\)</span> 分量受隐变量影响时列不可区分）。</li>
+</ol>
+</section>
+<section id="文献谱系" class="level2">
+<h2 class="anchored" data-anchor-id="文献谱系">文献谱系</h2>
+<ul>
+<li>Granger (1969) 的理想定义与 Lütkepohl (2006) 的 practical Granger（式 (3) 即其教科书估计量）：本文要修正的对象与第一条因果依据；Pearl (2000)、Spirtes et al.&nbsp;(2000) 的 SEM 语义是第二条依据；Eichler (2012) 是时间序列各种因果定义的综述对照。</li>
+<li>Hoyer et al.&nbsp;(2008)：用同一超完备 ICA 定理（Kagan et al.&nbsp;1973）识别线性隐变量模型，本文直接前驱——但只到有限多解且不适用 VAR，本文用自回归结构升级为唯一识别；Hyvärinen et al.&nbsp;(2010)：非高斯噪声用于瞬时效应。</li>
+<li>隐成分过程的其他路线：Jalali–Sanghavi (2012)（稀疏局部-全局结构的隐 VAR 识别，假设不同）、Boyen et al.&nbsp;(1999)（部分观测马尔可夫链的 EM，无识别理论）、Etesami et al.&nbsp;(2012)（树结构 + discrepancy 度量）。</li>
+<li>工具性引用：Kagan–Linnik–Rao (1973, Thm 10.3.1)（定理核心）、Dennis–Traub–Webber (1976)（矩阵多项式溶剂计数，Thm 3 核心）、Oh et al.&nbsp;(2005)（变分 EM 模板）、Ramachandran (1967)（非高斯性的封闭性，模型检验依据）。</li>
+<li>后续：ICML 2015 会议版即本文的短版；含隐混杂时间序列的可识别性研究（含同组 Gong、Zhang 的后续工作）由此展开。</li>
+</ul>
+</section>
+<section id="明确不覆盖" class="level2">
+<h2 class="anchored" data-anchor-id="明确不覆盖">明确不覆盖</h2>
+<p>不处理高阶或非线性 VAR、瞬时（同期）因果与归因；不给因果结构的搜索/模型选择（<span class="math inline">\(K_Z\)</span> 与滞后阶不从数据识别）；不讨论非平稳与结构漂移；不做干预或反事实的实验设计；不与非线性 Granger / 传递熵等方法比较（仅线性实用 Granger 为对照）。</p>
+</section>
+<section id="阅读路径" class="level2">
+<h2 class="anchored" data-anchor-id="阅读路径">阅读路径</h2>
+<p>先读 §1 与 §4（模型与两条因果辩护，必读——不接受这两条语义，后面识别结果无因果含义），再看 §4.3 的三维反例（ motivates 全文）；然后 §5（广义残差与引理 1–4，四个引理都很短）；§6 按兴趣：先 Thm 1 及其证明思路段，Thm 3 次之（Thm 2 顺带）；§7 两个算法与模型检验；§8 重点是真实数据一节（方法局限的诚实展示）。附录只在需要细节时读：B.1（Thm 1 证明）、B.3 + Theorem 5（Thm 3 的溶剂计数）、C（通有性）。姊妹篇对照：站内 1207.5136（TiMINo：无隐变量的时间序列因果识别，假设恰好相反的「因果充分」端）；1304.7920/1408.2063（结构方程的动力学语义——本文 §4.2 的 SEM 论证是其统计对偶）；1202.3737（另一条隐原因检测路线）。</p>
+</section>
+<section id="术语对照" class="level2">
+<h2 class="anchored" data-anchor-id="术语对照">术语对照</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>中文</th>
+<th>English</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>向量自回归过程</td>
+<td>vector autoregressive (VAR) process</td>
+</tr>
+<tr class="even">
+<td>结构矩阵</td>
+<td>structural matrix</td>
+</tr>
+<tr class="odd">
+<td>隐混杂（变量）</td>
+<td>hidden confounder</td>
+</tr>
+<tr class="even">
+<td>对角结构 VAR 过程</td>
+<td>diagonal-structural VAR process</td>
+</tr>
+<tr class="odd">
+<td>实用 Granger 因果分析</td>
+<td>practical Granger causal analysis</td>
+</tr>
+<tr class="even">
+<td>Granger 理想定义</td>
+<td>Granger’s ideal definition of causation</td>
+</tr>
+<tr class="odd">
+<td>广义残差</td>
+<td>generalized residual</td>
+</tr>
+<tr class="even">
+<td>超完备独立成分分析</td>
+<td>overcomplete independent component analysis (ICA)</td>
+</tr>
+<tr class="odd">
+<td>矩阵多项式 / 右解（溶剂）</td>
+<td>matrix polynomial / (right) solvent</td>
+</tr>
+<tr class="even">
+<td>类 Yule–Walker 方程</td>
+<td>Yule–Walker-type equation</td>
+</tr>
+<tr class="odd">
+<td>变分 EM</td>
+<td>variational expectation maximization</td>
+</tr>
+<tr class="even">
+<td>通有性（排除零测集）</td>
+<td>genericity (excluding a Lebesgue null set)</td>
+</tr>
+<tr class="odd">
+<td>可识别性 / 准可识别性</td>
+<td>identifiability / almost identifiability</td>
+</tr>
+<tr class="even">
+<td>自协方差结构</td>
+<td>autocovariance structure</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="来源定位" class="level2">
+<h2 class="anchored" data-anchor-id="来源定位">来源定位</h2>
+<p>来源：<code>papers/1411.3972.pdf</code>。关键编号：式 (1)(2)（VAR 与分块，§3–4）、(3) practical Granger 与 §4.3 反例（p.3–4）、(4)–(7) 广义残差与引理 1–4（§5）、假设 A1–A3/G1–G2 与 Theorems 1–3、Propositions 1–2（§6，p.4–6；定理证明在附录 B、通有性在附录 C）；Algorithm 1–2（§7，详细在附录 D）；模型检验（§7.3）；实验与图 1–2、真实数据矩阵与 RMSE 数字（§8，p.7–9）。</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "已复制");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "已复制");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

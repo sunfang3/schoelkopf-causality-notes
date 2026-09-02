@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN" xml:lang="zh-CN"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="立场文：监督学习大多是由效果反推原因的反因果任务，直接求逆在支撑集之外（强泛化）先天困难；若能查询因果模型，则在原因空间上搜索并用因果模型验证即可保证强泛化（Proposition 1），对抗鲁棒性、编解码器与解耦皆可读成该范式的注脚。">
+
+<title>反因果学习中的泛化 – Schölkopf 因果论文阅读站</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-66b4df7ba86f8287dc76b7fb130027a6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "没有结果",
+    "search-matching-documents-text": "匹配的文档",
+    "search-copy-link-title": "复制搜索链接",
+    "search-hide-matches-text": "隐藏其它匹配结果",
+    "search-more-match-text": "更多匹配结果",
+    "search-more-matches-text": "更多匹配结果",
+    "search-clear-button-title": "清除",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "取消",
+    "search-submit-button-title": "提交",
+    "search-label": "搜索"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Schölkopf 因果论文阅读站</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="搜索"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="展开或折叠导航栏" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">首页</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../schoelkopf-causality-arxiv-2008-2026.html"> 
+<span class="menu-text">全景（按年）</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../glossary.html"> 
+<span class="menu-text">术语表</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../notes.html"> 
+<span class="menu-text">逐篇笔记</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">反因果学习中的泛化</h1>
+<p class="subtitle lead">Niki Kilbertus et al., arXiv:1812.00524 (2018)</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">因果推断</div>
+    <div class="quarto-category">分布偏移</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    立场文：监督学习大多是由效果反推原因的反因果任务，直接求逆在支撑集之外（强泛化）先天困难；若能查询因果模型，则在原因空间上搜索并用因果模型验证即可保证强泛化（Proposition 1），对抗鲁棒性、编解码器与解耦皆可读成该范式的注脚。
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">发布于</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">2018年12月3日</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="导览" class="level2">
+<h2 class="anchored" data-anchor-id="导览">导览</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>作者</td>
+<td>Niki Kilbertus（MPI for Intelligent Systems, Tübingen / University of Cambridge）、Giambattista Parascandolo（MPI IS / MPI ETH Center for Learning Systems）、Bernhard Schölkopf（MPI IS）；按字母序署名</td>
+</tr>
+<tr class="even">
+<td>出处</td>
+<td>arXiv:1812.00524v1 [cs.LG]；短版曾报告于 NeurIPS 2018 workshop “Critiquing and correcting trends in machine learning”</td>
+</tr>
+<tr class="odd">
+<td>日期</td>
+<td>2018-12-03</td>
+</tr>
+<tr class="even">
+<td>页数</td>
+<td>12 页（正文 8 页 + 文献）</td>
+</tr>
+</tbody>
+</table>
+<p>一句话定位：承 1206.6471 的因果/反因果学习之分，把「为何 i.i.d. 之外的强泛化如此困难」归因于反因果方向，并论证出路不是更好的求逆器，而是「反因果模型驱动搜索 + 因果模型验证」的新范式。</p>
+</section>
+<section id="问题与模型" class="level2">
+<h2 class="anchored" data-anchor-id="问题与模型">问题与模型</h2>
+<p>研究问题：为何同一套「足够数据 + 大模型即可学会任何东西」的信念在迁移学习、域适应（domain adaptation）、协变量偏移（covariate shift）下系统性失效？因果方向与反因果方向（anti-causal，由效果 <span class="math inline">\(Y\)</span> 反推原因 <span class="math inline">\(X\)</span>）的学习难度差异何在，后者可否补救？</p>
+<p>模型与定义（§1–2）：标准学习设定由四条组成——(C1) 可测空间 <span class="math inline">\((\mathcal X,\Sigma_{\mathcal X})\)</span>、<span class="math inline">\((\mathcal Y,\Sigma_{\mathcal Y})\)</span>；(C2) 未知抽样分布 <span class="math inline">\(P(X)\)</span>（不必满支撑）；(C3) 未知固定条件分布 <span class="math inline">\(P(Y|X)\)</span>；(C4) 从 <span class="math inline">\(P(X,Y)=P(Y|X)P(X)\)</span> 的 i.i.d. 有限样本 <span class="math inline">\(S\)</span>。据此定义：</p>
+<ul>
+<li><strong>弱泛化（weak generalization）</strong>：在 (C1)–(C4) 下泛化到同一 <span class="math inline">\(P(X,Y)\)</span> 的未见样本。由 Glivenko–Cantelli 一致收敛，样本最终覆盖 <span class="math inline">\(\mathrm{supp}(P(X))\)</span>，故弱泛化本质是<strong>插值（interpolation）</strong>，ERM 一致性即可覆盖。</li>
+<li><strong>强泛化（strong generalization）</strong>：外推到 <span class="math inline">\(\mathrm{supp}(P(X))\)</span> 之外。文中自明这是非正式术语（脚注 2：与强普遍一致性无关）。</li>
+</ul>
+<p>支撑强泛化的是两条非形式前提：<strong>连续性法则（law of continuity）</strong>（自然由连续普适的机制治理，「Natura non facit saltus」，Leibniz）与「识别的直觉信念」——拟合训练数据的模型不只是模仿机制，而是（近似地）识别了它。在因果方向上，这两条与独立因果机制（Independent Causal Mechanisms, ICM）原则相容：机制 <span class="math inline">\(P(Y|X)\)</span> 对原因分布 <span class="math inline">\(P(X)\)</span> 的变化不变，而 <span class="math inline">\(P(X)\)</span> 可以换支撑（域适应的典型情形），故可望强泛化。反因果方向上 <span class="math inline">\(P(X|Y)\)</span> 一般不随 <span class="math inline">\(P(Y)\)</span> 的变化不变——这正是 (C3) 中「固定机制」只安放在因果方向的不对称。为简化，全文排除混杂（脚注 3：<span class="math inline">\(X,Y\)</span> 同为某因之果的混杂情形与反因果情形性质相近）。</p>
+<p>MNIST 例子（§2，Fig 1）给出支撑结构：原因是书写意图的脑状态，效应是像素图像；标签 <span class="math inline">\(l\in L\)</span> 是宏观性质，界定原因子集 <span class="math inline">\(S_l\subset\mathcal X\)</span>，<span class="math inline">\(\mathrm{supp}(P(X))\subset\bigcup_{l\in L}S_l\)</span> 但 <span class="math inline">\(S_l\setminus\mathrm{supp}(P(X))\)</span> 可非空（训练只见过无横线的 7，仍能给带横线的 7 以标签），甚至支撑之外还有可自然延拓标签的原因（手写字母）——强泛化的期望正是来自这种支撑延拓。</p>
+</section>
+<section id="识别或主要命题" class="level2">
+<h2 class="anchored" data-anchor-id="识别或主要命题">识别或主要命题</h2>
+<p>全文是立场文，唯一编号结果是构造性命题，其余为论证链。</p>
+<p><strong>第 3 节：反因果方向本质困难的证据链</strong>（好行为的函数可以没有好行为的逆）：</p>
+<ol type="1">
+<li>病态逆问题（ill-posed inverse problem）：从数据识别机制（Vapnik 意义下的 identification，区别于模仿）是逆问题，效应的微扰（测量噪声）可致推断原因的任意偏差；Hilbert 空间之间有界线性算子的 Moore–Penrose 广义逆可不连续。</li>
+<li>描述复杂度：因果方向的 Kolmogorov 复杂度描述更短（Janzing &amp; Schölkopf 2010 的算法马尔可夫条件），基于 MDL 的实用方法能从数据判向——反因果方向表达复杂度更高的实证证据。</li>
+<li>密码学单向函数（one-way function）：素因子分解、离散对数、二次剩余——多项式时间可算、任何随机算法求逆可忽略，即求逆只能穷举。</li>
+<li>NP 完全：子集和（subset sum，找 <span class="math inline">\(\alpha\in\{0,1\}^d\)</span> 使 <span class="math inline">\(x^\top\alpha=s\)</span>）正向易（点积易学易执行、对任意取值一致），逆向无多项式算法；<span class="math inline">\(\ell_0\)</span> 稀疏重构本质上是子集和，故 NP 完全。</li>
+<li>输入域限制：正向定义域天然可延拓（整数乘法），限制到素数元组后逆（分解）才变难——正向域的收缩即逆问题的解空间收缩，与 <span class="math inline">\(\mathrm{supp}(P(X))\subset\mathcal X\)</span> 的观察同构。</li>
+<li>表达层面：Abel–Ruffini 定理——五次以上一般多项式方程无代数解；<span class="math inline">\(f(x)=x+\sin(x)\)</span> 是初等双射却无初等逆。</li>
+</ol>
+<p>作者随即自答「为何反因果学习实践上常有效」：并非所有逆都病态；只恢复原因的高层性质（标签而非脑状态）可大幅降低难度；弱泛化域内近似保证本就覆盖复杂逆函数——但强泛化域内这些安慰全部失效。</p>
+<p><strong>Proposition 1（构造性反因果学习，§4.1）</strong>：假设可无限次查询有限域 <span class="math inline">\(\mathcal X\)</span> 上的确定性因果模型 <span class="math inline">\(f:\mathcal X\to\mathcal Y\)</span>，则在反因果方向，对每个 <span class="math inline">\(y\in\mathcal Y\)</span> 都能判定它是否有合法原因，若有则找出 <span class="math inline">\(x\in\mathcal X\)</span> 使 <span class="math inline">\(y\)</span> 为 <span class="math inline">\(x\)</span> 之效应。证明即枚举 <span class="math inline">\(\mathcal X\)</span> 并检验 <span class="math inline">\(f(x)=y\)</span>。可数无限域上数学成立但可能不停机；一般无限域的问题化为寻找高效<strong>搜索启发式</strong>——i.i.d. 下训练的监督模型恰是最有希望的候选启发式（驱动搜索），因果模型负责验证与外推。文中明示该命题假设因果模型及其全部适用域已知，实践中模型本身也要学。</p>
+<p><strong>Corollary（§4.2）</strong>：构造性反因果学习不可被欺骗——因每个原因只有单一标签与单一效应，程序要么给出合法匹配要么拒绝分类，故对抗样本对它无效。渲染任何茶壶都不会产生「猫加小噪声」的图像；穷尽原因仍无匹配（图像被大幅篡改）则（正确地）拒绝分类。</p>
+<p><strong>领域映射（§4.2，论证链的展开）</strong>：前馈网络计算步数有上界，不能实现迭代搜索，需 RNN 等自适应计算模型；对抗样本=强泛化失败，生成式防御（Defense-GAN、PixelDefend 等）即构造性反因果学习；编解码器中解码器对应因果机制、编码器对应反因果求逆，仅前者可望跨任务泛化、训练中充当验证器与正则项；解耦（disentangling，站内术语表的解耦表示）拆成「发现好的潜维度（定因果机制的定义域）」与「逐例反因果推断」两个子任务，现有方法只解前者；贝叶斯推断 <span class="math inline">\(P(X|Y)=P(Y|X)P(X)/P(Y)\)</span> 即先验采样驱动、正向机制验证的内置搜索（贝叶斯网络推断/MAP/结构学习的 NP 难结果与第 3 节呼应）；引力波参数估计（GW150914：MCMC 模拟数十万组参数的波形再匹配观测）、ABC、vision as inverse graphics、AlphaGo（在博弈的真实因果模型上搜索、网络引导）均为「搜索+验证」的既有实例；Feynman 的「猜想—计算—对比」科学方法与 Kahneman 系统 1/系统 2 被引为同构。</p>
+</section>
+<section id="估计经验" class="level2">
+<h2 class="anchored" data-anchor-id="估计经验">估计/经验</h2>
+<p>本文无自己的实验；所有证据均为文献指认（§4.2 各段 “Experiments:”）：Eslami et al.&nbsp;2016 与 Putzky &amp; Welling 2017 用 RNN 在已知生成模型上迭代推断，测试时能识别训练中从未同时出现的多物体（强泛化的征兆）；对抗防御四篇（Wang 2017、Samangouei 2018、Song 2017、Ilyas 2017）以生成模型合成匹配提升鲁棒性；Lake et al.&nbsp;2015 用笔画组合的概率程序生成模型做字符的少样本学习。这些数字属被引文献，本篇未提供新基准。</p>
+</section>
+<section id="开放问题" class="level2">
+<h2 class="anchored" data-anchor-id="开放问题">开放问题</h2>
+<ol type="1">
+<li><strong>自列</strong>：因果模型本身未知时须先学之，“might be hard in itself”——本文对「学到的因果模型不完美时验证环节如何退化」完全未分析；渲染引擎的不完美可被攻击利用（文中自己承认），Corollary 的「不可欺骗」依赖理想模型。</li>
+<li><strong>自列（隐含）</strong>：Proposition 1 只覆盖有限域，可数域可能不停机；连续域 <span class="math inline">\(\mathcal X\)</span> 上 <span class="math inline">\(f(x)=y\)</span> 的精确验证在测量噪声下无意义，引入容差 <span class="math inline">\(\|f(x)-y\|&lt;\epsilon\)</span> 后小扰动仍可能造成匹配出的 <span class="math inline">\(x\)</span> 剧烈跳动——病态性以另一形式回流，文中未处理。</li>
+<li><strong>理论缺口</strong>：第 3 节的证据链是类比而非归约——没有任何定理把「反因果学习的强泛化困难」形式化（单向函数存在性本身未证；「识别的直觉信念」无定义无度量）。强泛化自称非正式术语，全文缺少可证伪的刻画。</li>
+<li><strong>搜索效率无保证</strong>：无限域上依赖启发式引导搜索，但对启发式好坏（反因果模型捕获原因空间结构的程度）没有任何界；渲染引擎分类被自认「随机搜索可能极慢」。</li>
+<li><strong>标签的宏观性未建模</strong>：标签是低层原因的宏观性质（多对一商），Proposition 1 找到的是某个合法原因 <span class="math inline">\(x\)</span>，未说明如何从 <span class="math inline">\(x\)</span> 恢复宏观标签；「发现潜维度」与「逐例推断」二分中的第二任务被明示为难点而未解。</li>
+<li><strong>经验验证空白</strong>：全文无自己的实验，「搜索+验证优于直接求逆」这一核心主张没有对照基准的定量检验；后续文献（如 von Kügelgen et al.&nbsp;2021 对自监督学习的因果分析、Schölkopf et al.&nbsp;2021 因果表示学习纲领 2012.07398）沿此方向推进，也侧面说明本篇停留在纲领层。</li>
+</ol>
+</section>
+<section id="文献谱系" class="level2">
+<h2 class="anchored" data-anchor-id="文献谱系">文献谱系</h2>
+<p>前作：Schölkopf et al.&nbsp;2012（站内 1206.6471）与 Janzing &amp; Schölkopf 2010——因果/反因果之分与算法马尔可夫条件，本文的直接地基；Daniusis et al.&nbsp;2010、Shajarisales et al.&nbsp;2015——ICM 原则的可操作化；Peters, Janzing &amp; Schölkopf 2017《Elements of Causal Inference》——机制不变性与 MNIST 例子出处；Vapnik 1998——模仿/识别之别与病态逆问题；Kurková 2004、Rosasco et al.&nbsp;2005、Bertero et al.&nbsp;1988——逆问题与学习理论的接口；Mukherjee et al.&nbsp;2006、Bousquet &amp; Elisseeff 2002、Feldman &amp; Vondrak 2018——稳定性与泛化的等价，被引以连接可学习性与稳定性；Szegedy et al.&nbsp;2013——对抗样本现象；Weichwald et al.&nbsp;2014、Besserve et al.&nbsp;2017/2018——解码器因果、编码器反因果的实证刻画；Kos et al.&nbsp;2017——VAE 对抗攻击被重释为对编码器（反因果部件）的攻击；Eslami et al.&nbsp;2016、Putzky &amp; Welling 2017、Graves 2016、Figurnov et al.&nbsp;2017——自适应计算时间的证据与工具；Lake et al.&nbsp;2013/2015/2016——因果生成模型做单样本/少样本学习；Abbott et al.&nbsp;2016、Rubin 1984、Beaumont——物理模型可解时的搜索式推断（引力波、ABC）；Loper &amp; Black 2014、Tassa et al.&nbsp;2012、Silver et al.&nbsp;2016、Balog et al.&nbsp;2017——逆图形、在线规划、AlphaGo、程序归纳的搜索实例；Kahneman 2011、Griffiths &amp; Tenenbaum 2009、Ullman et al.&nbsp;2010——认知层的同构。后续：本文「搜索+验证」纲领由因果表示学习（Schölkopf et al., arXiv:2012.07398）与自监督学习的因果分析等线继承；站内 1509.08056/1903.01672 则代表「用分布变化学习因果结构」的互补路线。</p>
+</section>
+<section id="明确不覆盖" class="level2">
+<h2 class="anchored" data-anchor-id="明确不覆盖">明确不覆盖</h2>
+<p>不处理混杂情形（脚注 3 只顺带指出其与反因果相似）；不给「强泛化」形式定义也不证任何困难性定理；不提出新算法、新基准或新实验；不分析半监督/协变量偏移的具体可行性条件（那是 1112.2738 与 1206.6471 的任务）；不给解耦一个公认定义（只指出其缺失）；不讨论学因果模型本身的方法；不涉及多变量/循环因果结构。</p>
+</section>
+<section id="阅读路径" class="level2">
+<h2 class="anchored" data-anchor-id="阅读路径">阅读路径</h2>
+<p>先读 §1 的 C1–C4、弱/强泛化之别与连续性法则（全文立论的裂缝正在「直觉信念」的非形式性上）；§2 精读 ICM 不对称与 MNIST 支撑结构（<span class="math inline">\(S_l\)</span>、<span class="math inline">\(\mathrm{supp}(P(X))\)</span>、Fig 1–2）；§3 是证据链，可按「病态性→复杂度→计算复杂性→表达」的顺序快读；§4.1 的 Proposition 1 与 Corollary 是全文唯一编号结果，务必与 Fig 2 的「搜索+验证」回路对照；§4.2 各段可按兴趣选读。姊妹篇对照：站内 1206.6471（因果/反因果学习的原始纲领，本文是其强泛化篇）；站内 1112.2738（同一框架下协变量偏移/半监督的逐任务分析，先读它有助于理解 ICM 不对称如何落到具体场景）。阅读本文时建议带着一个疑问：Proposition 1 的「已知因果模型」假设在多大程度上把问题搬到了别处。</p>
+</section>
+<section id="术语对照" class="level2">
+<h2 class="anchored" data-anchor-id="术语对照">术语对照</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>中文</th>
+<th>English</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>反因果学习</td>
+<td>anti-causal learning</td>
+</tr>
+<tr class="even">
+<td>弱泛化</td>
+<td>weak generalization</td>
+</tr>
+<tr class="odd">
+<td>强泛化</td>
+<td>strong generalization</td>
+</tr>
+<tr class="even">
+<td>连续性法则</td>
+<td>law of continuity</td>
+</tr>
+<tr class="odd">
+<td>识别的直觉信念</td>
+<td>intuitive belief (of identification)</td>
+</tr>
+<tr class="even">
+<td>病态逆问题</td>
+<td>ill-posed inverse problem</td>
+</tr>
+<tr class="odd">
+<td>Moore–Penrose 广义逆</td>
+<td>Moore–Penrose generalized inverse</td>
+</tr>
+<tr class="even">
+<td>单向函数</td>
+<td>one-way function</td>
+</tr>
+<tr class="odd">
+<td>子集和问题</td>
+<td>subset sum</td>
+</tr>
+<tr class="even">
+<td>算法马尔可夫条件</td>
+<td>algorithmic Markov condition</td>
+</tr>
+<tr class="odd">
+<td>构造性反因果学习</td>
+<td>constructive anti-causal learning</td>
+</tr>
+<tr class="even">
+<td>搜索启发式</td>
+<td>search heuristic</td>
+</tr>
+<tr class="odd">
+<td>变化解耦</td>
+<td>disentangling (factors of variation)</td>
+</tr>
+<tr class="even">
+<td>视觉即逆图形</td>
+<td>vision as inverse graphics</td>
+</tr>
+<tr class="odd">
+<td>近似贝叶斯计算</td>
+<td>approximate Bayesian computation (ABC)</td>
+</tr>
+<tr class="even">
+<td>自适应计算时间</td>
+<td>adaptive computation time</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="来源定位" class="level2">
+<h2 class="anchored" data-anchor-id="来源定位">来源定位</h2>
+<p><code>papers/1812.00524.pdf</code>（12 页）。关键内容：C1–C4 与弱/强泛化、连续性法则（p.1–2）；ICM 不对称与 MNIST 的 <span class="math inline">\(S_l\)</span> 支撑结构、Fig 1–2（p.3–4）；§3 六类困难（病态逆问题、MDL、单向函数、子集和/<span class="math inline">\(\ell_0\)</span>、输入域限制、Abel–Ruffini）（p.4–5）；Proposition 1（p.5）；Corollary 与各领域推论（p.6–8）；§5 相关工作、§6 结论（p.8）。</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "已复制");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "已复制");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

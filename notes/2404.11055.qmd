@@ -1,0 +1,74 @@
+---
+title: "情感分析中的快慢思维：因果发现与因果提示"
+subtitle: "Zhiheng Lyu, Zhijing Jin et al., arXiv:2404.11055 (2024)"
+description: "把文档级情感分析拆成因果发现与预测两件事：用峰终定律把评论与星级的因果方向分为 C1（评论→情感，慢思维）与 C2（情感→评论，快思维），再用与数据方向对齐的因果提示给 LLM 归纳偏置，零样本五分类 F1 最高提升 32.13。"
+date: 2024-04-17
+categories: [因果推断, 因果发现, 大语言模型]
+paper-id: 2404.11055
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Zhiheng Lyu*（香港大学）、Zhijing Jin*（MPI & 多伦多大学）、Fernando Gonzalez（ETH Zürich）、Rada Mihalcea（密歇根大学）、Bernhard Schölkopf（MPI for Intelligent Systems, Tübingen）、Mrinmaya Sachan（ETH Zürich） |
+| 出处 | arXiv:2404.11055 [cs.CL]（站内 PDF 为 v2, 2024-10-27）；代码 github.com/cogito233/causal-sa |
+| 日期 | 2024-04-17（v1） |
+| 页数 | 20 页（正文与局限 9 页 + 附录 A–C 11 页） |
+
+一句话定位：将文档级情感分析（sentiment analysis, SA）重构为「二元因果发现 + 预测」双任务——借 Kahneman 快/慢思维与峰终定律（peak-end rule）从观测数据判定评论 $X$ 与星级 $Y$ 的因果方向，再以与数据方向对齐的因果提示（causal prompts）给 LLM 注入因果图的归纳偏置。
+
+## 问题与模型
+
+研究问题（§1–§2）：SA 数据中评论与星级孰因孰果无法事后追踪用户验证；既有「因果对齐（causal alignment）」结论——协变量偏移下更稳健、半监督学习只在反因果方向有效、对齐模型柯氏复杂度更低、机器翻译有监督性能受方向影响——全部针对从头训练的单一方向模型，LLM 时代（混合方向数据、提示式预测、无分方向模型）是否仍成立。模型（§2.2）：二元 cause-effect 问题的两个结构因果模型（SCM）假设，$C_1: X\to Y \Leftrightarrow Y:=f_Y(X,N_Y),\, N_Y\perp X$；$C_2: Y\to X \Leftrightarrow X:=f_X(Y,N_X),\, N_X\perp Y$。心理学对应（§3.2）：$C_1$ 即 System 2 慢思维（罗列利弊后慎重评分），$C_2$ 即 System 1 快思维（先有情绪再写评论合理化之）。操作化（§3.3）：对 $n$ 句评论用 DistilBERT-SST2 逐句打分（逆 sigmoid 截断到 $[-10,10]$，星级映射 $-10,-5,0,5,10$ 对应 1–5 星）得情感弧（emotion arc）$e=(s_1,\dots,s_n)$；慢思维预测 $\hat y_{\text{avg}}=\frac1n\sum_i s_i$、$\lambda_1=|y-\hat y_{\text{avg}}|$；快思维预测 $\hat y_{\text{peakEnd}}=\frac12(\mathrm{Peak}(e)+s_n)$（$\mathrm{Peak}$ 取离中性 3 最远者）、$\lambda_2=|y-\hat y_{\text{peakEnd}}|$；$\lambda_i$ 较小者归入 $C_i$。
+
+## 识别或主要命题
+
+无定理，为实证研究；「命题」由数据侧检验替代（§3.4，表 1）：过滤出至少 5 句的评论后，Yelp 测试集 34,851 条（$C_1$ 56% / $C_2$ 44%）、Amazon 英文测试 2,582 条（54%/46%）、App Review 全量 9,696 条（39%/61%）——两方向大致均衡。附录 B.2 用 Mann-Whitney U 秩检验验证两子集的 $\lambda_1,\lambda_2$ 分布显著不同（$p=8.4572\times10^{-71}$ 与 $1.36\times10^{-11}$，1K 样本），说明按 $\lambda$ 切分的两个子群有可区分的情感动力学。
+
+## 估计/经验
+
+三个子问题（§4，均为零样本五分类、5 个 GPT-4 改写提示取均值）。**Q1**（标准提示，Yelp-5 随机 1K 测试样本、7 个模型从随机基线到 GPT-4，表 3）：几乎所有模型在 $C_2$ 子集上更好，如 GPT-3 整体 F1 52.71，$C_1$ 43.96 对 $C_2$ 65.40——LLM 的决策模式更接近快思维。**Q2**（因果提示，500 样本，表 4–5）：$C_1$ 提示讲述「先写评论再仔细定星级」，$C_2$ 提示讲述「先选星级再写评论解释」；Data=$C_2$+Prompt=$C_2$ 几乎全面最优，$C_2$ 数据上 Prompt $C_2$ 比标准提示 GPT-2 XL 提升 32.13 F1（48.50 对 16.37）、GPT-4 提升 14.23（76.80 对 62.57）；但 Prompt $C_1$ 并不总帮助 $C_1$ 数据。**Q3**（机制检验，因果追踪 causal tracing 对 LLaMa-7B/Alpaca-7B 各 100 样本归因，图 2）：Prompt $C_1$ 下各句归因较均匀；Prompt $C_2$ 下峰句因果效应高于均值效应（LLaMa +3%、Alpaca +39%），但无模型充分关注末句——峰终定律只被部分内化。
+
+## 开放问题
+
+1. **模型与数据覆盖**（自认，Limitations）：LLM 迭代快，只覆盖写作时的一组模型，呼吁在更多 LLM 与更多 SA 数据集上验证。
+2. **心理学理论可更新**（自认）：若峰终/均值理论修正，$\lambda$ 值计算需随之修订；作者以因果提示的有效性佐证当前设定合理。
+3. **因果图过简**（自认）：仅二元基本情形，混淆因子、中介变量、碰撞变量留待后续。
+4. **范式扩展**（自认）：不同语言、不同场景的 SA 因果性质与方面级情感分析（ABSA）。
+5. **因果发现无外部真值**（我识别）：$\lambda$ 分类从未被用户调查或实验验证，论文以「对齐提示有效」反推分类合理，构成部分循环论证；$C_1/C_2$ 判定也没有间隔与不确定度处理，$\lambda_1\approx\lambda_2$ 的样本被强制二分，分类误差对 Q1–Q3 结论的影响未量化。
+6. **Prompt $C_1$ 失灵未解释**（我识别）：表 4 中 GPT-3 在 $C_1$ 数据上 Prompt $C_2$（54.44）反高于 Prompt $C_1$（38.36），与「对齐即更好」的叙事相悖；作者只将其引向 Q3 的机制讨论，未给出不对称性的解释或假设检验。
+
+## 文献谱系
+
+前作（在本文中的角色）：Jin et al. 2021（数据收集的因果方向）——本文的问题与「因果对齐」概念直接来源，其标注过程假说在此被操作化；Schölkopf et al. 2012（因果/反因果学习）——半监督不对称论据；Janzing & Schölkopf 2010（算法化马尔可夫条件）——柯氏复杂度论据；Ni et al. 2022——机器翻译中方向影响有监督性能的证据；Kahneman (2011)、Kahneman et al. (1993)、Epstein (1994)、LeDoux (1998)——快/慢系统与峰终定律的心理学根据；Reagan et al. 2016——情感弧概念；Lyu et al. 2022（UAI CRL Workshop）——第一作者的先行工作，检验 LLM 对因果/反因果提示的指纹；Hoyer et al. 2008、Zhang & Hyvärinen 2009、Janzing 2019——cause-effect 问题背景；Meng et al. 2022 与 Vig et al. 2020——Q3 因果追踪/因果中介分析工具；Schick & Schütze 2022、Min et al. 2022——非因果依据的提示工程对照面。后续：同一团队 2405.14808 把干预主义审计推广到 LLM 隐式个性化；站内 2210.12023（数学推理鲁棒性的因果框架）、2306.05836（Corr2Cause，LLM 纯因果推断评测）与之构成「因果×LLM」的评测脉络。
+
+## 明确不覆盖
+
+不处理混淆、中介、对撞等超出二元的图；不做反事实查询；不验证 $\lambda$ 分类的生成过程真值（无用户调查、无RCT）；不做微调与少样本（正文全部零样本）；只覆盖英文数据集与星级型标签；不涉及 ABSA 与方面间关系。
+
+## 阅读路径
+
+先读图 1（全文结构、两个提示与情感弧示例一图看懂）→ §2.2 的 SCM 定义与 §2.3 的三条 LLM 时代差异 → §3.2–3.3（心理学对应与 $\lambda$ 操作化，表 2 的两个例子必须看）→ §4.1 表 3（Q1）→ §4.2 表 4–5（Q2，注意 $C_1$ 列的不对称）→ §4.3 图 2 与 Limitations。姊妹篇对照：2210.12023（同为把因果图用于审计 LLM 行为，那里是干预扰动的鲁棒性）；2306.05836（Corr2Cause，LLM 因果推理能力的另一极——考模型的推断而非给模型归纳偏置）；2405.14808（同组后续，把「模型行为是否有因果结构」推广到用户背景变量）。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 情感分析 | sentiment analysis (SA) |
+| 因果对齐 / 方向匹配 | causal alignment / direction match |
+| 反因果学习 | anticausal learning |
+| 峰终定律 | peak-end rule |
+| 快/慢思维（系统 1/2） | fast/slow thinking (System 1/2) |
+| 情感弧 | emotion arc |
+| 因果提示 | causal prompts |
+| 对齐分数 | alignment score ($\lambda$) |
+| 因果追踪 | causal tracing |
+| 因果中介分析 | causal mediation analysis |
+| 结构因果模型 | structural causal model (SCM) |
+| 方面级情感分析 | aspect-based sentiment analysis (ABSA) |
+
+## 来源定位
+
+`papers/2404.11055.pdf`（20 页，v2）。图 1 总览 p.2；SCM 假设 C1/C2 §2.2 p.3；$\lambda$ 公式 (5)–(8) 与表 2 示例 §3.3 p.5；表 1 数据统计 p.5；表 3 标准提示结果 p.6；表 4 因果提示结果 p.6；表 5 提示文本 p.7；图 2 因果归因 p.8；Limitations p.9；A.2 句级打分（式 9–10）p.14；A.3 因果追踪实现 p.14；B.2 Mann-Whitney U 检验 p.15；C 情感弧聚类 p.15。

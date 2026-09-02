@@ -1,0 +1,75 @@
+---
+title: "生成式干预模型：从扰动特征到原子干预"
+subtitle: "Nora Schneider et al., arXiv:2411.14003 (2024)"
+description: "把扰动特征映射为联合估计因果模型中原子干预分布的生成式干预模型（GIM），使因果方法首次能预测未见扰动的分布移位并给出机制解释；非线性合成系统上结构与干预目标推断全面领先，完全 OOD 预测与黑箱持平。"
+date: 2024-11-21
+categories: [因果推断, 因果发现, 扰动建模]
+paper-id: 2411.14003
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Nora Schneider（TU München / Helmholtz Munich）、Lars Lorch（ETH Zürich）、Niki Kilbertus（TU München / Helmholtz Munich / MCML）、Bernhard Schölkopf（MPI für Intelligente Systeme, Tübingen / ETH Zürich / ELLIS Tübingen）、Andreas Krause（ETH Zürich） |
+| 出处 | arXiv:2411.14003 [cs.LG]；ICML 2025（PMLR 267）；站内 PDF 为 v2（2025-06-30） |
+| 日期 | 2024-11-21（v1） |
+| 页数 | 25 页（正文 9 页 + 文献约 4 页 + 附录 A–E 12 页） |
+
+一句话定位：在「扰动特征 $\gamma$ 可观测、但它修改了哪些因果机制未知」的设定下，用跨扰动共享的生成网络把 $\gamma$ 映射为联合估计 SCM 中原子干预的分布，从而把逐扰动独立的未知干预因果发现升级为可对任意 $\gamma$ 采样的摊化推断（amortized inference）。
+
+## 问题与模型
+
+研究问题：预测扰动效应的两条既有路线各有硬伤。黑箱方法（自编码器、条件最优传输 CondOT、基础模型）以 $\gamma$ 为协变量端到端预测分布移位，能外推但不可解释、难用于实验设计、绑定特定特征空间；机制式因果方法（JCI-PC、UT-IGSP、GnIES、DCDI、BaCaDI）把移位刻画为对因果模型的干预，可解释，但要么假设干预目标已知、要么对每个扰动独立推断原子干预而不利用 $\gamma$，于是对未见特征 $\gamma^*$ 无定义。目标是建模后验预测密度 $p(x\mid\mathcal D;\gamma^*)$（式 1）。
+
+模型：系统变量 $x\in\mathbb R^d$ 由 SCM $\mathcal M=\{\mathcal G,\theta\}$ 生成，$p(x;\mathcal G,\theta)=\prod_i p_i(x_i\mid x_{\mathcal G_i};\theta)$（式 2）按独立因果机制（ICM）因子化。扰动被建模为稀疏机制移位：对稀疏目标子集的原子干预把被干预机制替换为 $\tilde p_i(x_i\mid x_{\mathcal G_i};\theta,\psi)$（式 3），记干预 $\mathcal I=\{I,\psi\}$、目标指示 $I\in\{0,1\}^d$；硬/软（含移位）干预见附录 A（式 13/14）。数据 $\mathcal D=\{(\mathbf X^{(k)},\gamma^{(k)})\}_{k=1}^K$，各环境 i.i.d. 采样。核心构造是生成式干预模型（Generative Intervention Model, GIM，式 4）：$p(\mathcal I;\gamma,\phi)=p(I;g_\phi(\gamma))\,p(\psi;h_\phi(I,\gamma))$，$g_\phi,h_\phi$ 为任意函数（实践用 MLP），对所有扰动共享；在因果模型上边缘化干预得 $p(x;\mathcal M,\gamma,\phi)=\int p(x\mid\mathcal I;\mathcal M)\,p(\mathcal I;\gamma,\phi)\,d\mathcal I$（式 5）。
+
+## 识别或主要命题
+
+本文不证明新定理，其立场是「识别性继承、泛化靠摊化」：在标准函数形式与噪声假设下，Brouillard et al. (2020) 的未知干预识别性结果直接适用——大样本极限下 MAP 估计恢复训练数据的真实干预目标，以及与真实图同属一个干预马尔可夫等价类（interventional Markov equivalence class，Yang et al. 2018）的图；前提是真实等价类落在图先验支撑内，且 $\gamma\mapsto\mathcal I$ 的真实映射可由 $\phi$ 表达并被先验支撑。对**未见**扰动，可识别性取决于 $\gamma$ 的信息量，论文仅作经验刻画（图 4：预测误差随 $\gamma$ 的 PCA 成分数单调下降）。论证链的关键一环是把稀疏机制移位（sparse mechanism shift, SMS）原理操作化：干预稀疏性写入先验（式 11 的 $\beta_I\|I\|_1$、式 12 的 $\beta_M\|\mathcal G\|_{1,1}$），「扰动=少数机制的局部修改」因此同时约束图与干预两端。
+
+## 估计/经验
+
+推断为 MAP 点估计：$p(x\mid\mathcal D;\gamma)\approx p(x\mid\mathcal M^*,\phi^*;\gamma)$（式 6），联合目标 $\log p(\mathcal M,\phi,\mathcal D)$（式 9）把 $\mathcal M,\phi$ 当跨环境共享的隐量、环境条件独立（图 1）。可微化：离散无环图用 Lorch et al. (2021) 连续松弛 $\mathcal M_\alpha=\{Z,\theta\}$（低秩内积 Bernoulli 图分布，$\alpha\to\infty$ 收敛）；机制取线性高斯（式 7）或 MLP（式 8），每变量学习噪声尺度以规避 var-sortability 伪影；NO-BEARS 无环正则 + 增广拉格朗日，Gumbel-sigmoid 重参数化离散量，蒙特卡洛近似（有偏但 $M\to\infty$ 一致）。
+
+实验一（合成，图 2/3/4）：$d=20$ 的 ER/无标度 DAG（期望 $2d$ 边），干预效应为随机 Hill 函数 $h_\lambda(c)=\lambda/(1+(0.75/c)^4)$，$\lambda\sim U[-6,-2]\cup[2,6]$；训练 160 个干预环境（40 个 Hill 函数 $\times$ 4 剂量，每环境 50 样本）加 1 个观测环境（800 样本）；部分 OOD 为旧目标新剂量 $c\in\{0.25,0.75,1.25,1.75,2.25\}$（200 环境），完全 OOD 为 20 个新目标—机制对配旧剂量。非线性系统上 GIM 的 SID、Edge-F1、Target-F1 全面超过 BaCaDI*（同先验同似然但不摊化的消融）、JCI-PC 及其把 $\gamma$ 加为上下文节点的变体——仅纳入特征而不建模其机制不足以改进因果发现；线性系统上 GnIES/UT-IGSP 更优。GIM 是唯一能预测未见 $\gamma$ 的因果方法，完全 OOD 的 $W_2$ 与均值距离和 MLP 黑箱持平或更好。图 2C：训练数据因祖先变量同时被干预而暗示错误的表层移位，MLP 拟合表面、GIM 恢复真实 Hill 函数。实验二（SciPlex3 scRNA-seq，图 5）：3 细胞系（A549/K562/MCF7）$\times$ 4 种表观遗传药物 $\times$ 4 剂量，聚焦 50 个标记基因，逐一留出每药最高剂量 10µM（每细胞系 4 个划分）；GIM 预测最稳健（Mean Distance、Pearson 相关均优），marker 基因边缘分布定性最准（CA12/TFPI2 两例），且是唯一适用于未见 $\gamma$ 的机制式生成模型。
+
+## 开放问题
+
+本文自认：(1) 仅 MAP 点估计，完全贝叶斯处理以量化机制不确定性留待未来；(2) 可用于主动实验设计，挑选信息量最大的下一个 $\gamma$；(3) 迁移到已知原子干预的应用并纳入结构先验（如 GEARS 式知识图）；(4) 扩展到更大系统；(5) 未见扰动的可识别性只有经验刻画，无理论保证。我另识别：(6) 合成实验的 $\gamma$ 是真实干预参数 $(I,\psi)$ 的 15 维 PCA——近乎无噪地编码了答案本身，真实分子指纹是否具有同等信息量无从检验；SciPlex3 上药物全部在训练中出现，实际验证的只是「新剂量」而非「新药物」外推；(7) 摊化网络容量与训练扰动多样性（40 个 Hill 函数族）之间的关系无理论刻画，完全 OOD 的 Target-F1 下降本身说明机制形状覆盖有限；(8) 多扰动同时施加（组合用药）仅在 §3.3 顺带说「可同时生成多个 $\mathcal I$」，无任何实验验证干预叠加的交互效应；(9) 各环境共享同一 $\mathcal M$ 且 $I=0$ 对应观测环境的设定排除了环境特异性混杂，文中未给出该假设的诊断检验。
+
+## 文献谱系
+
+前作（在本文中的角色）：Pearl (2009)——SCM 与原子干预的形式底座；Peters et al. (2017)、Schölkopf (2022)——SMS/ICM 原理，式 (11)(12) 稀疏先验的来源；Brouillard et al. (2020, DCDI)——可微因果发现骨架与识别性结论的出处；Hägele et al. (2023, BaCaDI)——逐扰动独立推断 $\mathcal I$ 的最近前作，其消融 BaCaDI* 直接对照出摊化的增益；Lorch et al. (2021)——图连续松弛与未来贝叶斯化的模板；Squires et al. (2020, UT-IGSP)、Gamella et al. (2022, GnIES)、Mooij et al. (2020, JCI-PC)——「目标未知但不利用 $\gamma$」路线的基线；Yang et al. (2018)——干预马尔可夫等价类；Bunne et al. (2022, CondOT)、Hetzel et al. (2022)、Lotfollahi et al. (2023)——黑箱条件预测路线及图 3 对照；Roohani et al. (2024, GEARS)、Gonzalez et al. (2024)——依赖专家知识的领域特定混合模型，被定位为不可通用；Reisach et al. (2021)、Ormaniec et al. (2025)——var-sortability 伪影，促使逐变量噪声尺度学习；Srivatsan et al. (2020)——SciPlex3 数据源。后续：结论指出的实验设计路线对应 Agrawal et al. (2019)、Toth et al. (2022)、Ailer et al. (2024)。
+
+## 明确不覆盖
+
+不处理干预目标已知的经典因果效应估计设定；不学时序动态或干预后的转移过程；不做组合扰动实验；不提供未见 $\gamma$ 的可识别性理论；SCM 定义在观测变量上，不处理潜混杂与潜变量系统；不回答反事实（Pearl 第三阶）查询；scRNA-seq 实验限于 50 个标记基因，不涉及全基因组规模。
+
+## 阅读路径
+
+先读 §1 与图 1（板块图：$\gamma\to\mathcal I\to x$，共享 $\mathcal M,\phi$）；§2 问题设定与三类相关工作的坐标系；§3 顺读式 (2)–(6)，GIM 的全部思想浓缩在式 (4)(5)；§4 只需看 MAP 目标、连续松弛与两类稀疏先验，推导细节在附录 B；§5–§6 精读图 2（结构/目标/机制三层评估）、图 3（三种分布预测情形）、图 4（$\gamma$ 信息量消融）、图 5（SciPlex3）；§7 即开放问题总述。姊妹篇对照：站内 2306.00542（未知干预的非参数可辨识性理论——同一「目标未知」问题在表示学习端的对偶，且其每环境一次干预的设定恰是本文 $K$ 环境的极限情形）；2206.11131（变分因果动态：同样从干预学模块化世界模型，但对象是时序潜变量，干预语义为潜空间 do）；2102.11107（SMS/CRL 纲领，本文先验设计的思想源头）。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 生成式干预模型 | Generative Intervention Model (GIM) |
+| 扰动特征 | perturbation features |
+| 原子干预 | atomic intervention |
+| 干预目标 | intervention targets |
+| 摊化推断 | amortized inference |
+| 后验预测分布 | posterior predictive distribution |
+| 稀疏机制移位 | sparse mechanism shift (SMS) |
+| 干预马尔可夫等价类 | interventional Markov equivalence class |
+| 硬/软/移位干预 | hard / soft / shift intervention |
+| 连续图松弛 | continuous graph relaxation |
+| 增广拉格朗日法 | augmented Lagrangian method |
+| 结构干预距离 | structural intervention distance (SID) |
+| var-sortability 伪影 | var-sortability artifact |
+| 零膨胀对数正态机制 | zero-inflated log-normal mechanism |
+
+## 来源定位
+
+`papers/2411.14003.pdf`（25 页）。关键内容：式 (1) 问题定义（p.2）；式 (2)–(5) GIM 构造（p.3）；式 (6) MAP 近似（p.3）；式 (7)–(12) 机制、联合目标与先验（p.4–5）；识别性讨论（p.5 末段）；§5 实验设置（p.6）；图 2/图 3（p.7）、图 4/图 5 与 §7 结论（p.8–9）；附录 A 干预类型与式 (13)(14)（p.13）；附录 D.1 合成数据（40 Hill 函数 $\times$ 4 剂量、每环境 50 样本、观测 800 样本）与 D.2 SciPlex3 预处理（p.15–16）；附录 E 附加结果（p.21 起）。

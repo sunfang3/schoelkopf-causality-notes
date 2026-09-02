@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN" xml:lang="zh-CN"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="系统梳理把概率测度嵌入再生核希尔伯特空间的核均值嵌入框架：边际与条件分布嵌入的定义、特征核刻画与收敛速率，以及 MMD 两样本检验、HSIC 依赖度量、分布数据学习、核求和/乘积/贝叶斯法则与因果发现等应用。后刊于 Foundations and Trends in Machine Learning 10(1–2), 2017。">
+
+<title>分布的核均值嵌入：综述与新方向 – Schölkopf 因果论文阅读站</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-66b4df7ba86f8287dc76b7fb130027a6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "没有结果",
+    "search-matching-documents-text": "匹配的文档",
+    "search-copy-link-title": "复制搜索链接",
+    "search-hide-matches-text": "隐藏其它匹配结果",
+    "search-more-match-text": "更多匹配结果",
+    "search-more-matches-text": "更多匹配结果",
+    "search-clear-button-title": "清除",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "取消",
+    "search-submit-button-title": "提交",
+    "search-label": "搜索"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Schölkopf 因果论文阅读站</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="搜索"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="展开或折叠导航栏" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">首页</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../schoelkopf-causality-arxiv-2008-2026.html"> 
+<span class="menu-text">全景（按年）</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../glossary.html"> 
+<span class="menu-text">术语表</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../notes.html"> 
+<span class="menu-text">逐篇笔记</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">分布的核均值嵌入：综述与新方向</h1>
+<p class="subtitle lead">Krikamol Muandet et al., arXiv:1605.09522 (2016)</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">因果推断</div>
+    <div class="quarto-category">核方法</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    系统梳理把概率测度嵌入再生核希尔伯特空间的核均值嵌入框架：边际与条件分布嵌入的定义、特征核刻画与收敛速率，以及 MMD 两样本检验、HSIC 依赖度量、分布数据学习、核求和/乘积/贝叶斯法则与因果发现等应用。后刊于 Foundations and Trends in Machine Learning 10(1–2), 2017。
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">发布于</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">2016年5月31日</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="导览" class="level2">
+<h2 class="anchored" data-anchor-id="导览">导览</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>作者</td>
+<td>Krikamol Muandet（Mahidol University 数学系，兼 MPI for Intelligent Systems, Tübingen）、Kenji Fukumizu（Institute of Statistical Mathematics, Tokyo）、Bharath Sriperumbudur（Pennsylvania State University 统计系）、Bernhard Schölkopf（MPI for Intelligent Systems, Tübingen）</td>
+</tr>
+<tr class="even">
+<td>出处</td>
+<td>arXiv:1605.09522v4 [stat.ML]（v1 2016-05-31；所据 PDF 为 v4，2020-12-13）；后刊于 Foundations and Trends in Machine Learning 10(1–2): 1–141, 2017</td>
+</tr>
+<tr class="odd">
+<td>日期</td>
+<td>2016-05-31</td>
+</tr>
+<tr class="even">
+<td>页数</td>
+<td>147 页（正文至 p.119，参考文献自 p.121 起）</td>
+</tr>
+</tbody>
+</table>
+<p>一句话定位：核均值嵌入（kernel mean embedding）领域的权威综述——把「分布本身」作为可计算对象映入 RKHS，使核方法的全套工具作用于概率测度；Schölkopf 学派的 HSIC、KCI、MMD 检验与「因果推断即分布上的学习」路线共用这套语言，本文是其理论保证与应用版图的地图。</p>
+</section>
+<section id="问题与模型" class="level2">
+<h2 class="anchored" data-anchor-id="问题与模型">问题与模型</h2>
+<p>研究问题：如何将分布 <span class="math inline">\(P\)</span> 表示为再生核希尔伯特空间（RKHS）中的可计算元素，使期望、条件期望与分布间的运算化为内积和算子代数，并回答三个递进问题——嵌入保留多少信息、经验估计有何统计性质、能支撑哪些推断。框架如下。<strong>定义 3.1</strong>：核均值嵌入 <span class="math inline">\(\mu:\ P\mapsto\mu_P=\int k(x,\cdot)\,\mathrm dP(x)\)</span>（Bochner 积分）。<strong>引理 3.1</strong>（Smola et al.&nbsp;2007）：若 <span class="math inline">\(\mathbb E_P[k(X,X)]&lt;\infty\)</span> 则 <span class="math inline">\(\mu_P\in\mathcal H\)</span> 且 <span class="math inline">\(\mathbb E_P[f(X)]=\langle f,\mu_P\rangle_{\mathcal H}\)</span> 对一切 <span class="math inline">\(f\in\mathcal H\)</span>——期望成为内积，这是全部推断应用的原型。信息保留程度由核决定：线性核只留一阶矩，非齐次多项式核（例 3.1）保留到相应阶矩，平移不变核的嵌入是特征函数的加窗版本（例 3.3：<span class="math inline">\(\mu_P=\psi*P\)</span>，<span class="math inline">\(\hat\mu_P(\omega)=\varphi_P(\omega)\,\mathcal F\psi(\omega)\)</span>）。无信息损失的刻画是<strong>定义 3.2</strong>（特征核，characteristic kernel：<span class="math inline">\(P\mapsto\mu_P\)</span> 单射，即 <span class="math inline">\(\lVert\mu_P-\mu_Q\rVert=0\iff P=Q\)</span>）与<strong>定义 3.3</strong>（通用核，universal kernel：RKHS 在 <span class="math inline">\(C_b(\mathcal X)\)</span> 中稠密；紧集上通用 <span class="math inline">\(\Rightarrow\)</span> 特征）；高斯、拉普拉斯核在 <span class="math inline">\(\mathbb R^d\)</span> 上特征（Fukumizu et al.&nbsp;2008 用傅里叶变换条件、Sriperumbudur et al.&nbsp;2010 用「傅里叶谱测度支集为全空间」证明；积分严格正定也蕴含特征）。通用性强于特征性，平移不变、连续且衰减到零时二者一致；非特征核则把分布压成等价类。条件分布一侧（第 4 章）：协方差/互协方差算子 <span class="math inline">\(C_{XX},C_{YX}\)</span>，<strong>定义 4.1</strong> 给条件均值嵌入 <span class="math inline">\(U_{Y|X}:=C_{YX}C_{XX}^{-1}\)</span>、<span class="math inline">\(U_{Y|x}=C_{YX}C_{XX}^{-1}k(x,\cdot)\)</span>，要求 <span class="math inline">\(\mathbb E_{Y|x}[g(Y)\mid X=x]=\langle g,U_{Y|x}\rangle_{\mathcal G}\)</span>；因 <span class="math inline">\(C_{XX}\)</span> 紧致（任意小正特征值），逆一般不良定且 <span class="math inline">\(C_{XX}^{-1}\)</span> 可能不存在（例如高斯 RKHS 下独立性使 <span class="math inline">\(\mathbb E[g(Y)\mid X=\cdot]\)</span> 为常数函数、不在 <span class="math inline">\(\mathcal H\)</span> 中），须正则化为 <span class="math inline">\(C_{YX}(C_{XX}+\lambda I)^{-1}\)</span>。</p>
+</section>
+<section id="识别或主要命题" class="level2">
+<h2 class="anchored" data-anchor-id="识别或主要命题">识别或主要命题</h2>
+<p>综述无新定理，组织主线为「数据点 <span class="math inline">\(\to\)</span> 概率测度 <span class="math inline">\(\to\)</span> 条件分布 <span class="math inline">\(\to\)</span> 与其他方法的关系 <span class="math inline">\(\to\)</span> 未来方向」，关键定理均为对文献的整理，转述如下。<strong>定理 3.4</strong>：有界核（可分拓扑空间、<span class="math inline">\(\sup_x k(x,x)\le C_k\)</span>）下 <span class="math inline">\(\lVert\hat\mu_P-\mu_P\rVert\le\sqrt{C_k/n}+\sqrt{2C_k\log(1/\delta)/n}\)</span> 以概率 <span class="math inline">\(1-\delta\)</span> 成立，速率 <span class="math inline">\(n^{-1/2}\)</span> 且极小化最优（Tolstikhin et al.&nbsp;2016），<span class="math inline">\(\sqrt n(\hat\mu_P-\mu_P)\)</span> 收敛到零均值高斯过程。<strong>定理 3.2</strong>（Fukumizu et al.）：<span class="math inline">\(C_{XX}\mathbb E_{Y|X}[g(Y)\mid X=\cdot]=C_{XY}g\)</span>——条件嵌入的算子方程；<strong>定理 3.3</strong>（Baker 1973）：<span class="math inline">\(C_{YX}=C_{YY}^{1/2}V_{YX}C_{XX}^{1/2}\)</span>，规范化互协方差算子 <span class="math inline">\(V_{YX}\)</span>（<span class="math inline">\(\lVert V\rVert\le1\)</span>）是条件依赖度量的基础。<strong>最大均值差异（MMD）</strong>（§3.5）：单位球积分概率度量 <span class="math inline">\(\mathrm{MMD}[\mathcal H,P,Q]=\lVert\mu_P-\mu_Q\rVert\)</span>（式 3.29），特征核时为概率测度空间的度量，平移不变时等于特征函数的 <span class="math inline">\(L^2(\Lambda)\)</span> 距离；<strong>定理 3.6</strong>（Gretton et al.&nbsp;2012a）：无偏二次时间 U 统计量在备择下以 <span class="math inline">\(\sqrt m\)</span> 速率渐近高斯。<strong>核独立性检验（HSIC）</strong>（§3.6，式 3.37）<span class="math inline">\(=\lVert C_{XY}\rVert_{\mathrm{HS}}^2\)</span>，积核特征时为零当且仅当独立；条件版本有 <span class="math inline">\(V\)</span>-算子类度量与 Zhang et al.&nbsp;(2011) 的核条件独立性检验（KCI）（§4.7）。第 4 章核心是<strong>核和法则</strong>（式 4.15：<span class="math inline">\(\mu_X=U_{X|Y}\mu_Y\)</span>）、<strong>核乘积法则</strong>（式 4.19：<span class="math inline">\(C_{XY}=U_{X|Y}C_{YY}\)</span>）与<strong>核贝叶斯法则</strong>（Fukumizu et al.&nbsp;2013：先验以 <span class="math inline">\(\mu^{\Pi}_Y\)</span>、似然以算子进入，一致性定理 5–7 给出 <span class="math inline">\(n^{-8\alpha/27}\)</span>、<span class="math inline">\(L^2\)</span> 下 <span class="math inline">\(n^{-\alpha/3}\)</span> 的慢速率），使求和、乘积、贝叶斯更新完全非参数地在嵌入空间完成，支撑核置信传播、滤波、隐树模型、预测状态表示与核 Bellman 算子（式 4.25）等应用。<strong>定理 4.1/4.2</strong>：在 <span class="math inline">\(C_{XX}\)</span> 单射、<span class="math inline">\(\mu_\Pi\in\mathcal R(C_{XX})\)</span>、<span class="math inline">\(\mathbb E[g(Y)\mid X=\cdot]\in\mathcal H\)</span> 条件下条件嵌入良定义，经验式 <span class="math inline">\(\hat\mu_{Y|x}=S_y^*(K+n\lambda I)^{-1}k_x\)</span>——与边际嵌入同形但系数 <span class="math inline">\(\beta\)</span> 不必非负、不必和一。分布数据学习（§3.7）：分布上的核 <span class="math inline">\(\kappa(P,Q)=\langle\mu_P,\mu_Q\rangle\)</span> 诱导的函数类对概率空间只是线性的（引理 3.7），Christmann–Steinwart 的高斯型核（定理 3.8）才稠密于 <span class="math inline">\(C_b\)</span>；<strong>定理 3.9</strong>（Lopez-Paz et al.&nbsp;2015）给出「<span class="math inline">\(n\)</span> 个分布、每个分布 <span class="math inline">\(n_i\)</span> 个样本」分类问题的超额风险界，要求 <span class="math inline">\(\sqrt{\log n/n_i}=o(1)\)</span>；§3.8 处理分布原像（distributional pre-image，式 3.50）与 kernel herding。因果发现（§4.8）被定位为一簇应用的汇合：KCI 进入 PC 类算法、核概率程序设计（KPP）嵌入加性噪声模型、判向当作分布分类（Lopez-Paz et al.&nbsp;2015）、用联合嵌入的张量秩检测有限隐混杂（Sgouritsa et al.&nbsp;2013 定理 1：秩恰为混杂数 <span class="math inline">\(m\)</span>）、「<span class="math inline">\(P(X)\)</span> 与 <span class="math inline">\(P(Y|X)\)</span> 不相关」的复杂度准则（Chen et al.&nbsp;2014）。第 5 章划界：KDE 的 <span class="math inline">\(L^2\)</span> 距离是偏置 MMD 的特例，能量距离/距离协方差是特定核下的 HSIC（Sejdinovic et al.&nbsp;2012），Fraunhofer 衍射即均值嵌入（Harmeling et al.&nbsp;2013：单射性蕴含衍射不毁信息）。</p>
+</section>
+<section id="估计经验" class="level2">
+<h2 class="anchored" data-anchor-id="估计经验">估计/经验</h2>
+<p>综述无自办实验；经验内容为转述：核滤波在强非线性动力学上胜过需精确模型的标准 Kalman 滤波（Song et al.&nbsp;2009）；MMD 替代 GAN 判别器使目标有闭式且特征核下为零当且仅当生成分布等于数据分布（§3.5）；KBR 用于非线性非参数观测模型的滤波（Kanagawa et al.&nbsp;2016）。计算方面：MMD 二次时间，线性时间子采样、B-test（<span class="math inline">\(O(n^{3/2})\)</span>）与随机傅里叶特征各有方差或可分辨性损失（Chwialkowski et al.&nbsp;2015 指出原始 RFF-MMD 无法区分一大类测度）。</p>
+</section>
+<section id="开放问题" class="level2">
+<h2 class="anchored" data-anchor-id="开放问题">开放问题</h2>
+<ol type="1">
+<li><strong>核选择（§6.1 自陈）</strong>：特征性是总体性质，有限样本下不保证信息保留；带宽等参数无原则性选择方法；非特征核的「对受限分布类特征」（如紧支集分布 + sinc 核）何时够用无指导。</li>
+<li><strong>条件嵌入的存在性与速率缺口（§4.1.1）</strong>：<span class="math inline">\(C_{XX}^{-1}\)</span> 一般不存在，正则化后的收敛 <span class="math inline">\(O_p((n\lambda)^{-1/2}+\lambda^{1/2})\)</span>（Song et al.&nbsp;2009）或特征值衰减下的 <span class="math inline">\(O_p(n^{-b/(4b+1)})\)</span>（Fukumizu 2015）都慢于边际的 <span class="math inline">\(n^{-1/2}\)</span>；KBR 的 <span class="math inline">\(n^{-8\alpha/27}\)</span> 慢速率与实际表现的差距作者明言无法解释。</li>
+<li><strong>系数不可作概率解释（定理 4.2 后讨论）</strong>：条件嵌入的 <span class="math inline">\(\beta\)</span> 几乎总不非负、不和一，凡需把嵌入读作密度或状态分布的应用（RL、滤波）被迫归一化，而这破坏核 Bellman 算子的压缩性——综述指出问题但未给解。</li>
+<li><strong>高维功效与可扩展性（§3.5、§6.3–6.4）</strong>：MMD 速率与维数无关但常数含 <span class="math inline">\(d\)</span>，Reddi et al.&nbsp;(2015)、Ramdas et al.&nbsp;(2015a,b) 已证检验功效随维度退化；<span class="math inline">\(O(n^2)\)</span> 计算的各加速方案均以方差、一致性或可分辨性为代价，无同时保三者的方法。</li>
+<li><strong>随机过程与贝叶斯解释（§5.5、§6.2）</strong>：嵌入只定义在有限维对象上的分布，无穷维对象（过程）的嵌入仅有初步结果；<span class="math inline">\(\mu_P\)</span> 的完全贝叶斯解释明确列为 open question。</li>
+<li><strong>隐私（§6.6）</strong>：两样本检验与依赖度量需直接访问个体数据、易受对抗攻击；分布层面的隐私与性能权衡未起步。</li>
+<li><strong>因果侧（§6.5）</strong>：潜在结果框架下反事实分布永不可全观测，「能否用嵌入表示反事实分布」被作为方向提出而非回答。</li>
+</ol>
+</section>
+<section id="文献谱系" class="level2">
+<h2 class="anchored" data-anchor-id="文献谱系">文献谱系</h2>
+<ul>
+<li>Berlinet &amp; Thomas-Agnan (2004)、Smola et al.&nbsp;(2007)：均值嵌入的早期形式化，定义 3.1 与引理 3.1 出处。</li>
+<li>Baker (1970, 1973)：互协方差算子及其分解（定理 3.3），条件依赖度量一系的算子基础。</li>
+<li>Fukumizu et al.&nbsp;(2004, 2008, 2013)：特征核概念的提出与高斯/拉普拉斯特征性证明、条件嵌入算子方程（定理 3.2）、核贝叶斯法则——第 4 章主干。</li>
+<li>Sriperumbudur et al.&nbsp;(2008–2012)：特征核的系统刻画（傅里叶支集、积分严格正定）、MMD 与 Wasserstein/全变差的可比性、嵌入估计的统计性质——第 3 章理论主干。</li>
+<li>Gretton et al.&nbsp;(2005a, 2012a)：HSIC 与 MMD 检验及其渐近分布（定理 3.6）；Borgwardt et al.&nbsp;(2006) 是 MMD 两样本检验的应用起点；Tolstikhin et al.&nbsp;(2016) 补上极小化最优性。</li>
+<li>Song et al.&nbsp;(2009–2013)：条件嵌入在滤波、置信传播、隐树模型、HMM 谱算法、预测状态表示中的展开；其 2013 短综述是本文之前唯一的同类综述；Grünewälder et al.&nbsp;(2012) 补上向量值回归解释与收敛分析。</li>
+<li>Sejdinovic et al.&nbsp;(2012)：能量距离/距离协方差是特定核下 HSIC 的特例——第 5 章以此划定与统计学界的等价边界；Harmeling et al.&nbsp;(2013)：Fraunhofer 衍射即均值嵌入。</li>
+<li>因果一支：Schölkopf et al.&nbsp;(2012) 的因果/反因果分解、Lopez-Paz et al.&nbsp;(2015) 的判向即分布分类（站内 1502.02398，其定理即本文定理 3.9）、Sgouritsa et al.&nbsp;(2013)、Chen et al.&nbsp;(2014)、Schölkopf et al.&nbsp;(2015) 的 KPP（站内 1501.06794）、Zhang et al.&nbsp;(2011) 的 KCI（站内 1202.3775）——§4.7–4.8 把它们统一为「嵌入上的操作」。</li>
+</ul>
+</section>
+<section id="明确不覆盖" class="level2">
+<h2 class="anchored" data-anchor-id="明确不覆盖">明确不覆盖</h2>
+<p>不提出新方法或新定理（定位为综述）；不处理核本身的构造学（只引用特征性刻画）；不做密度估计（正因回避密度估计才引入嵌入，KDE 仅作对照）；不覆盖随机过程与无穷维分布的嵌入；不讨论计算实现细节与软件；因果部分只综述到 2016 年（判向、混杂检测），不涉时序因果发现与均衡因果模型。</p>
+</section>
+<section id="阅读路径" class="level2">
+<h2 class="anchored" data-anchor-id="阅读路径">阅读路径</h2>
+<p>初学者按 §2（RKHS、Mercer/Bochner/Schoenberg 三定理与 Hilbert–Schmidt 算子）<span class="math inline">\(\to\)</span> §3.1–3.3（定义 3.1–3.3 与定理 3.4 是全文心脏）<span class="math inline">\(\to\)</span> §3.5–3.6（MMD 与 HSIC）<span class="math inline">\(\to\)</span> §4.1–4.3（条件嵌入与三条法则）；应用取向的读者可跳读 §3.7–3.8 与 §4.4–4.8，§5–§6 留作地图。站内对照：1202.3775（KCI，本文 §4.7 的条件独立性检验主干）；1502.02398（判向当作分布分类，其学习理论即本文定理 3.9）；1501.06794（KPP，函数运算与因果应用的出处）；1603.00285（dHSIC，HSIC 向多变量联合独立性的推广）；1412.3773 与 1603.00784（HSIC 作判向统计量的两个用场）。</p>
+</section>
+<section id="术语对照" class="level2">
+<h2 class="anchored" data-anchor-id="术语对照">术语对照</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>中文</th>
+<th>English</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>核均值嵌入</td>
+<td>kernel mean embedding</td>
+</tr>
+<tr class="even">
+<td>特征核</td>
+<td>characteristic kernel</td>
+</tr>
+<tr class="odd">
+<td>通用核</td>
+<td>universal kernel</td>
+</tr>
+<tr class="even">
+<td>再生核希尔伯特空间</td>
+<td>reproducing kernel Hilbert space (RKHS)</td>
+</tr>
+<tr class="odd">
+<td>最大均值差异</td>
+<td>maximum mean discrepancy (MMD)</td>
+</tr>
+<tr class="even">
+<td>积分概率度量</td>
+<td>integral probability metric (IPM)</td>
+</tr>
+<tr class="odd">
+<td>希尔伯特–施密特独立性准则</td>
+<td>Hilbert–Schmidt Independence Criterion (HSIC)</td>
+</tr>
+<tr class="even">
+<td>协方差 / 互协方差算子</td>
+<td>covariance / cross-covariance operator</td>
+</tr>
+<tr class="odd">
+<td>条件均值嵌入</td>
+<td>conditional mean embedding</td>
+</tr>
+<tr class="even">
+<td>核和法则 / 核乘积法则 / 核贝叶斯法则</td>
+<td>kernel sum / product rule / kernel Bayes’ rule</td>
+</tr>
+<tr class="odd">
+<td>分布原像</td>
+<td>distributional pre-image</td>
+</tr>
+<tr class="even">
+<td>分布数据学习 / 分布风险最小化</td>
+<td>learning on distributional data / distributional risk minimization</td>
+</tr>
+<tr class="odd">
+<td>支撑测度机</td>
+<td>support measure machine (SMM)</td>
+</tr>
+<tr class="even">
+<td>核置信传播</td>
+<td>kernel belief propagation</td>
+</tr>
+<tr class="odd">
+<td>U 统计量 / V 统计量</td>
+<td>U-statistic / V-statistic</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="来源定位" class="level2">
+<h2 class="anchored" data-anchor-id="来源定位">来源定位</h2>
+<p>来源：<code>papers/1605.09522.pdf</code>（147 页）。定义 3.1 与引理 3.1（§3.1，p.30–31）；例 3.1–3.3 与经验估计式 (3.12)（§3.1，p.31–34）；定理 3.2–3.3（§3.2，p.36–37）；定理 3.4、定义 3.2–3.3 与特征核刻画（§3.3，p.38–42）；MMD 式 (3.28)–(3.34) 与定理 3.5–3.6（§3.5，p.50–54）；HSIC 式 (3.37)–(3.38)（§3.6，p.61–63）；引理 3.7、定理 3.8–3.9（§3.7，p.66–70）；分布原像式 (3.50)（§3.8，p.75）；定义 4.1、定理 4.1–4.2 与经验式 (4.7)–(4.8)（§4.1，p.84–87）；三条法则与核贝叶斯法则式 (4.15)–(4.22)（§4.3，p.89–94）；核 Bellman 算子式 (4.25)（§4.6，p.102–103）；条件依赖度量式 (4.26)–(4.27)（§4.7，p.104–106）；因果发现综述（§4.8，p.107–108）；与 KDE/ECF/DBN-距离协方差/傅里叶光学的关系（§5，p.109–114）；未来方向七节（§6，p.115–118）。</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "已复制");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "已复制");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

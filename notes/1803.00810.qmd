@@ -1,0 +1,92 @@
+---
+title: "多维线性回归的非因果伪象检测：混杂与过拟合的共同几何签名"
+subtitle: "Janzing & Schölkopf, arXiv:1803.00810 (2018)"
+description: "把一维混杂检测推广到 d 维预测变量：在 ICA 式独立源混杂模型与旋转不变高斯先验下，证明回归系数向量的方向密度只需 Σ_XX 与维数即可写出，且混杂与过拟合都表现为向量向小特征值子空间集中，据此给出 β 的极大似然估计与无混杂检验。"
+date: 2018-03-02
+categories: [因果推断, 混杂检测]
+paper-id: 1803.00810
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Dominik Janzing、Bernhard Schölkopf（Max Planck Institute for Intelligent Systems, Tübingen） |
+| 出处 | arXiv:1803.00810 [stat.ML] |
+| 日期 | 2018-03-02 |
+| 页数 | 12 页（正文 9 页 + 附录：Lemma 1 与 Theorem 3 的证明） |
+
+一句话定位：Janzing–Schölkopf (2017) 一维混杂检验的多维推广——利用回归系数向量相对协方差矩阵 $\Sigma_{XX}$ 的「非典型取向」，统一检测高维线性回归中的混杂（confounding）与过拟合（overfitting）伪象。
+
+## 问题与模型
+
+研究问题：$d$ 维预测变量 $X=(X_1,\dots,X_d)$ 与目标 $Y$ 显著相关、且先验排除 $Y\to X$（如时间顺序）时，关联究竟是 $X$ 对 $Y$ 的因果影响，还是隐藏共同原因或过拟合造成的伪象。该「无混杂性」问题是后续变量选择的前提。核心思想遵循独立因果机制（Independent Causal Mechanisms, ICM）：纯因果时 $P_X$ 与 $P_{Y|X}$ 互不携带信息，违反即留痕。受独立成分分析（Independent Component Analysis, ICA）启发设 $\ell\ (\ge d)$ 个互不相关单位方差源 $Z$，结构方程
+$$X=MZ,\qquad Y=a^{\mathrm T}X+c^{\mathrm T}Z,\tag{1–2}$$
+则 $\Sigma_{XX}=MM^{\mathrm T}$，$\Sigma_{XY}=MM^{\mathrm T}a+Mc$，回归得 $a'= \Sigma_{XX}^{-1}\Sigma_{XY}=a+M^{-\mathrm T}c$（式 5）：$a$ 是干预效应（$p(y\mid\mathrm{do}(x))$），$a'$ 是观测条件（$p(y\mid x)$），$M^{-\mathrm T}c$ 放大 $M$ 的小奇异值方向。混杂强度定义为
+$$\beta:=\frac{\lVert a'-a\rVert^2}{\lVert a\rVert^2+\lVert a'-a\rVert^2}\in[0,1]\tag{6}$$
+（0 纯因果、1 纯混杂）。**Definition 1（ICA 混杂模型）**：$a,c$ 的分量独立取自旋转不变高斯先验 $N(0,\sigma_a^2)$、$N(0,\sigma_c^2)$，只有比值 $\theta:=\sigma_c^2/\sigma_a^2$ 重要。
+
+## 识别或主要命题
+
+- **Theorem 1（模型等价）**：$a'$ 与 $\sqrt{\sigma_a^2 I+\sigma_c^2\Sigma_{XX}^{-1}}\,b$（$b$ 为标准高斯，Definition 2）同分布——推断只需 $\Sigma_{XX}$ 与 $d$，混合矩阵 $M$ 与源数 $\ell$ 完全无关；这是多维情形比一维简单的根源。
+- **Lemma 1**：矩阵 $A$ 诱导的球面方向密度 $p(\tilde v)=1/(\det A\cdot\lVert A^{-1}\tilde v\rVert^d)$。
+- **Theorem 2（方向密度）**：取 $R_\theta:=I+\theta\Sigma_{XX}^{-1}$，单位向量 $\tilde v:=a'/\lVert a'\rVert$ 的对数密度（相对球面均匀分布）
+$$\log p_\theta(\tilde v)=\tfrac12\big[\log\det R_\theta-d\log\langle\tilde v,R_\theta^{-1}\tilde v\rangle\big].\tag{10}$$
+- **Theorem 3（集中度量现象，concentration of measure）**：$\tilde v\sim p_{\theta_0}$ 时单个样本的对数密度以趋于 1 的概率集中在 $\tfrac12[\log\det R_\theta-\log\tau(\cdot)]$ 附近，误差 $O(1/d)$——即 $d$ 大时**一个**回归向量实例就足以做似然推断（$\tau$ 为归一化迹）。
+- 第 5 节（无混杂检验）：$H_0:\theta=0$ 的统计量
+$$T(\tilde v)=\tfrac1{\sqrt d}\big(\langle\tilde v,\Sigma_{XX}^{-1}\tilde v\rangle-\tau(\Sigma_{XX}^{-1})\big)\tag{12}$$
+在均匀方向下零均值，且与 $\theta=0$ 处的得分函数 $\partial\log p_\theta/\partial\theta$ 成比例；零分布近似为特征值加权的混合 $\chi^2$ 分布。
+- 第 6 节（过拟合）：若 $Y\perp X$ 而样本量 $n$ 不足，无正则最小二乘可改写为 $\hat a=M^{-\mathrm T}y'$（$M:=Vx$，$y':=Vy$ 各向同性），恰为 $\ell=n-1$ 的纯混杂模型——过拟合产生与混杂相同的低特征值子空间集中签名，二者不可分但可统一检出。
+
+## 估计/经验
+
+估计流程（第 4 节）：由样本得 $\hat\Sigma_{XX},\hat\Sigma_{XY}$ 与 $\hat a'$；对 $\hat a'/\lVert\hat a'\rVert$ 最大化式 (10) 得 $\hat\theta$；再由大数定律近似换算
+$$\beta\approx\frac{\tau(\Sigma_{XX}^{-1})^2\theta}{\tau(\Sigma_{XX}^{-1})^2\theta+1}\tag{11}$$
+（原文式 11，即 $\tau(\Sigma_{XX}^{-1})^2\sigma_c^2$ 与 $\sigma_a^2$ 之比）。实验：(i) 模拟（$d=\ell=10,20,50,100$，$n=10000$，$\sigma_a,\sigma_c\sim U[0,1]$）：$\hat\beta$ 与真值 $\beta$ 明显相关、随 $d$ 增大改进，$\beta$ 近 0 或 1 处最好；单侧无混杂检验在 $\beta>0.6$ 时以水平 0.05/0.1 大多被拒。(ii) 过拟合模拟（无混杂，$d=10$）：$n=20$ 时 p 值大量偏小（误拒），$n=100,1000$ 仍偏小，$n=10000$ 才近均匀——该维度需万级样本。(iii) 光学装置（$X$ 为 $3\times3$ 图像、$Y$ 为光度计亮度、LED 构造一维混杂，真值 $\beta$ 已知）：11 个变混杂数据集上 $\hat\beta$ 与真值显著相关但倾向低估；纯混杂（$\beta=1$）得 $\hat\beta=0.768$、纯因果（$\beta=0$）得 $\hat\beta=0$。(iv) 红酒口感（UCI，11 个成分）：全变量 $\hat\beta=0$，剔除主导变量酒精后 $\hat\beta=0.62$，剔其他任一成分则 $\hat\beta\approx0$。(v) MEG（Neuromag-122，17730 样本，取前 10 通道轮流作目标）：$\hat\beta$ 依次为 $1.0,1.0,1.0,1.0,0.0,0.1,0.6,1.0,1.0,1.0$，多数被判定强混杂，与「10 个变量不可能全是汇点」的论证相容。
+
+## 开放问题
+
+1. 高斯旋转不变先验是理想化的：作者明言稀疏化正则与该先验不兼容，而真实回归系数常稀疏/结构化，先验失配如何影响 $\hat\beta$ 未分析（真实数据系统性低估即其征兆，第 9 节自认）。
+2. 样本量需求无理论：$d=10$ 需 $n$ 约 10000 才避免误拒，结论只来自模拟；一般 $d$–$n$ 关系、$\hat\beta$ 的置信区间与偏差均未给出。
+3. 混杂与过拟合在本文框架内不可区分：统一检出之后如何分离（作者猜测其与正则化、跨域泛化有深层联系，见引言与 Schölkopf et al. 2012 的猜想）完全留作开放。
+4. $\ell<d$ 的情形未覆盖（Theorem 1 只声称 $\ell\ge d$ 时 $\ell$ 无关）；非线性关系、非高斯源、时序依赖样本均未处理。
+5. 检验的零分布（混合 $\chi^2$）只是启发式近似，未见水平校准的数值验证；$\hat\theta$ 的极大似然估计无一致性证明。
+
+## 文献谱系
+
+- Janzing & Schölkopf (2017, Journal of Causal Inference)：一维混杂的光谱检测，本文的直接前作；其方法无法直接推广到多维，本文以「方向的集中度量」重新建模并简化了「依赖」的含义（第 9 节对比）。
+- Hyvärinen et al. (2001) ICA：不相关源加混合的混杂模型的来源（本文只需源不相关，不必独立）。
+- Peters, Janzing & Schölkopf (2017)：独立机制原理的正式表述，本文公理层面的依据。
+- Pearl (2000)：$p(y|x)$ 与 $p(y\mid\mathrm{do}(x))$ 之别，即 $a'$ 与 $a$ 之别的语义。
+- Spirtes et al. (1993)：条件独立路线，引言中作为「需要第三变量」的对照背景。
+- Schölkopf et al. (2012, ICML)：$P_X$ 与 $P_{Y|X}$ 独立的模型更易泛化的猜想，本文结论暗示其与混杂校正的联系。
+- Vigário et al. (1998)：MEG 数据（ICA 去伪影的经典数据），本文宏观合理性的试金石；Lichman (2013) UCI：红酒数据。
+- Blöbaum et al. (2017)、Hoyer et al. (2009)、Zhang & Hyvärinen (2009)、Kano & Shimizu (2003)、Sun et al. (2006)：引言列举的无条件独立可用之非传统假设路线，本文自置于该谱系。
+
+## 明确不覆盖
+
+不判定 $X\to Y$ 与 $Y\to X$（方向由先验排除）；不处理非线性模型与非高斯先验；不做变量选择；不分离混杂与过拟合；不给出样本量理论；$\ell<d$ 与时序数据不在模型内。
+
+## 阅读路径
+
+先读第 1 节的三点贡献清单与图 1–2 建立场景；核心链条按 Definition 1/2 → Theorem 1（等价模型）→ Lemma 1 + Theorem 2（方向密度）→ Theorem 3（单实例可用）顺序读第 2–3 节；第 4 节末的四步流程与式 (11)、第 5 节统计量 (12)、第 6 节过拟合类比各一页；实验先看 7.3（样本量阈值）与 8.1（已知真值 $\beta$ 的光学装置）。姊妹篇对照：站内 1202.3737（探测低复杂度隐共同原因——同一「无混杂性检验」问题的另一种信息论刻画）；站内 1412.3773（其基准评测明言混杂情形 (c)/(e) 难以处理，本文正是针对该缺口）；Janzing & Schölkopf (2017) 为一维前作（不在站内）。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 混杂强度 | confounding strength ($\beta$) |
+| 非因果伪象 | non-causal artifact |
+| ICA 式混杂模型 | ICA based confounding model |
+| 旋转不变先验 | rotation-invariant prior |
+| 方向密度 | density of directions |
+| 集中度量现象 | concentration of measure |
+| 无混杂检验 | test for non-confounding |
+| 得分函数 | score function |
+| 混合卡方分布 | mixed $\chi^2$-distribution |
+| 归一化迹 | renormalized trace ($\tau$) |
+
+## 来源定位
+
+来源：`papers/1803.00810.pdf`。关键结果原文编号：结构方程与 $\beta$ 定义式 (1)–(6)（第 2 节）、Definition 1–2 与 Theorem 1（第 3 节）、Lemma 1 与 Theorem 2 式 (7)–(10)（第 3 节）、Theorem 3（第 3 节末，证明在附录 10.2）、$\beta$ 换算式 (11)（第 4 节）、检验统计量式 (12)（第 5 节）、过拟合推导（第 6 节）、模拟与真实数据（第 7–8 节，图 3–7）、讨论（第 9 节）。

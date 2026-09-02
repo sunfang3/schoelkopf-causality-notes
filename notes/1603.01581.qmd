@@ -1,0 +1,77 @@
+---
+title: "云计算调试与竞价决策中的反事实近似"
+subtitle: "Philipp Geiger et al., arXiv:1603.01581 (2016)"
+description: "把云系统的性能调试与 spot 资源竞价决策分别形式化为结构反事实概率与干预后概率，证明仅凭图因果模型即可计算带 KL 误差上界的近似反事实，并给出『不完全条件分布』近似积分的误差界。"
+date: 2016-03-04
+categories: [因果推断, 反事实]
+paper-id: 1603.01581
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Philipp Geiger、Bernhard Schölkopf（MPI for Intelligent Systems, Tübingen）、Lucian Carata（University of Cambridge） |
+| 出处 | arXiv:1603.01581v8 [cs.AI]（v1 2016-03-04，v8 2020-03-10） |
+| 日期 | 2016-03-04 |
+| 页数 | 23 页（正文 17 页 + 附录证明 + 参考文献） |
+
+一句话定位：因果推断进入云计算/系统运维的第一篇概念性应用——用两个带误差上界的近似定理（GCM 近似反事实、边际近似积分）把沙箱实验整合、观测层面的性能归因与隐私—可预测性权衡套进 Pearl 框架。
+
+## 问题与模型
+
+两个驱动问题：(1) 云系统的自动控制与性能调试（performance debugging）——个体客户观察到高延迟时，成因在 VM 内的并发负载还是同物理服务器上其他 VM？(2) spot 资源拍卖中价格不可预测，客户能否在不泄露隐私的前提下预测自己出价行为的价格后果？基本定义：图因果模型（graphical causal model, GCM）= 因果 DAG + 每个变量 $X$ 的条件密度 $p_{X|PA_X}$；函数因果模型（functional causal model, FCM）额外为每个 $X$ 配隐背景根变量 $U_X$ 与结构方程 $X=f_X(PA_X,U_X)$。结构反事实按 Pearl 定义：$p(Y_{do\,X=x}=y|e)=\sum_u p(y|do(x),u)\,p(u|e)$（式 (1)），**只对 FCM 有定义**。Example 1 是全文支点：$X:=U_X,\ Y:=U_Y$ 与 $Y:=X\oplus U_Y$ 两个 FCM 诱导同一个 GCM（$X\to Y$，均匀条件分布），但反事实 $p(Y_{do\,X=1}=0|X{=}0,Y{=}0)$ 分别为 1 与 0——GCM 不决定反事实。作者定义近似反事实 $p̃(Y_{do\,X=x}=y|e)=\sum_w p(y|do(x),w)\,p(w|e)$（式 (2)），其中 $W:=Z\setminus X$、$Z$ 为 GCM 的根变量集。
+
+## 识别或主要命题
+
+**Proposition 1**（§3.1，式 (3)）：若 FCM $M_0$ 诱导 GCM $M$，则 $D\big(p(Y_{do\,X=x}|E)\,\|\,p̃(Y_{do\,X=x}|E)\big)\le H(E|Z)$——仅凭 GCM 就知道近似在最坏（对证据取平均）意义上错多少；当根变量完全决定一切变量时 $H(E|Z)=0$、近似精确。推广为 **Proposition 3**（附录 A.1）：把 $Z$ 从根变量放宽为满足 $(Y\perp_\text{d-sep} An(Z)|Z)$ 且 $X$ 不影响 $W:=Z\setminus X$ 的任意变量集，证明用 KL 单调性与互信息链式法则（$D\le I(W,E:U_0)\le H(E|Z)$）。**Proposition 2**（§3.2，式 (4)）：定义不完全条件分布的近似积分 $p̄(z)=\sum_{x_0,\dots,x_K,c}p(z|x_0,\dots,x_K)\prod_k p(x_k|c)\,p(c)$；若 $Z\perp C\mid X_0,\dots,X_K$，则 $D(p(Z)\|p̄(Z))\le\sum_k H(X_k|C)$，界中各量只依赖各方已公开的信息。作者明确将其定位为 Pearl–Bareinboim 可迁移性（transportability）的简单近似版本。
+
+## 估计/经验
+
+流程四步（§4.2）：Step 1A 由专家知识、程序代码与观测数据推断因果 DAG 与部分机制；Step 1B 设计沙箱实验——随机变动 $X$ 的全部父变量、回归 $X$ 于 $PA_X$，把 $p(x|pa_X)=p(x|do\,pa_X)$ 作为机制移植进目标模型（Example 4 演示漏变或漏回归某父变量如何把 $p(L{=}1)$ 的预测从 $1/2$ 错成 $0$ 或 $1/4$）；Step 1C 用干预后分布优化策略 $\pi$（Example 5）；Step 1D 把个体调试问题译为反事实查询并用 $p̃$ 回答（Example 6：$L:=R+S+U_L$，$p(U_L{=}0)=1/2$，近似反事实 $=1/4$，真值 $=0$，界 $H(L|R,S)=1$ bit）。实验（§6）：(a) 真实系统——单台物理服务器跑 Web 服务与并发负载，相关 Poisson 请求源 $H$ 同时供 $R$ 与 $S$，由观测数据经后门调整得 $p̂(l|do\,s)$，其 99 分位数与真实干预数据在量级与趋势上吻合（Figure 6）；(b) 更真实的 lighttpd 系统只给出取自 Carata 博士论文的初步因果 DAG（Figure 7），作者自注未做评估；(c) 隐私模拟——$X_k:=C\oplus D\oplus N_{X_k}$、$Z:=Y_1\wedge Y_2$（AND），每个参数 $r\in[0,0.5]$ 抽 1000 样本，$p̄(z)$ 始终接近 $p(z)$ 但 Proposition 2 的界明显偏松（Figure 8）。
+
+## 开放问题
+
+1. **实用性未被证明**（§1.1 自认）：两命题的实用性 "remains to be proved"；对真实云系统的应用（§6.2）"比预期困难"，截至 v8 仍无评估——整个调试管线止步于玩具与初步模型。
+2. **界的松紧与最优 $Z$ 的选择**：Example 6 中界（1 bit）与实际误差（$-\log 4$ 的量级）同阶但无指导意义；脚注 3 自认选取更靠近 $Y$ 的 $Z$ 可能收紧近似，留作未来工作；Figure 8 直接显示 Proposition 2 的界可改进。
+3. **反事实语义本身存疑**（Remark 1）：狭义反事实不可证伪、不能指导未来决策；作者改用"系统状态慢变"的宽义辩护，但承认"更透彻的分析可能富有成果"（脚注 5）、Pearl 形式化是否适合调试问题开放，且"近似在实践中离真反事实多近"无法判定。
+4. **理论缺口**：全文假设离散变量（§2.1 自认部分结果可能推广）；$H(E|Z)$、$H(X_k|C)$ 需从有限样本估计，无估计误差分析；§7 自认 Balke–Pearl 型界可能给出比 Proposition 2 更强的集合收窄，未做。
+5. **隐私方案忽略博弈**：§5.4 自认不考虑策略性行为，某些场景会出问题；客户可能连 $p(x_k|c)$ 也不愿公布；博弈论/机制设计扩展只在结论中提议。
+6. **Step 1A 无算法**：因果 DAG 的推断被外包给专家知识与独立性检验，模数性（modularity）假设在数据中心尺度上未被检验。
+
+## 文献谱系
+
+前作：Pearl《Causality》提供 GCM/FCM、$do$ 算子、后门调整与式 (1) 的反事实定义（其 §7.2.2 曾一笔带过基于 GCM 的反事实，本文接手展开）；Pearl–Bareinboim 的可迁移性系列（含选择图）是 Step 1B 机制移植与"哪些机制在环境变化下不变"推理的直接理论来源；Balke & Pearl (1994) 的反事实界是 Proposition 2 的对照与改进方向；Bottou et al. (2013) 的计算广告反事实学习系统是"因果与控制"的平行应用先例；Lemeire et al. (2007) 是最接近的因果性能建模前作但不做反事实；Carata 等的 provenance/Resourceful/Soroban 提供测量工具与 Figure 7 模型；MATRIX、JustRunIt 等沙箱式系统是本文批评的"无原则语言"对象；Angel et al. 与 McSherry–Talwar 差分隐私机制被引为隐私相关工作但不整合因果知识。后续：此文是因果推断进入系统/运维（后称 AIOps）方向的早期引文，其"GCM 近似反事实"在 Schölkopf 组后续因果表示讨论中被引为例证。
+
+## 明确不覆盖
+
+不做连续变量的一般理论；不给因果 DAG 学习算法（Step 1A 只是信息源清单）；不处理策略性行为与机制设计；不做真实数据中心的端到端评估（自认）；不处理时序动态、反馈与非平稳；不给隐私下形式化定义（非差分隐私）；不做因果发现的可识别性理论。
+
+## 阅读路径
+
+先读 §3.1：Example 1（GCM 为何不定反事实）→ 式 (2) 与 Proposition 1 → Example 2 与 Example 6 的具体数字，这是全文核心；再读 §4.2 四步流程与 §4.3 三个例子（Example 4 的错误模式最实用）；§5 配合 Proposition 2 与 Example 7 读隐私方案；§6 只看 Figure 6（后门调整预测）与 Figure 8（界的松紧）；理论读者进附录 A.1（Proposition 3 的 KL 单调性链条，两页）。姊妹篇对照：1507.05333（不变条件分布与因果迁移——Step 1B/1C 的机制不变性思想的成熟表述）；1112.2738（半监督下的因果视角——同为"因果知识帮助非 i.i.d. 决策"的论证）；1202.3757（机制类识别——本文 Step 1A 假设的 DAG 推断难题的另一面）。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 图因果模型 | graphical causal model (GCM) |
+| 函数因果模型 | functional causal model (FCM) |
+| 结构反事实（概率） | structural counterfactual (probability) |
+| 近似反事实 | approximate counterfactual |
+| 后干预（后软干预）分布 | post-(soft-)interventional distribution |
+| 根变量 / 背景变量 | root variable / background variable |
+| 可迁移性 | transportability |
+| 选择图 | selection diagram |
+| 后门调整 | back-door adjustment |
+| 沙箱实验 | sandbox experiment |
+| 观测层面性能调试 | observation-level performance debugging |
+| 不完全条件分布 | incomplete conditional distributions |
+| 近似积分 | approximate integration |
+| 机制 / 策略 | mechanism / policy |
+| 因果充分性 | causal sufficiency |
+
+## 来源定位
+
+`papers/1603.01581.pdf`（23 页）。Example 1 与式 (1)–(2)（p.3–4）；Proposition 1（p.4，式 (3)）；Proposition 2 与式 (4)（§3.2，p.5）；四步流程 §4.2（p.6–8，Remark 1 在 p.7–8）；Examples 4–6（p.8–12）；隐私方案与 Example 7（§5，p.12–14）；真实系统实验与 Figure 6（§6.1，p.14–15）；Figure 7 初步因果 DAG（§6.2，p.15–16）；隐私模拟与 Figure 8（§6.3，p.17）；相关工作（§7，p.17–18）；Proposition 3 及证明（附录 A.1，p.18–21）；Proposition 2 证明（附录 A.2，p.21）。

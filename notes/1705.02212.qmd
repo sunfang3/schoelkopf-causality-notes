@@ -1,0 +1,89 @@
+---
+title: "群不变性原理：把「原因与机制独立」统一进 Haar 测度框架"
+subtitle: "Michel Besserve et al., arXiv:1705.02212 (2017)"
+description: "用紧群上的 Haar 随机变换打散原因—机制配对，把迹条件与谱独立准则统一为同一通用性方程，并把 ICM 推广到含隐变量的生成模型（NMF、高斯混合聚类、GAN）。"
+date: 2017-05-05
+categories: [因果推断, 因果发现, 生成模型]
+paper-id: 1705.02212
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Michel Besserve（MPI for Intelligent Systems 与 MPI for Biological Cybernetics, Tübingen；MPI-ETH Center for Learning Systems）、Naji Shajarisales、Bernhard Schölkopf、Dominik Janzing（MPI for Intelligent Systems, Tübingen） |
+| 出处 | arXiv:1705.02212v1 [stat.ML] |
+| 日期 | 2017-05-05（仅 v1） |
+| 页数 | 16 页（正文与文献 12 页 + 附录 A–C 4 页） |
+
+一句话定位：为「原因与机制独立」（Independence of Cause and Mechanism, ICM）原理给出一个群论统一框架——在原因的属性空间上施加紧群的 Haar 随机变换，检验实测对比值是否等于「打散后」的期望对比——并把迹方法（站内 0909.4386）与谱独立准则（SIC，站内 1503.01299）证明为该框架的特例，再将框架推广到含隐变量的无监督生成模型。
+
+## 问题与模型
+
+研究问题（§1）：ICM 原理已催生多个因果判向算法，但各方法对「独立」的诠释互不相同，且独立性是在原因与机制这两个性质不同的对象之间度量，无法用随机变量的统计独立性刻画；需要一个统一语言来定义并检验「机制相对于其输入是通用的（generic）」，并推广到因果发现之外。
+
+直观原型（§2）：两个多边形互相遮挡、判断谁在前，生成模型 $S=m_{p_1,\theta_1,p_2,\theta_2}(O_1,O_2)$（式 (1)–(2)）。以「承载物体边缘的直线数」$C(S)$ 为对比：红色在前的假设下，随机旋转一物体后 $C$ 对几乎所有 $\varphi$ 不变（典型）；黄色在前的假设下则 $C(S_{\varphi'})\ge C(S)+2$（可疑地低），故判红在前——Kanizsa 三角（图 1a）的虚轮廓（illusory contours）正利用非典型对齐。
+
+形式框架（§3）：结构因果模型 $v_k:=f_k(v_1,\dots,v_n)$；用属性函数 $A,A'$ 把原因与效应映入属性空间 $\mathcal A,\mathcal A'$，视机制 $m$ 直接作用于 $\mathcal A$。两个要素：(i) 通用群 $G$——作用于 $\mathcal A$ 的紧拓扑群，带唯一 Haar 概率测度 $\mu_G$；(ii) 原因-机制对比函数（Cause-Mechanism Contrast, CMC）$C:\mathcal A'\to\mathbb R$。**Definition 1（期望通用对比，Expected Generic Contrast, EGC）**（式 (3)）：$\langle C\rangle_{m,x}=\int_G C(mgx)\,d\mu_G(g)$。**通用性方程**（式 (4)）：$C(mx)\approx\langle C\rangle_{m,x}$——观测对比等于随机打散后的期望，观测才典型、符合 ICM；否则机制疑似为该输入量身定制。作者明言这是理想化假设，其正当性依赖测度集中而此类结果留作未来工作；操作上应把 $C(mx)$ 视为零假设 $C(mgx),g\sim\mu_G$ 下的检验统计量。
+
+## 识别或主要命题
+
+- **式 (5)**（§3.3）：若原因分布 $P_X$ 为 $G$ 不变（Wijsman 1967：可参数化为 $x=g\tilde x$，$g\sim\mu_G$ 与 $\tilde x$ 独立），则期望通用比 $E_x[C(mx)/\langle C\rangle_{m,x}]=1$，即 ICM「平均成立」；非不变分布下方法可能失效。证明在附录 C。
+- **Proposition 2 + Postulate 1（迹条件，Trace Condition）**（§4.1）：线性 SCM $Y=MX+E$（式 (6)），取归一化迹为 CMC、$SO(n)$ 的 Haar 正交矩阵 $U$ 为通用群。Proposition 2（式 (8)）：对称阵 $A,B$ 有 $E_U\operatorname{tr}(U^\top AUB)=\frac1n\operatorname{tr}(A)\operatorname{tr}(B)$，从而 EGC $=\tau_n(\Sigma_X)\tau_m(MM^\top)+\tau_m(\Sigma_E)$——Janzing et al. (2010) 的 Trace Condition $\tau_m(M\Sigma_XM^\top)\approx\tau_n(\Sigma_X)\tau_m(MM^\top)$（式 (7)）恰为通用性方程，且对加性噪声不变。
+- **Postulate 2 与 Proposition 10**（附录 B）：LTI 系统 $Y=h*X$（式 (16)），群取正频率 $[0,\tfrac12]$ 上模 $1/2$ 平移群（负频率按偶对称补全），对比取总功率，则 $G$-通用性等价于 SIC（式 (17)）——SIC 也是通用性方程的特例。
+- **Proposition 3（NMF）**（§5.2）：$X=WV^\top$，假设列置换不变（$W,V$ 的列序配对无特定关系）；对比 $\operatorname{tr}(XX^\top)=\operatorname{tr}(W^\topW\,V^\top V)$（式 (9)），中心化后 EGC（式 (10)）$=\operatorname{tr}(\tilde W^\top\tilde W)\operatorname{tr}(\tilde V^\top\tilde V)/(n-1)$；证明依赖 **Lemma 11**（附录 C）：Haar 置换矩阵的平均在常向量子空间及其正交补上分块数量化（Schur 引理）。
+- **Proposition 4（高斯混合聚类）**（§5.3）：$Z\sim\mathrm{Mult}(\pi_1,\dots,\pi_K)$、$X|_{z=k}\sim N(\mu_k,\Sigma_k)$（式 (11)–(12)）；通用群取 $O(p)$ 作用于簇均值、对比取 $C(X)=E\operatorname{tr}(XX^\top XX^\top)$，则 $C(X)-\langle C\rangle_{\mu,\Sigma}=4\sum_k\pi_k\big(\mu_k^\top\Sigma_k\mu_k-\|\mu_k\|^2\frac{\operatorname{tr}[\Sigma_k]}{p}\big)$——偏差恰好度量簇均值与协方差主轴的共线（对齐）程度。
+- **GAN 重释**（§5.4，式 (13)–(15)）：生成器输入 $Z$ 为 $[0,1]^K$ 上 i.i.d. 均匀，原因分布对逐分量模 1 平移群不变；理想判别器下 $\max_G E_{X\sim p_g}[\log D(X)]=\langle D\rangle_{G,z_0}$（式 (15)），即生成器训练是在学满足通用性方程的因果生成模型（$D$ 为对比函数）。
+
+## 估计/经验
+
+实验全部为合成模拟，论点是「通用比可作算法失效指示器」。NMF（§5.2.3，图 4）：20 个数据矩阵、5 个分量；$W$ 系数 i.i.d. 均匀 $[0,1]$，$V$ 以 Bernoulli(0.1) 选非零元（稀疏利于可识别性）、非零值 i.i.d. 均匀 $[0,1]$，加小均匀噪声；比较交替最小二乘（als）与乘性更新（mult）、2000 次模拟，性能取真 $W$ 列与最佳匹配估计列的平均余弦相似度。结果：mult 的通用比倾向大于 1、als 小于 1 且频繁失败；高估分量数时通用比逐渐偏离 1（图 4b），可指示模型错设。聚类（§5.3.3，图 6）：20 维空间 5 个随机簇（均值取各向同性高斯，sd 2；协方差随机轴与特征值），k-means 与高斯混合 EM、800 次模拟；失败试验（正确率 <99%）的通用比铺满 $[0.98,1.1]$，成功（>99%）与真值集中在 1 附近。视觉例子为定性演示。
+
+## 开放问题
+
+1. **无测度集中定理**（§3.2 自认）：通用性方程的概率正当性需要「$C(mgx)$ 的分布集中于 EGC」一类结果，作者承认难以获得、留作未来工作——相比 0909.4386 与 1503.01299 各自的浓度论证，本框架退回纯假设。
+2. **无显著性检验**：只比较通用比点估计与 1 的距离，无零假设分布的有限样本校准或 p 值；仅援引 Zscheischler et al. (2011) 的自由概率检验为提示，并未实现。
+3. **群与对比的选取无准则**：$SO(n)$、置换群、$O(p)$、平移群在每个应用里都手工挑选，框架不提供选 $G$ 与 $C$ 的方法，也无选错后的稳健性分析；可测性要求被脚注略过。
+4. **原因分布非不变即失效**：式 (5) 只在 $P_X$ 为 $G$ 不变时保证期望通用比为 1，真实原因常是低复杂度、非不变的分布；文中只说此时方法「不太可能成功」，无不变性可否检验的诊断。
+5. **「改进算法」停留在口号**：NMF 一节声称扰动「可被量化并用于改进算法」、GAN 一节建议在中间表示层也施加通用性，两者都只有相关性观察，无把通用比反馈进训练的算法与实验。
+6. **统一不完整**：正文与附录只把迹方法与 SIC 纳入框架，其余 ICM 方法（ANM、IGCI、逆回归）仅以「将另文报告」带过；含隐变量情形只有单一隐层结构（图 3b），多层因果图上的复合机制未形式化。
+7. **经验验证空白**：NMF/聚类均为低维合成数据，未在用作动机的真实数据（如 MNIST）上检验；GAN 部分零实验，其「通用性解释」无经验支持。
+
+## 文献谱系
+
+前作（被统一对象）：Janzing, Hoyer & Schölkopf（ICML 2010，站内 0909.4386）的迹方法——Prop 2 证明其 Trace Condition 是通用性方程在 $SO(n)$ 下的特例；Shajarisales et al.（2015，站内 1503.01299）的 SIC——附录 B Prop 10 用平移群纳入；Janzing & Schölkopf（2010，站内 0804.3678）与 Lemeire & Janzing（2012）给出 ICM 的算法信息论表述，是「独立无统一定义」的来源；Daniusis et al.（2010，站内 1203.3475）、IGCI（Janzing et al. 2012, AIJ）与逆回归（Sgouritsa et al. 2015）同属待统一家族。纲领性前作：Schölkopf et al.（2012，站内 1112.2738）提出 ICM 可指导因果/反因果学习等更广问题，§5 的无监督应用直接承接此纲领。工具与背景：Freeman（1994）的通用视点假设供 §2 例子；Wijsman（1967, 1990）、Eaton（1989）、Tung（1985）供 Haar 测度技术。应用侧：Goodfellow et al.（2014）的 GAN 与 Uehara et al.（2016）是重释对象；NMF 一线（Lawton & Sylvestre 1971 等）提供生成式解读传统，Donoho & Stodden（2004）供稀疏可识别性依据；Peters et al.（2016）、Rojas-Carulla et al.（2015）等迁移工作支撑「因果模型比统计模型稳健」的动机。后续：本文是 ICM 群论化路线的纲领文件，站内可与两篇被统一的原始方法（0909.4386、1503.01299）对照阅读。
+
+## 明确不覆盖
+
+不处理未观测共因与混杂判识；不做多变量图结构发现（条件独立性方法仅作背景）；不给新的判向算法或在真实数据上的判向实验（迹方法/SIC 的实验在各自原文）；不提供通用性方程的浓度定理；不改进 GAN 训练（只给重释与提议）；不涉及 ICM 在半监督/协变量偏移等学习理论后果的具体推导（只引文献作动机）。
+
+## 阅读路径
+
+先读 §2（p.2–4，遮挡例子与三要素抽象，全部直觉所在）；再读 §3.2–3.3（p.5–6，Definition 1、式 (3)–(5)，框架核心仅两页）；§4.1（p.6）把迹方法装入框架，应与站内 0909.4386 对照；附录 B（p.15，Prop 10）把 SIC 装入框架，与站内 1503.01299 对照——这三篇构成「迹方法—SIC—群论统一」三角。§5 按兴趣选读：NMF（§5.2）与聚类（§5.3）结构相同（不变性假设→对比→命题→模拟），GAN 一节（§5.4）短但启发式最强。附录 A（p.13–14）仅复习群论定义（Definitions 5–9），附录 C（p.16）证明技术性强可后读。姊妹篇对照：0909.4386（被统一的迹方法）、1503.01299（被统一的 SIC，其浓度定理正是本文留白的部分）、1112.2738（ICM 的学习理论纲领，§5 的动机来源）、0804.3678（ICM 的算法信息论表述）。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 通用群 | generic group |
+| 原因-机制对比函数 | Cause-Mechanism Contrast (CMC) |
+| 期望通用对比 | Expected Generic Contrast (EGC) |
+| 通用性方程 | genericity equation |
+| 通用比 | generic ratio |
+| 属性 | attribute |
+| 紧拓扑群 | compact topological group |
+| Haar 测度 | Haar measure |
+| 群作用 | group action |
+| 迹条件 | Trace Condition |
+| 归一化迹 | normalized trace |
+| 非负矩阵分解 | Non-negative Matrix Factorization (NMF) |
+| 通用视点假设 | generic viewpoint assumption |
+| 虚轮廓 | illusory contours |
+| 交替最小二乘 | alternating least squares |
+| 乘性更新 | multiplicative updates |
+| 生成对抗网络 | Generative Adversarial Network (GAN) |
+
+## 来源定位
+
+`papers/1705.02212.pdf`。关键内容：§2 遮挡例子与图 1（p.2–3）；§2.3 三要素抽象（p.4）；Definition 1 与式 (3)–(4)（p.5）；式 (5)（p.6）；Postulate 1 式 (7) 与 Proposition 2 式 (8)（p.6）；NMF 式 (9)–(10) 与 Proposition 3（p.7–8）、实验与图 4（p.9）；聚类式 (11)–(12)（p.9）、对比与 Proposition 4（p.10）、图 5–6（p.10–11）；GAN 式 (13)–(15)（p.11）；附录 A Definitions 5–9（p.13–14）；附录 B Postulate 2、式 (17) 与 Proposition 10（p.15）；附录 C 证明（式 (8)、式 (5)、Proposition 3、Lemma 11，p.16）。

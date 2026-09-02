@@ -1,0 +1,81 @@
+---
+title: "正交搜索的因果特征选择：CORTH Features"
+subtitle: "Ashkan Soleymani et al., arXiv:2007.02938 (2020)"
+description: "把去偏/双重机器学习的 Neyman 正交化从「已知处理变量」推进到「发现处理变量」：一对其余逐变量扫描并检验条件协方差 χ_j，在协变量间允许非线性、有环、隐混杂的 SEM 中识别响应的全部直接因果父节点。"
+date: 2020-07-06
+categories: [因果推断, 因果发现]
+paper-id: 2007.02938
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Ashkan Soleymani（MIT EECS；同等贡献）、Anant Raj（Inria / ENS Paris；同等贡献）、Stefan Bauer（KTH Stockholm）、Bernhard Schölkopf（MPI IS, Tübingen）、Michel Besserve（MPI IS） |
+| 出处 | arXiv:2007.02938 [stat.ML]；站内 PDF 为 v3（2022-09-17）；TMLR 08/2022（OpenReview: Q54jBjc896） |
+| 日期 | 2020-07-06（v1） |
+| 页数 | 31 页（正文 12 页 + 参考文献 + 附录 A–D） |
+
+一句话定位：已撤回的 arXiv:1903.02456（Raj, Gresele, Besserve, Schölkopf, Bauer, 2019）的重写扩展版——以目标为中心（只求 $Y$ 的直接父集而非全图），把 Double ML 的正交化检验变成可在 $d$ 的多项式时间内扫描全部协变量的因果特征选择算法；站内有前身的摘要级笔记。
+
+## 问题与模型
+
+研究问题：在大协变量集中识别 $Y$ 的全部直接因果父节点（direct causal parents）。已有方法（PC 族、LiNGAM 等）随变量数至少指数增长、难推广到非线性与有环。设定：协变量 $X\in\mathbb{R}^d$ 由 $d$ 个唯一可解（unique solvability，即无自环；Bongers et al. 2021）的结构方程生成，协变量之间允许非线性、有环与隐混杂；响应 $Y:=\langle\theta,X\rangle+U$ (1)，$U$ 为零均值外生变量且与其他外生变量独立（即 $Y$ 无隐混杂）。核心假设：**LDC**（$Y$ 与父节点间线性直接效应——弱效应可线性化的近似）与 **NFD**（无协变量是 $Y$ 的后代，如基因型–表型）。于是 $\theta_j\neq 0$ 当且仅当 $X_j$ 是直接父节点，问题化为检验 $d$ 个系数是否为零。
+
+## 识别或主要命题
+
+**归约（§2.1, 式 2–3）**：$\chi_j:=\mathbb{E}[(Y-\mathbb{E}(Y\mid X_{-j}))(X_j-\mathbb{E}(X_j\mid X_{-j}))]=\theta_j\,\mathbb{E}[(X_j-\mathbb{E}(X_j\mid X_{-j}))^2]$——检验 $\theta_j\neq 0$ 化为检验模型无关的条件协方差泛函 $\chi_j\neq 0$。**Proposition 2（p.7，证明附录 A.2）**：在图 2 的结构下（$X_k$ 与 $Z$ 间允许非线性、混杂、有环、正反向皆可），分数 $\psi=(Y-X_k\theta-X_{-k}^\top\beta)(X_k-r_{XX_{-k}}X_{-k})$（$r_{XX_{-k}}=\mathbb{E}[X_kX_{-k}^\top]\mathbb{E}[X_{-k}X_{-k}^\top]^{-1}$）对估计 $\theta$ 满足 **Neyman 正交条件（Neyman orthogonality）**——干扰参数估计偏差的一阶影响为零，且与 $X_k\to Z$ 还是 $Z\to X_k$ 无关。**Proposition 3（p.8）**：条件 (13)–(15)（$U$ 零均值条件零期望、二阶矩有限、$\mathbb{E}[(X_j-\mathbb{E}(X_j\mid X_{-j}))^2]\neq 0$）下，(a) $j$ 是父节点当且仅当 $\chi_j\neq 0$；(b) $\chi_j$ 具双重稳健性（double robustness），条件期望可用 Lasso 等正则化方法估计。**Definition 4（近似线性稀疏类 ALS）与 Proposition 5（p.8，特化自 Smucler et al. 2019, Thm 1）**：交叉拟合估计满足 $\sqrt{n}$ 收敛 $\hat{\chi}_j\to_D\mathcal{N}(\chi_j,\sigma_j^2/n)$；据此用正态检验（$|\hat{\chi}_j|\geq 1.96\hat{\sigma}_j/\sqrt{n}$，95% 水平）加 Bonferroni 校正判定入选。**Example 1（p.7，附录 A.1）**：三变量线性系统中，即便对 $\theta_2$ 的部分线性回归解读在因果方向上不成立，正交分数仍无偏。
+
+## 估计/经验
+
+**Algorithm 1（CORTH Features, p.5–6）**：对每个 $i$：取 $D=X_i$、$Z=X_{-i}$ 做「一对其余」（one-vs-the-rest）划分；$K$ 份交叉拟合，在补集上用 Lasso 拟合 $\hat{m}_i:Z\to X_i$ 与 $\hat{g}_i:Z\to Y$；在留出份上算 $\hat{\chi}_i$ 与方差（式 16–18）；正态检验决定入选。复杂度：加速坐标下降 $O(\sqrt{d}\kappa_{\max}\log(1/\varepsilon))$ 次迭代、每次 $O(nd)$，整体 $d$ 的多项式。实验：(i) 因果结构学习设定 72000 个模拟 DAG（节点 5–50，连通度/非线性概率/噪声/样本量各数档，每设定 100 个图，>10GB；参数表 Table C.1），与 LiNGAM、PC/rankPC、MMHC、GES 族、FCI+、PCI、Lasso 及五个马尔可夫毯（Markov blanket）方法比较：Table 1（每格平均自 24000 次模拟）中 CORTH 的 ACC/F1 在 $n=100/500/1000$ 下为 0.88/0.78、0.93/0.91、0.94/0.92，优于 LiNGAM（0.84/0.65、0.91/0.74、0.94/0.88）与最强对手 PCI（0.83/0.59、0.91/0.85、0.93/0.89）；Fig. 3 显示基线随噪声与非线性显著退化而本方法稳健。(ii) 回归设定 15000 个 DAG（100 节点、Beta 噪声）对比精确后选择推断、Debiased Lasso、前向逐步、LARS 等，结论一致。(iii) 运行时间在 5–1000 节点间呈 log-log 线性（Fig. 5）。(iv) 真实数据：COVID-19 Einstein 数据集上最常被选中的「原因」为年龄分位、动脉乳酸、早幼粒细胞、静脉血气碱剩余——作者自明无医学地面真值，仅作假说。
+
+## 开放问题
+
+1. **LDC 线性假设（作者自列，§4）**：$Y$ 与父节点间非线性直接效应的推广被列为「值得探索的自然方向」，无任何部分结果。
+2. **NFD 是硬边界（作者自认，§2.3）**：若 $Y$ 是任一协变量的祖先，算法在假阳与假阴两个方向都可能失败；无近似违背下的敏感性分析。
+3. **条件 (15) 是一种「对 $X$ 的忠实性」替代（我识别）**：它要求每个协变量不能被其余协变量完美预测——近共线时 $\chi_j$ 方差爆炸、检验失效（高维基因数据常见情形），文中未讨论。
+4. **渐近理论与实验条件脱节（我识别）**：Proposition 5 的条件 (i)–(vi)（稀疏、支撑有界、$U$ 指数尾、特征值界）在模拟数据上未验证是否成立；Bonferroni 在大 $d$ 下保守，无功效分析。
+5. **真实数据验证缺地面真值（作者自认，§3.4）**：COVID 变量如年龄分位更像混杂而非可干预原因，「直接原因」与「预测特征」的解释边界未被讨论。
+6. **目标中心（我识别）**：返回父集但不给图其余部分的定向或完备表征；与马尔可夫毯方法的等价论证（§3.1.1）依赖量身设定的条件，何时分歧未量化。
+7. **出身记录（我识别）**：前身被撤回的原因未说明，v3 相对其的理论增量无逐条对照，引用应以本 TMLR 版为准。
+
+## 文献谱系
+
+Chernozhukov et al.（2018a，Double ML）——部分线性模型 (4)–(9) 与正交化估计的直接来源，本文把「单个已知处理变量」的效应估计迭代化为 $d$ 个假设处理变量的扫描。Smucler, Rotnitzky & Robins（2019）——双线性影响函数（BIF）类估计量的双重稳健性与 $\sqrt{n}$ 收敛，Proposition 5 即其定理的特化。Shah & Peters（2020，PCI）——条件独立性检验基线（最强对手之一），证明技术同源。Javanmard & Montanari（2014/2018）、Zhang & Zhang（2014）——Debiased Lasso：同为去偏路线但需高斯设计与严格稀疏条件，不保证恢复全部非零系数。Spirtes et al.（2000）/Pearl（2009）的 PC 族与忠实性——本文对照面：声明既不需要忠实性也不需要无环；Bongers et al.（2021）/Forré & Mooij（2017）——有环 SCM 的马尔可夫分解，Proposition 2 证明所用。Brito & Pearl（2012）/Van der Zander & Liskiewicz（2016）——广义工具变量路线的最近前作（仅线性无环）。动机场景为基因–表型（引 Yao et al. 2015 等）。
+
+## 明确不覆盖
+
+不做全图因果发现（只识别 $Y$ 的直接父集）；不处理 $Y$ 与父节点间的非线性效应（LDC）；不处理 $Y$ 反向影响协变量或含 $Y$ 的环路（NFD）；不用干预数据或工具变量；不处理 $Y$ 与协变量间的隐混杂（$U$ 独立性）；不给有限样本保证；不给父集之外的结构解释。
+
+## 阅读路径
+
+先读 §1 的假设段（LDC/NFD 的基因–表型动机）与贡献列表；§2.1 归约式 (2)–(3) 是全文核心直觉——「系数为零」变「条件协方差为零」；§2.2 复习 Double ML 与 Neyman 正交条件 (5)–(9)；§2.3 Algorithm 1 与复杂度；§2.4 的 Example 1 配附录 B 非线性例子（「内部非线性只需无偏线性估计」）；§2.5 从假设 (13)–(15) 到 Prop 3、Def 4、Prop 5 与 95% 检验；§3 看 Table 1、Fig. 3、Fig. 5；§3.4 注意免责声明；证明在附录 A.1–A.4（A.2 先高斯似然后一般最小二乘，值得读）。姊妹篇：站内摘要级笔记 1903.02456（已撤回前身，可对照哪些主张被保留、哪些理论被补强）；站内 2002.06278/2010.06529 的追索一脉与本篇无直接关联，不必并读。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 直接因果父节点 | direct causal parents |
+| 结构方程模型 | structural equation model (SEM) |
+| 唯一可解性 | unique solvability |
+| 线性直接因果效应（假设） | linear direct causal effects (LDC) |
+| 无后代特征（假设） | no feature descending from $Y$ (NFD) |
+| 去偏 / 双重机器学习 | debiased / double machine learning (Double ML) |
+| Neyman 正交性 | Neyman orthogonality |
+| 干扰参数 | nuisance parameter |
+| 交叉拟合 | cross-fitting |
+| 条件协方差 | conditional covariance |
+| 双重稳健性 | double robustness |
+| 双线性影响函数 | bilinear influence function (BIF) |
+| 近似线性稀疏类 | approximately linear-sparse (ALS) class |
+| 一对其余 | one-vs-the-rest |
+| 马尔可夫毯 | Markov blanket |
+| 忠实性 | faithfulness |
+| 精确后选择推断 | exact post-selection inference |
+| Bonferroni 校正 | Bonferroni correction |
+
+## 来源定位
+
+`papers/2007.02938.pdf`（31 页）。关键内容：LDC/NFD 假设与动机（§1, p.1–2）；归约式 (2)–(3)（§2.1, p.4）；Double ML 与正交分数 (4)–(9)（§2.2, p.4–5）；Algorithm 1 与复杂度（§2.3, p.5–6）；Example 1、Proposition 2 与图 2（§2.4, p.7）；假设 (13)–(15)、Proposition 3、Definition 4、Proposition 5 与 95% 检验（§2.5, p.8–9）；72000 DAG 实验设置（§3.1, p.9–10，参数表 Table C.1 见 p.23）；Fig. 3 稳健性（p.10）；Table 1 与 Fig. 5 运行时间（p.11）；COVID-19 与讨论（§3.4/§4, p.12）；证明（附录 A.1–A.4, p.17–21）；非线性例子（附录 B, p.22–23）。

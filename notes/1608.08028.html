@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN" xml:lang="zh-CN"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="证明在『结构动态稳定』条件下，常微分方程组在时变干预下的渐近行为（含周期振荡）可用动态结构因果模型（DSCM）刻画，且『先干预再导出』与『先导出再干预』结果一致。把 Mooij et al.&nbsp;(2013) 的『静态平衡 + 常数干预』推广到『渐近动态 + 依时变化的干预』。">
+
+<title>从确定性 ODE 到动态结构因果模型 – Schölkopf 因果论文阅读站</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-66b4df7ba86f8287dc76b7fb130027a6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "没有结果",
+    "search-matching-documents-text": "匹配的文档",
+    "search-copy-link-title": "复制搜索链接",
+    "search-hide-matches-text": "隐藏其它匹配结果",
+    "search-more-match-text": "更多匹配结果",
+    "search-more-matches-text": "更多匹配结果",
+    "search-clear-button-title": "清除",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "取消",
+    "search-submit-button-title": "提交",
+    "search-label": "搜索"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Schölkopf 因果论文阅读站</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="搜索"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="展开或折叠导航栏" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">首页</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../schoelkopf-causality-arxiv-2008-2026.html"> 
+<span class="menu-text">全景（按年）</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../glossary.html"> 
+<span class="menu-text">术语表</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../notes.html"> 
+<span class="menu-text">逐篇笔记</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">从确定性 ODE 到动态结构因果模型</h1>
+<p class="subtitle lead">Paul K. Rubenstein et al., arXiv:1608.08028 (2016)</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">因果推断</div>
+    <div class="quarto-category">动力系统</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    证明在『结构动态稳定』条件下，常微分方程组在时变干预下的渐近行为（含周期振荡）可用动态结构因果模型（DSCM）刻画，且『先干预再导出』与『先导出再干预』结果一致。把 Mooij et al.&nbsp;(2013) 的『静态平衡 + 常数干预』推广到『渐近动态 + 依时变化的干预』。
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">发布于</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">2016年8月29日</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="导览" class="level2">
+<h2 class="anchored" data-anchor-id="导览">导览</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>作者</td>
+<td>Paul K. Rubenstein（University of Cambridge 工程系，兼 MPI for Intelligent Systems, Tübingen）、Stephan Bongers（University of Amsterdam 信息学研究所）、Bernhard Schölkopf（MPI for Intelligent Systems, Tübingen）、Joris M. Mooij（University of Amsterdam 信息学研究所）</td>
+</tr>
+<tr class="even">
+<td>出处</td>
+<td>arXiv:1608.08028v2 [cs.AI]（v1 2016-08-29；v2 2018-07-09，即 UAI 2018 会议版）</td>
+</tr>
+<tr class="odd">
+<td>日期</td>
+<td>2016-08-29</td>
+</tr>
+<tr class="even">
+<td>页数</td>
+<td>14 页（正文 9 页 + 补充材料 A–C 5 页）</td>
+</tr>
+</tbody>
+</table>
+<p>一句话定位：SCM 常由 ODE 的平衡态导出，但既有结果既要求系统收敛到与初始条件无关的唯一静态平衡、又只能建模把变量钳为常数的干预——受迫阻尼谐振子这等简单系统两条都不满足；本文证明换成「渐近轨迹 + 时变干预」后 SCM 框架仍然严格可导出，把可导出 SCM 的系统类从平衡态系统扩到周期等动态渐近行为。</p>
+</section>
+<section id="问题与模型" class="level2">
+<h2 class="anchored" data-anchor-id="问题与模型">问题与模型</h2>
+<p>引言自问：SCM 框架能否扩展到不收敛到平衡的系统、需对 ODE 与干预作什么假设；本文对前者给出肯定答案、对后者给出充分条件。ODE <span class="math inline">\(D\)</span> 是「每变量一个方程」的耦合方程组 <span class="math inline">\(f_i(X_i,X_{\mathrm{pa}(i)})(t)^{(k)}=0\)</span> 加初始条件（<span class="math inline">\(0\le k\le n_i-1\)</span>），第 <span class="math inline">\(i\)</span> 个方程（可含各阶时间导数）被视为决定 <span class="math inline">\(X_i\)</span> 动力学的因果机制，泛函依赖图（允许自环）即因果图；不取 Mooij et al.&nbsp;(2013) 的一阶规范化分解，因其在时变干预下引出 complications（§3.3）。例 1 是 <span class="math inline">\(D=2\)</span> 双质量-弹簧-阻尼系统，墙端固定。<strong>时变完美干预</strong>（§3.1）<span class="math inline">\(do(X_I=\zeta_I)\)</span>：把被干预变量的方程替换为 <span class="math inline">\(X_i(t)-\zeta_i(t)=0\)</span>，<span class="math inline">\(\zeta_I\)</span> 为整条轨迹；取常数轨迹时退化为通常的完美干预。<strong>干预集</strong>（§3.2）：对每个 <span class="math inline">\(I\subseteq\mathcal I\)</span> 取轨迹集 <span class="math inline">\(\mathrm{Dyn}_I\)</span>，令 <span class="math inline">\(\mathrm{Dyn}=\bigcup_I\mathrm{Dyn}_I\)</span>，要求「干预本身」与「系统响应」都落在 <span class="math inline">\(\mathrm{Dyn}\)</span> 内。<strong>定义 1（模块性，modularity）</strong>：<span class="math inline">\(\zeta_I\in\mathrm{Dyn}_I\iff\)</span> 各分量轨迹 <span class="math inline">\(\zeta_{i_k}\in\mathrm{Dyn}_{i_k}\)</span>——单变量轨迹可任意拼装成联合干预。平凡的模块化例子：全体常数轨迹（即 Mooij et al.&nbsp;2013）、渐近互异的全体 <span class="math inline">\(C^1\)</span> 轨迹、全体周期运动（本文贯穿示例）；每个渐近等价类只放一条代表轨迹，因为对所有可能的轨迹建模既不可操作也使从数据估计病态（脚注 1）。<strong>动态稳定性</strong>（§4，定义 2–3）：<span class="math inline">\(D\)</span> 相对 <span class="math inline">\(\mathrm{Dyn}_I\)</span> 动态稳定，指存在唯一 <span class="math inline">\(\eta_\varnothing\in\mathrm{Dyn}_I\)</span> 使对任意初始条件解 <span class="math inline">\(X_I(t)\to\eta_\varnothing(t)\)</span>；<span class="math inline">\((D,\mathrm{Traj})\)</span> 相对 <span class="math inline">\(\mathrm{Dyn}_I\)</span> 动态稳定指对每个 <span class="math inline">\(\zeta_I\in\mathrm{Traj}\)</span> 干预后 ODE 均动态稳定。例 3 的受迫欠阻尼振子 <span class="math inline">\(X_1(t)=r(t)+l+A\cos(\omega t+\varphi_0)\)</span>（式 (1)，<span class="math inline">\(r(t)\)</span> 指数衰减）是标准示例，图 2 用两组参数数值演示渐近动力学与初始条件无关。<strong>动态结构因果模型（DSCM，定义 4）</strong>：取值于 <span class="math inline">\(\mathrm{Dyn}\)</span> 的结构方程组 <span class="math inline">\(X_i=F_i(X_{\mathrm{pa}(i)})\)</span>，<span class="math inline">\(F_i:\mathrm{Dyn}_{\mathrm{pa}(i)}\to\mathrm{Dyn}_i\)</span> 把父变量的整条渐近轨迹映为子变量的渐近轨迹；<span class="math inline">\(\mathrm{Dyn}\)</span> 全为常数轨迹时退化为传统确定性 SCM。</p>
+</section>
+<section id="识别或主要命题" class="level2">
+<h2 class="anchored" data-anchor-id="识别或主要命题">识别或主要命题</h2>
+<p><strong>定义 5（结构动态稳定性，structural dynamic stability）</strong>：<span class="math inline">\(\mathrm{Dyn}\)</span> 模块化且对每个 <span class="math inline">\(i\)</span>，<span class="math inline">\((D,\mathrm{Dyn}_{\mathcal I\setminus\{i\}})\)</span> 相对 <span class="math inline">\(\mathrm{Dyn}_{\mathcal I}\)</span> 动态稳定——对「除一个变量外全部干预」的任意方式，剩余变量的渐近轨迹唯一落于 <span class="math inline">\(\mathrm{Dyn}\)</span>，且由模块性这条轨迹本身又是合法干预值，这是构造结构方程的关键；<span class="math inline">\(\mathrm{Dyn}\)</span> 为全体常数轨迹时恰是 Mooij et al.&nbsp;(2013) 的结构稳定性。作者自陈这是很强的假设。</p>
+<p><strong>定理 1</strong>（§5.2）：设 <span class="math inline">\((D,\mathrm{Dyn})\)</span> 结构动态稳定，则如下构造的 <span class="math inline">\(F_i:\eta_{\mathrm{pa}(i)}\mapsto\eta_i\)</span> 良定义：由模块性取 <span class="math inline">\(\zeta_{\mathcal I\setminus\{i\}}\)</span> 使其父分量等于 <span class="math inline">\(\eta_{\mathrm{pa}(i)}\)</span>，结构动态稳定性给出干预后系统的唯一渐近轨迹 <span class="math inline">\(\eta\in\mathrm{Dyn}_{\mathcal I}\)</span>，取其第 <span class="math inline">\(i\)</span> 分量。证明（补充 A.1）：非父变量的方程已被干预解出，<span class="math inline">\(X_i\)</span> 的方程化为同一个 <span class="math inline">\(f_i(X_i,\eta_{\mathrm{pa}(i)})(t)=0\)</span>，与 <span class="math inline">\(\zeta\)</span> 在非父变量上的取值无关，唯一性强制 <span class="math inline">\(\eta_i\)</span> 唯一；由此得导出 DSCM <span class="math inline">\(M_D\)</span>。<strong>定理 2</strong>（§5.3）：<span class="math inline">\(\zeta_I\in\mathrm{Dyn}_I\)</span> 时，<span class="math inline">\(D_{do(X_I=\zeta_I)}\)</span> 动态稳定当且仅当干预后 DSCM <span class="math inline">\(M_{D_{do}}\)</span> 有唯一解，且该解就是描述干预后 ODE 渐近动力学的 <span class="math inline">\(\mathrm{Dyn}_I\)</span> 元素——DSCM 虽由「一次干预 <span class="math inline">\(D-1\)</span> 个变量」构造，却正确建模对任意子集的干预。<strong>定理 3 与推论 1</strong>（§5.4）：<span class="math inline">\(M_{D_{do(X_I=\zeta_I)}}=(M_D)_{do(X_I=\zeta_I)}\)</span>，且再叠一次干预可交换——图 3 的交换图成立，故 DSCM 忠实推理 ODE 在 <span class="math inline">\(\mathrm{Dyn}\)</span> 内任意干预下的渐近动力学。</p>
+<p><strong>例 4</strong>（双质量-弹簧系统的显式 DSCM）：取 <span class="math inline">\(\mathrm{Dyn}_{\{1,2\}}\)</span> 为各变量的绝对收敛余弦级数轨迹 <span class="math inline">\(\sum_{j=1}^\infty A_i^j\cos(\omega_i^j t+\varphi_i^j)\)</span>，则 <span class="math inline">\((D,\mathrm{Dyn}_{\{1,2\}})\)</span> 结构动态稳定，DSCM 为 <span class="math inline">\(X_1=F_1(X_2)\)</span>、<span class="math inline">\(X_2=F_2(X_1)\)</span>，式 (2)–(3)：父轨迹的每个频率分量被映射为同频分量，幅度乘上共振因子（由 <span class="math inline">\(k,m,b,\omega\)</span> 决定）并移相 <span class="math inline">\(-\arctan(\cdot)\)</span>，外加弹簧原长决定的常数偏移。补充 B.2 并演示了为何需要结构动态稳定性：若 <span class="math inline">\(\mathrm{Dyn}\)</span> 只取单余弦干预，子变量在两个父变量同时干预下的响应含常数项加两个余弦项、已不在该集合内，必须放大到拟周期集 <span class="math inline">\(\mathrm{Dyn}_{qp}\)</span>；补充 B.1 则在常数 <span class="math inline">\(\mathrm{Dyn}\)</span> 下复现 Mooij et al.&nbsp;(2013) 的谐振子链 SCM。§5.5 对比动态贝叶斯网络（DBN）：DBN 须把连续系统离散化（补充 C 的欧拉格式，式 (8)），对瞬态与渐近都只是近似、计算代价随离散步长 <span class="math inline">\(\Delta\to0\)</span> 发散；DSCM 以「只建模选定的干预集」为代价换取对这些干预的精确刻画。</p>
+</section>
+<section id="估计经验" class="level2">
+<h2 class="anchored" data-anchor-id="估计经验">估计/经验</h2>
+<p>无数据实验。全文是定义–定理–证明加两个物理例子；唯一的数值内容是图 2 的两幅受迫振子模拟（见上）。作者明言：连简单谐振子的 DSCM 都已相当复杂，参数的数据驱动估计留作未来工作，本文只是应用得以发展之前「必要的第一步理论」。</p>
+</section>
+<section id="开放问题" class="level2">
+<h2 class="anchored" data-anchor-id="开放问题">开放问题</h2>
+<ol type="1">
+<li><strong>从数据学习 DSCM（自列第一方向）</strong>：实用参数化、测量噪声、时序数据只在有限时点采样——三项挑战均只列出；例 4 已显示即使是线性系统，显式 DSCM 也复杂到难以直接使用。</li>
+<li><strong>初始条件独立假设过强（自列第二方向）</strong>：动态稳定性要求渐近行为对一切初始条件唯一；多稳态、初始条件依赖的渐近行为被整体排除。静态情形的放松已由 Blom &amp; Mooij (2018) 做出，动态情形无对应结果。</li>
+<li><strong>随机系统（自列第三方向）</strong>：与 Bongers &amp; Mooij (2018) 的随机微分方程→SCM 的组合——带噪声的振荡系统——完全未开始。</li>
+<li><strong><span class="math inline">\(\mathrm{Dyn}\)</span> 的选择无方法论</strong>：结构动态稳定性是相对给定 <span class="math inline">\(\mathrm{Dyn}\)</span> 的性质；<span class="math inline">\(\mathrm{Dyn}\)</span> 太小可能不满足（B.2 的单余弦集即反例）而须放大，但如何系统地寻找既模块化、又使系统结构动态稳定、又可参数化估计的轨迹集，文中只有脚注 1 承认无光滑性约束时从数据估计轨迹是病态的。</li>
+<li><strong>稳定性假设不可操作</strong>：需对所有 <span class="math inline">\(i\)</span> 与所有 <span class="math inline">\(\zeta\in\mathrm{Dyn}\)</span> 验证唯一渐近轨迹，除线性阻尼机械例子外无可验证判据——与 Mooij et al.&nbsp;(2013) 的稳定性假设所受批评相同；定义 2 明确回避「除零测集外」的放松以省技术细节。</li>
+<li><strong>只有完美干预且丢弃瞬态</strong>：渐近等价类取商使收敛速率与瞬态信息全部丢失；软干预不建模；应用域（EEG、昼夜节律、化学振荡、电路、卫星控制）只在引言列举并指向周期控制理论（Bittanti &amp; Colaneri 2009），无真实系统实例，与时序因果发现的关系被声明「正交」而非打通。</li>
+</ol>
+</section>
+<section id="文献谱系" class="level2">
+<h2 class="anchored" data-anchor-id="文献谱系">文献谱系</h2>
+<ul>
+<li>Mooij et al.&nbsp;(2013, UAI；站内笔记 1304.7920，期刊版 1408.2063)：直接前身；本文把其平衡态换成轨迹、常数干预换成时变干预，<span class="math inline">\(\mathrm{Dyn}\)</span> 取常数轨迹时全部定义退化为该文；补充 B.1 显式复现其谐振子链结构方程。</li>
+<li>Bongers, Peters, Schölkopf &amp; Mooij (2018, arXiv:1611.06221)：一般含环 SCM 理论，为「DSCM 概念上就是 SCM」提供形式背景。</li>
+<li>Bongers &amp; Mooij (2018, arXiv:1803.08784)：随机微分方程到 SCM 的转化——本文自列第三方向的静态对应物；Blom &amp; Mooij (2018, arXiv:1805.06539)：允许平衡依赖初始条件的广义 SCM——第二方向的静态对应物。</li>
+<li>Iwasaki &amp; Simon (1994)、Dash (2005)、Lacerda et al.&nbsp;(2008)、Voortman et al.&nbsp;(2010)、Sokol &amp; Hansen (2014)：由差分/微分方程导出因果模型的先行谱系；除后两者外均假设静态平衡，本文是把该纲领推出平衡假设的一步；Sokol &amp; Hansen 亦是 §5.5「连续系统须离散化才能进 DBN」论断的依据。</li>
+<li>Koller &amp; Friedman (2009)：DBN，§5.5 的比较对象；Pearl (2009)：do-记号及模块化所对应的 autonomy/invariance 观念；Spirtes (1995)、Mooij et al.&nbsp;(2011)、Hyttinen et al.&nbsp;(2012)：SCM 表达循环模型的既有能力；Granger (1969)、Card &amp; Krueger (1993)：被声明与本文「正交」的时序因果方法。</li>
+</ul>
+</section>
+<section id="明确不覆盖" class="level2">
+<h2 class="anchored" data-anchor-id="明确不覆盖">明确不覆盖</h2>
+<p>不从时序数据学习或估计 DSCM（无统计层）；不处理随机性与测量噪声；不建模瞬态动力学与收敛速率；不含软/非完美干预；混沌与多稳态被稳定性假设排除；不做因果发现（因果图由 ODE 的泛函依赖结构直接给出）；与 DBN 的比较停留在表示与计算代价层面，无算法或实证对比；不主张这是从物理模型导出 SCM 的唯一方式。</p>
+</section>
+<section id="阅读路径" class="level2">
+<h2 class="anchored" data-anchor-id="阅读路径">阅读路径</h2>
+<p>§1 两个动机问题（平衡假设的两大局限）→ §2 ODE 记号与例 1 → §3.2 <span class="math inline">\(\mathrm{Dyn}\)</span> 与模块性（定义 1，全文最大的自选自由度）→ §4 定义 2–3 与例 3 → §5.1–5.2 定义 5 与定理 1（构造核心）→ §5.3–5.4 定理 2、定理 3、推论 1 与图 3 交换图（主结果）→ §5.5 DBN 对比 → 补充 B（一般 <span class="math inline">\(D\)</span> 的显式推导，B.2 解释为何必须放大 <span class="math inline">\(\mathrm{Dyn}\)</span>）。姊妹篇：先读站内 1304.7920 或 1408.2063（静态前作，LEE 构造与式 (13) 勘误辨析），再读本文即见每一步推广的对应关系；1411.3972（同为结构方程的动力学辩护，但走 VAR + 统计识别路线）与 1207.5136（TiMINo，时序因果发现的无环假设传统）可作两端对照。</p>
+</section>
+<section id="术语对照" class="level2">
+<h2 class="anchored" data-anchor-id="术语对照">术语对照</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>中文</th>
+<th>English</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>动态结构因果模型</td>
+<td>Dynamic Structural Causal Model (DSCM)</td>
+</tr>
+<tr class="even">
+<td>结构动态稳定性</td>
+<td>structural dynamic stability</td>
+</tr>
+<tr class="odd">
+<td>动态稳定性</td>
+<td>dynamic stability</td>
+</tr>
+<tr class="even">
+<td>模块性</td>
+<td>modularity</td>
+</tr>
+<tr class="odd">
+<td>时变完美干预</td>
+<td>time-dependent perfect intervention</td>
+</tr>
+<tr class="even">
+<td>轨迹集 / 干预集</td>
+<td>set of trajectories <span class="math inline">\(\mathrm{Dyn}\)</span></td>
+</tr>
+<tr class="odd">
+<td>拟周期轨迹</td>
+<td>quasi-periodic trajectories</td>
+</tr>
+<tr class="even">
+<td>绝对收敛余弦级数</td>
+<td>absolutely convergent cosine series</td>
+</tr>
+<tr class="odd">
+<td>受迫（欠）阻尼振子</td>
+<td>forced (under-)damped oscillator</td>
+</tr>
+<tr class="even">
+<td>动态贝叶斯网络</td>
+<td>Dynamic Bayesian Network (DBN)</td>
+</tr>
+<tr class="odd">
+<td>欧拉离散化</td>
+<td>Euler discretization</td>
+</tr>
+<tr class="even">
+<td>交换图</td>
+<td>commutative diagram</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="来源定位" class="level2">
+<h2 class="anchored" data-anchor-id="来源定位">来源定位</h2>
+<p>来源：<code>papers/1608.08028.pdf</code>（14 页）。定义 1（§3.2，p.3）；干预后 ODE（§3.3，p.4）；定义 2–3、例 3 与式 (1)、图 2（§4，p.4–5）；定义 4（§5，p.5）；定义 5 与定理 1（§5.2，p.6）；例 4 与式 (2)(3)（p.6 与 p.8 图 4）；定理 2（§5.3，p.7）；定理 3、推论 1 与图 3（§5.4，p.7–8）；证明在补充 A（p.10–11）；B.1 常数干预 SCM、B.2 拟周期推导与式 (7)（p.11–13）；DBN 式 (8)（补充 C，p.14）。勘误注（经页面渲染目检与补充 B 推导双重核对）：例 4 主文本把 <span class="math inline">\(C_{1j}\)</span> 写作 <span class="math inline">\([k_1+k_2-m_1(\omega^{2j})^2]^2\)</span>、式 (3) 常数项含分母 <span class="math inline">\(k_2+k_3\)</span>、式 (2) 常数项缺 <span class="math inline">\(k_0l_0\)</span> 项，且例 1 把右侧墙端记为 <span class="math inline">\(X_D=L\)</span>——这些与本文自己的 <span class="math inline">\(D=2\)</span> 设置（弹簧仅 <span class="math inline">\(k_0,k_1,k_2\)</span>、墙在 <span class="math inline">\(X_{D+1}=L\)</span>）及 B.2 的内联推导（质量 <span class="math inline">\(i\)</span> 的齐次刚度为 <span class="math inline">\(k_i+k_{i-1}\)</span>，对两个父方向的分母相同）不一致，应为索引笔误，读者宜以补充材料 B 的公式为准。</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "已复制");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "已复制");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

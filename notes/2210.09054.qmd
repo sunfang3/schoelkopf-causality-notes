@@ -1,0 +1,77 @@
+---
+title: "位置-尺度噪声模型的可识别性与估计：LOCI 判向框架"
+subtitle: "Alexander Immer et al., arXiv:2210.09054 (2022)"
+description: "证明 $Y=f(X)+g(X)N$ 的因果方向除病态情形外可识别，用高斯自然参数化给出首个联合凹且弱相合的 LSNM 估计器，装入 LOCI 框架后在 13 个基准上取得总体最优判向准确率。"
+date: 2022-10-13
+categories: [因果推断, 因果发现]
+paper-id: 2210.09054
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Alexander Immer（ETH Zürich / MPI-IS Tübingen）、Christoph Schultheiss（ETH）、Julia E. Vogt、Bernhard Schölkopf（ETH / MPI-IS）、Peter Bühlmann、Alexander Marx（ETH AI Center） |
+| 出处 | arXiv:2210.09054 [stat.ML]（v1 2022-10-13，v2 2023-06-01）；ICML 2023（PMLR 202） |
+| 日期 | 2022-10-13 |
+| 页数 | 17 页（正文 9 页 + 补充材料 A–E 8 页） |
+
+一句话定位：把加性噪声模型（additive noise model, ANM）判向推广到噪声可被原因函数缩放的位置-尺度噪声模型（location-scale noise model, LSNM），补上「可识别 + 可相合估计」两块理论，并以 LOCI 框架做成实用判向器。
+
+## 问题与模型
+
+**定义 1**（LSNM）：$Y:=f(X)+g(X)N_Y$，$X\perp\!\!\!\perp N_Y$，$f:\mathcal X\to\mathbb R$，$g:\mathcal X\to\mathbb R^+$ 严格为正。$g$ 为常数时退化为 ANM，$f$ 为常数时退化为乘性噪声模型。三个子问题：(i) 反向模型何时也满足同样结构约束（可识别性）；(ii) 如何相合地联合估计 $f$ 与 $g$——常规均值/方差参数化 $\theta_1(x)=\mu(x),\theta_2(x)=\sigma^2(x)$ 的对数似然 Hessian 符号不定（二阶导 $[\theta_2-2(\theta_1-y)^2]/2\theta_2^3$ 可正可负），非凹似然使一致性论证无从下手；(iii) 如何组合成判向分数。
+
+## 识别或主要命题
+
+**定理 1**（PDE 刻画）：设正反向模型均成立，$\nu_1,\nu_2$ 为 $Y$ 与 $N_X$ 的二次可微对数密度，记 $G(x,y)=g(x)f'(x)+g'(x)[y-f(x)]$，则机制须对所有 $G\neq0$ 的 $(x,y)$ 满足二阶偏微分方程（式 1）。把每个使 $G(x_0,y)\neq0$ 的 $x_0$ 代入即得关于 $y$ 的 ODE，把 $\nu_1$ 约束到二维仿射空间；仅当所有 ODE 解空间以非常特殊的组合重叠且给出合法对数密度时反向模型才存在——除这些病态情形外方向可识别。该式与并发工作 Strobl & Lasko（2022）等价（本文独立证明并修正其 $g'$ 项符号错误）。隐含约束：$N_X$ 对数密度须二次可微（排除均匀分布等有界支撑原因变量）。**引理 1**：以自然参数 $\eta_1(x)=\psi(x)^\top w_1,\ \eta_2(x)=-\phi(x)^\top w_2$（正特征映射保证 $\eta_2<0$）参数化条件高斯，似然（式 2）在 $(w_1,w_2)$ 上联合凹。**定理 2**：假设 1（$T\ge T_0$ 后 Fisher 信息阵正定）加 Cramér 型光滑条件下，MLE 弱相合且 $\sqrt T(\hat w_T-w^*)\xrightarrow{d}\mathcal N(0,I(w^*)^{-1})$。**定理 3**（改自 Zhang et al. 2015）：高斯 LSNM 且 MLE 相合时 $\lim_{T\to\infty}\ell_{X\to Y}(\hat\theta_T)-\ell_{Y\to X}(\hat\xi_T)\ge0$，等号当且仅当反向模型存在；注意 $|J_{X\to Y}|=|g(x)|\neq1$，与 ANM 不同不能在似然比较中忽略。**定理 4**（引 Khemakhem et al. 2021，改正其笔误）：高斯情形反向模型仅两类——$(g,f)=(1/\sqrt Q,P/Q)$ 型多项式构造且边缘为 log-mix-rational-log 密度，或 $g,k$ 常数、$f,h$ 线性且双高斯的平凡情形。
+
+## 估计/经验
+
+两个估计器均把 $p(y|x)$ 写成自然参数化高斯：特征映射版（5 阶 25 节点样条）有闭式迭代、可靠收敛到全局最优；神经网络版取 $\eta_1=f_1(x,w),\ \eta_2=-\tfrac12\exp(f_2(x,w))$（单隐层宽 100、tanh、Adam 余弦调度 5000 步），无保证但可拟合任意复杂度。**LOCI** 流程：先标准化数据（防 Reisach et al. 2021 的方差伪影），双向估计后或按对数似然判向（LOCI$_M$），或对残差 $\hat N_Y=(Y-\hat f(X))/\hat g(X)$ 做 HSIC 检验、取大 p 值方向（LOCI$_H$，RESIT 式）。实验：Tagasovska et al. 五个合成集（AN/ANs/LS/LSs/MNU）上 NN-LOCI$_M$ 全部 100% 准确，同架构 ANM 估计器在 LS/LSs/MNU 上可跌破 10%（图 3），LSs 上 RESIT 仅 6%、CAM 53%；8 个更易违反假设的基准（SIM 系、Tübingen、CE-Cha、Net、Multi）上 NN-LOCI$_H$ 聚合准确率第一（13 基准中 7 个单项最佳），GRCI 的 AUDRC 略优。附录 E 与异方差回归标准 IFGLS 对照：正弦异方差仿真（$T=10^2$–$10^4$，100 次重复取中位 KL）显示凹估计器小样本显著更稳、IFGLS 在特征过多时灾难性过拟合，两者在最优特征下渐近等价。
+
+## 开放问题
+
+1. **病态情形清单未完成**（§2 自认）：类似 Zhang & Hyvärinen（2009）对后非线性模型的完整不可识别情形枚举，LSNM 尚未得到。
+2. **非高斯噪声仅初步触及**（§7 自列未来工作）：MNU 上的经验成功之外，非高斯情形的估计与判向理论未展开。
+3. **神经网络版无保证**（自认）：过参数化使 NN 估计器不继承凹性与相合性，尽管其实验表现最好。
+4. **只有弱相合**（§4.2 自认）：RESIT 适合性需要 $L^2$ 相合（等价于 Fisher 信息在真值处足够尖锐，对任意非线性特征映射困难），故严格说 LOCI$_H$ 需样本切分才有保证（经验上全数据训练反而更好）。
+5. **特征映射必然误设**（自认）：实践中用样条近似，正确定价的特征映射不可知，定理 2 前提无法核验。
+6. **估计器本身缺深入分析**（附录 E 自认）：两估计器渐近等价，更细的统计性质「留作未来工作」。
+7. **仅双变量**（本人识别）：Jacobian 与 PDE 论证都是双变量的，多变量图结构下的 LSNM 判向未触及；假设 1（$T_0$ 后 Fisher 信息正定）实践中不可检验，无有限样本指导。
+
+## 文献谱系
+
+本文直接续接可识别函数因果模型主线：Shimizu et al.（2006，线性非高斯）→ Hoyer et al.（2009，非线性 ANM，Schölkopf 合作，定理 1 沿用其 ODE 证明路线）→ Peters et al.（站内 0911.0280 离散 ANM、1309.6779 RESIT——后者是 LOCI$_H$ 的直接蓝本）→ Zhang & Hyvärinen（2009，后非线性）与 Zhang et al.（2015，MLE 判据，定理 3 来源）→ 本文推广到异方差 LSNM。Khemakhem et al.（2021，因果自回归流）给出高斯反向模型刻画（定理 4）；并发工作 Strobl & Lasko（2022，GRCI）独立证明同一 PDE 但聚焦根因分析、用启发式两阶段算法，本文以自然参数化提供首个相合估计器。估计侧：Harvey（1976）的 IFGLS 是被对照的计量经济学标准；Le et al.（2005）的异方差高斯过程是自然参数化先例；HSIC 承自 Gretton et al.（2005）；Reisach et al.（2021）的方差伪影批评催生标准化步骤。概念上，作者指出对 LSNM 须修正独立因果机制表述——独立噪声源是 $p_{Y|X}\cdot|J_{X\to Y}|$ 而非 $p_{Y|X}$ 本身，即 Janzing & Schölkopf（2010）的算法独立性条件在非常数缩放下需重新定义。竞品：CAM（Bühlmann et al. 2014）、QCCD（Tagasovska et al. 2020，兼数据来源）、HECI（Xu et al. 2022）、FOM（Cai et al. 2020）。站内对照：1412.3773（ANM 一致性与基准——定理 3 与弱相合讨论是该文 Theorem 20 谱系的 LSNM 延伸）。
+
+## 明确不覆盖
+
+不处理多变量因果图发现（仅双变量判向）；不做混杂检测与隐混杂；非高斯噪声下的判向理论（仅经验触及 MNU）；不涉及时序/面板数据；不覆盖后非线性模型等更一般函数因果模型的估计。
+
+## 阅读路径
+
+先读 §1 与图 1（ANM 与 LSNM 拟合同一数据的对比——全文动机浓缩于此）；§2 定理 1 与其后的解空间讨论是可识别性核心；§3 从非凹性反例（均值/方差参数化的 Hessian）读起再进自然参数化、引理 1 与假设 1；§4 两小节分别给出 LOCI$_M$/LOCI$_H$ 的理论依据（定理 3 与 RESIT 适合性讨论值得细读）；§6 图 2–4 是主要实验证据。补充材料按需：A（算法）、B（定理 4）、D（13 基准全表）、E（IFGLS 对照）。姊妹篇对照：0911.0280（离散 ANM 可识别性——同一「推广 ANM 模型类并刻画可识别性」议程的离散端）、1309.6779（RESIT——LOCI$_H$ 的算法源头）、1412.3773（ANM 一致性与 CauseEffectPairs 基准——定理 3 所改写的判据与评测传统的出处）。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 位置-尺度噪声模型 | location-scale noise model (LSNM) |
+| 异方差 | heteroscedasticity |
+| 加性噪声模型 | additive noise model (ANM) |
+| 乘性噪声模型 | multiplicative noise model |
+| 自然参数 | natural parameters |
+| 特征映射 | feature maps |
+| 联合凹似然 | jointly concave likelihood |
+| 弱相合 | weak consistency |
+| Fisher 信息阵 | Fisher information matrix |
+| 雅可比行列式 | Jacobian determinant |
+| 可行广义最小二乘 | iterative feasible generalized least squares (IFGLS) |
+| 判决率曲线下面积 | area under the decision rate curve (AUDRC) |
+| 核独立性检验 | HSIC |
+| 样条 | splines |
+
+## 来源定位
+
+`papers/2210.09054.pdf`（17 页）。关键内容：LSNM 定义 1 与可识别性 PDE 定理 1（式 1，p.2–3）；自然参数化式 2–3 与引理 1（p.4）；假设 1 与相合性定理 2（p.4）；定理 3（p.5–6）；LOCI$_H$/LOCI 定义 §4.2–4.3（p.6）；实验图 2–4 与 §6（p.7–9）；补充材料 B 定理 4（p.14–15）、D 全部基准表 1–2（p.16）、E IFGLS 对照（p.17）。

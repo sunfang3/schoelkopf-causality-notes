@@ -1,0 +1,78 @@
+---
+title: "德尔斐不确定性：不可辨识隐混杂下的离线强化学习"
+subtitle: "Alizée Pace et al., arXiv:2306.01157 (2023)"
+description: "把离线 RL 中不可辨识隐混杂造成的价值多解性定义为第三类不确定性——相容世界集合上的价值方差（德尔斐不确定性），并以之作悲观惩罚嵌入 CQL，构造混杂规避的策略学习算法 Delphic ORL。"
+date: 2023-06-01
+categories: [因果推断, 离线强化学习]
+paper-id: 2306.01157
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Alizée Pace（ETH AI Center / ETH Zürich 计算机系 / MPI-IS 图宾根）、Hugo Yèche（ETH Zürich）、Bernhard Schölkopf（MPI-IS 图宾根）、Gunnar Rätsch（ETH Zürich）、Guy Tennenholtz（Google Research） |
+| 出处 | arXiv:2306.01157 [cs.LG]（v1 2023-06-01）；ICML 2023 |
+| 日期 | 2023-06-01 |
+| 页数 | 26 页（正文 9 页 + 参考文献 6 页 + 附录 A–E 11 页） |
+
+一句话定位：当行为策略依赖影响奖励与转移的未观测变量（隐混杂，hidden confounding）且不作任何可辨识假设时，本文把「与观测轨迹分布相容的世界模型之间的价值分歧」定义为第三类不确定性——德尔斐不确定性（delphic uncertainty）——并以之作悲观（pessimism）惩罚，构造混杂规避的离线 RL 算法 Delphic ORL。
+
+## 问题与模型
+
+数据生成环境为上下文马尔可夫决策过程（contextual MDP, CMDP）$M=(S,Z,A,T,r,\rho_0,\nu,\gamma)$（§2，图 1）：每回合固定抽上下文 $z\sim\nu$，奖励 $r_t=r(s_t,a_t,z)$、转移 $T(\cdot|s_t,a_t,z)$ 均依赖 $z$。行为策略 $\pi_b(a|s,z)$ 能看到 $z$，但数据集 $D$ 只含轨迹不含 $z$；学习目标是与上下文无关的最优策略 $\tilde\pi^\ast\in\tilde\Pi$。轨迹分布按式 (1) 因子分解，其中每一项都因依赖 $z$ 而不可辨识，故可能存在多个「世界」给出同一观测分布 $P^{\pi_b}(\tau)$。§3 的 bandit 双世界例子（图 2）给出核心直觉：单点上下文配均匀策略与双上下文配依赖上下文的策略诱导相同边缘 $P^{\pi_b}(a,r)$，但对均匀策略给出不同价值且最优动作不同。混杂强度沿用敏感性分析的比值参数 $\Gamma=\max_{z,z'}[\pi_b(a|s,z)/\pi_b(a|s,z')]$（Rosenbaum 型，§6）。混杂偏误是与数据量无关的结构性偏误，既不能被认知/偶然不确定性刻画，也不能归约为部分可观测问题（§7）。
+
+## 识别或主要命题
+
+本文明确放弃识别：不作任何使 $z$ 可辨识的假设（无环境干预、无前门/后门代理），转而量化不可辨识性本身。**Definition 4.1**（p.4）：$P^{\pi_b}$ 的相容世界（compatible world）是满足式 (1) 分解出同一 $P^{\pi_b}(\tau)$ 的元组 $w=(Z_w,\nu_w,\rho_{0,w},P^r_w,T_w,\pi_{b,w})$，全体记 $\mathcal W$。**Theorem 4.2**（方差分解，证明附录 B.1，两次套用全方差定律）：对任意 $\pi\in\Pi$，$\mathrm{Var}(Q^{\pi}_{\theta_w})=\mathbb E_w[\,\text{偶然项}+\text{认知项}\,]+\mathrm{Var}_w\big(\mathbb E_{\theta_w}[\mathbb E[Q_{\theta_w}|\theta_w,w]|w]\big)$，末项（世界间价值均值之方差）即德尔斐不确定性；高斯特例见式 (2)。附录 B.2 给渐近诠释：数据无穷（认知消失）且环境确定（偶然消失）时，只要仍有多世界相容且赋值不同，德尔斐项独存——这是它与前两类不确定性的实质区别。
+
+## 估计/经验
+
+**算法**（§5，Algorithm 1/2）：训练 $W$ 个相容世界模型，各自用变分推断最大化 ELBO $\mathbb E\log Q^{\pi_b}_\theta+\alpha\log\pi_{b,\theta}-\beta\,\mathrm{D_{KL}}(\nu_\theta(z|\tau)\|p(z))$，世界间随机化先验方差、潜维 $|Z|\in\{1,\dots,16\}$ 与架构（附录 C.1）；一步反事实价值用重要性比 $\pi(a|s)/\pi_{b,\theta}(a|s,z)$ 边缘化 $z$ 估计；局部德尔斐不确定性 $u^\pi_d(s,a)=\mathrm{Var}_w(Q^\pi_w(s,a))$；把 Bellman 目标改为 $Q'_{\mathrm{target}}=Q_{\mathrm{target}}-\lambda u^\pi_d$ 嵌入保守 Q 学习（Conservative Q-Learning, CQL）。**实验一**：脓毒症模拟（Oberst–Sontag 环境，隐藏糖尿病状态为 $z$；1 万步数据，$\Gamma$ 可调至 100，图 4–5 基于 $N=864$ 条轨迹、10 次运行）：认知不确定性随数据量下降、偶然随奖励方差上升，而德尔斐不随数据量下降、随 $\Gamma$ 上升，且集中于唯一被糖尿病混杂的动作——血管加压药给药（图 9a）；Delphic ORL 回报随 $\Gamma$ 增大对 CQL/BCQ/BC 优势扩大（图 5）。**实验二**：HiRID ICU 电子健康记录（>3.3 万住院、状态维 203，优化血管加压药/补液，SOFA 评分度量严重度）：人为排除 14 个变量（年龄、各系统诊断等，$\Gamma\in[1.2,200]$）构造混杂，用评估时可见 $z$ 的双重稳健离线策略评估（OPE）：全部 14 个混杂（$\Gamma\approx200$）时 Delphic ORL 62.2±1.0，优于 CQL 59.3±0.9、BC 59.6±0.8、BCQ 54.6±1.3；无混杂（$\Gamma=1$）时 CQL 反而略优（68.2±0.7 对 67.6±1.1，表 1）。6 名临床专家对 45 条合成轨迹盲评，高 $\Gamma$ 时偏好 Delphic ORL、低 $\Gamma$ 时偏好接近临床实践的 BC（图 7）。**消融**（表 4，$\Gamma=46$）：Bellman 目标惩罚 54.9±4.6 优于样本加权 44.7±4.2 与不确定性阈值 24.6±3.4；约 10 个世界即收敛（图 9b）。
+
+## 开放问题
+
+1. **领域与动态混杂**（自认，§8/A.3）：实证仅限医学场景；时变混杂（MDPUC 可形式化为 CMDP，附录 A.2）下德尔斐估计与惩罚的行为未作实证研究。
+2. **$\mathcal W$ 的近似**（自认，A.3）：如何最好地近似相容世界集合是开放问题——更好近似可改善校准、效率与可扩展性；大规模强混杂问题上计算开销昂贵。
+3. **无理论保证**（半自认，附录 E）：约 10 个世界即收敛只是经验观察，作者明言「需要进一步理论工作建立保证与正确性概率」；Thm 4.2 本身是方差恒等式，不提供 $u_d$ 的置信陈述。
+4. **偏误–方差权衡**（自认，A.3）：混杂偏误与 Q 函数估计方差之间存在权衡（承 Wang & Blei），需大而高质量数据；临床部署不可单独依赖算法。
+5. **本人识别**：$u_d$ 是方差型度量而非部分辨识界——与策略真实价值的上下界没有形式化联系，与敏感性分析只在附录 A.2 定性对比，「悲观多少才够」无界支撑，只能靠 $\lambda$ 扫描配 OPE 调参。
+6. **本人识别**：超参选择的评估循环——$\lambda$、$W$ 用假设评估时可见 $z$ 的 OPE 挑选，而真实部署恰恰不可见 $z$；无混杂时已轻微劣于 CQL（表 1 末行），何时该关闭德尔斐惩罚没有可操作判据。
+7. **本人识别**：世界集合的覆盖性无法验证——若先验/架构族未覆盖真实世界，$u_d$ 系统性低估混杂，文中没有诊断该低估的任何检验。
+
+## 文献谱系
+
+Oberst & Sontag (2019) 提供脓毒症环境与混杂版反事实 OPE；Hyland et al. (2020) 与 Yèche et al. (2021) 的 HiRID 基准提供真实 ICU 数据与循环衰竭标注。认知/偶然二分法（Kendall & Gal 2017；Hüllermeier & Waegeman 2021）被 Thm 4.2 推广为三分。悲观离线 RL（Kumar et al. 2020 CQL——宿主算法与主要基线；Fujimoto et al. 2019 BCQ；Bain & Sammut 的行为克隆 BC）原本只惩罚认知不确定性，本文把悲观对象换成混杂偏误。可辨识路线前作（Lu et al. 2018 的去混杂 RL；Wang et al. 2021、Zhang & Bareinboim 2019/2020 的因果 RL；Kumor et al. 2021 的序贯因果模仿学习）依赖环境干预或前门/后门代理，是本文刻意不作的可辨识假设。敏感性分析线（Rosenbaum 2002 的 $\Gamma$；Kallus et al. 2019、Jesson et al. 2021、Oprescu et al. 2023 的部分辨识界；Namkoong et al. 2020、Bennett & Kallus 2021 的混杂下 OPE 不确定性集）给界但界宽且难适配高维序贯决策，本文自定位为其可扩展的实践补充（附录 A.2 对照）。Tennenholtz et al. (2022) 与 Saengkyongam et al. (2023) 研究潜混杂下的协变量偏移，是互补挑战；Gottesman et al. (2018) 提供观测医疗数据中评估 RL 的方法论（OPE + 专家盲评 + 策略分歧分析）。
+
+## 明确不覆盖
+
+不处理可辨识设定（不用前门/后门代理与环境干预）；不给策略价值的部分辨识界（只有方差型不确定性）；不做时变混杂的实验；不实验连续动作空间（基线因离散动作空间选定）；不涉及在线数据收集与探索；不处理覆盖不足与模型类误设之外的其他结构性偏误来源。
+
+## 阅读路径
+
+先读 §3（式 1 与图 2 双世界例子）→ §4（Def 4.1 与 Thm 4.2、式 2，附录 B.2 的渐近诠释）→ §5（图 3 世界模型、Algorithm 1 与 Bellman 惩罚）→ §6.1 图 4–5 → §6.2 表 1 与图 6–7；附录 A.2（与敏感性分析、MDPUC 的对照）、C.2（Algorithm 2 与三种替代悲观形式）与 E（消融）值得精读。姊妹篇对照：2306.02235（干预下线性因果表示的可辨识性）——同样面对「潜变量只以边缘分布进入观测数据」的多解性，但走的是加干预数据换取可识别条件的路线，本文则接受不可辨识并量化随之而来的多解性，两文合读可见 Schölkopf 组处理潜结构不确定性的两种互补姿态；另可对照站内 2106.04619（内容/风格解耦）看「用干预/增广定义不可辨识方向」的共同思路。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 德尔斐不确定性 | delphic uncertainty |
+| 相容世界 | compatible world |
+| 隐混杂 | hidden confounding |
+| 上下文马尔可夫决策过程 | contextual Markov decision process (CMDP) |
+| 行为策略 | behavioural policy |
+| 上下文无关策略 | context-independent policy |
+| 混杂强度 | confounding strength ($\Gamma$) |
+| 认知不确定性 | epistemic uncertainty |
+| 偶然不确定性 | aleatoric uncertainty |
+| 悲观（惩罚） | pessimism |
+| 保守 Q 学习 | Conservative Q-Learning (CQL) |
+| 批量约束 Q 学习 | Batch-Constrained Q-Learning (BCQ) |
+| 行为克隆 | behaviour cloning (BC) |
+| 双重稳健离线策略评估 | doubly-robust off-policy evaluation (OPE) |
+| 带未测混杂的 MDP | MDP with Unmeasured Confounding (MDPUC) |
+
+## 来源定位
+
+`papers/2306.01157.pdf`（26 页）。式 (1) 与混杂偏误讨论 p.3；图 2 双世界例子 p.4；Def 4.1 p.4；Thm 4.2 与式 (2) p.5；Algorithm 1 p.6；图 4–5 p.7；表 1、图 6–7 p.8；局限 §8 p.9–10；敏感性分析对照附录 A.2 p.16–17、局限与未来工作 A.3 p.17；证明 B.1–B.2 p.17–19；Algorithm 2 p.20；OPE 式 (8) p.22–23；消融表 4 与图 9–10 p.25。

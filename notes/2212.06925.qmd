@@ -1,0 +1,80 @@
+---
+title: "解释与预测的因果审计：超参数作为处理变量"
+subtitle: "Amir-Hossein Karimi et al., arXiv:2212.06925 (2022)"
+description: "把显著性解释与模型预测的关系形式化为对共同因果祖先——超参数——的处理效应，在 3 万个 CNN 的模型动物园上发现超参数对解释的影响大多不经预测介导，且模型性能越高与理想情形的差距越大。"
+date: 2022-12-13
+categories: [因果推断, 可解释性]
+paper-id: 2212.06925
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Amir-Hossein Karimi（MPI-IS / ETH，工作完成于 Google Research 实习）、Krikamol Muandet（CISPA）、Simon Kornblith、Been Kim（Google Brain）、Bernhard Schölkopf（MPI-IS） |
+| 出处 | arXiv:2212.06925 [cs.LG]；ICML 2023 |
+| 日期 | 2022-12-13（v4 2023-05-12） |
+| 页数 | 23 页（正文与参考文献 10 页 + 附录 A–B 13 页） |
+
+一句话定位：把「显著性解释 $E$ 与模型预测 $Y$ 究竟有多大关系」这一可解释性悬案，形式化为对二者共同因果祖先——超参数 $H$——的处理效应（treatment effect）估计问题，在现成的模型动物园（model zoo）上做观测研究，发现 $H$ 对 $E$ 的影响远大于经 $Y$ 介导的影响，且模型性能越高、与「理想解释」的差距反而越大。
+
+## 问题与模型
+
+可解释性文献已有两路定性证据：未训练与已训练模型的解释难以区分（Adebayo et al. 2018 的合理性检验），某些方法的理论结果与 $Y$ 无关（Nie et al. 2018；Srinivas & Fleuret 2021）；但控制混杂后系统量化 $E$–$Y$ 关系一直缺位。本文的模型是解释生成过程（explanation generating process, EGP）三阶段：训练 $\mathcal T:\mathcal H\times\mathcal D\to\mathcal F$、预测 $\mathcal P:\mathcal F\times\mathcal X\to\mathcal Y$、解释 $\mathcal E:\mathcal F\times\mathcal X\times\mathcal Y\to\mathfrak E$。固定随机种子后三段皆确定论，系统随机性仅来自 $X$，故在任何数据观测之前即已赋值的超参数向量 $H$ 是 $Y$ 与 $E$ 合理的共同因果祖先（Reichenbach 共因原理 + Rubin 潜在结果（potential outcomes）框架）。记 $Y_h^*(x),E_h^*(x)$ 为取 $H=h$ 时的潜在预测/解释，个体处理效应（individual treatment effect, ITE）$\mathrm{ITE}_Y(x)=Y_h^*(x)-Y_{h'}^*(x)$（式 1），并推广到单/多非二值处理（式 3–4，对 $h_{\setminus i}$ 边缘化）。解释是 $d_1\times d_2$ 的显著图（saliency map），故把减法换成 RKHS 距离得核化处理效应（kernelized treatment effect, KTE，式 5）：$\|\varphi(Y_h^*(x))-\varphi(Y_{h'}^*(x))\|_{\mathcal G}$。
+
+## 识别或主要命题
+
+无定理，识别依赖两条假设。假设 2.1（完全可交换性，full exchangeability）：$Y_h^*\perp\!\!\!\perp H$、$E_h^*\perp\!\!\!\perp H$ 对一切 $h$ 成立——模型动物园的超参数在预指定范围内独立随机抽取，近似构造出随机化实验；假设 2.2（无混杂，unconfoundedness）：无共同因素同时影响 $H$ 的取值与结果。附录 A.2 的关键观察：此机械设定下任一 $h$ 的潜在结果都可由前向仿真精确计算，因果推断的基本问题（fundamental problem of causal inference）在此表现为算力问题而非可观测性问题——处理一个个体（重训一个模型）与处理所有个体一样昂贵。直接/间接影响的分离：随机置换 $Y_i(x)$ 后重算解释 $\tilde E_{[i]}$，同时切断 $H\to Y$ 与 $Y\to E$，比较置换前后的相关结构；作者明言这只是对经典中介分析（mediation analysis）的近似，高维非线性下难以严格适配。
+
+## 估计/经验
+
+数据：Unterthiner et al. (2020) 模型动物园，30,000 个 3 层 CNN（4,970 参数，最多 86 个 epoch），CIFAR10/SVHN/MNIST/Fashion-MNIST 各一套；超参数含优化器、初始化类型与尺度、激活函数、学习率、$\ell_2$ 正则、dropout、数据划分（连续量按对数标记离散化，附录 A.3）。检验 Gradient、SmoothGrad、Integrated Gradients、Grad-CAM 四种显著图方法（按 Adebayo et al. 2018 预处理、负归因置零），并设 $E\equiv Y$ 的 Identity 为「理想」参照。模型按测试准确率分 8 桶（0–20、…、95–99、99–100 百分位；Table 2）。结果：(i) KTE 对 linear/poly/RBF/cosine 四种核不敏感（图 2，CIFAR10 上 100 个实例）；(ii) 各类 $H$ 对 $E,Y$ 的影响方式总体相似（图 3）；(iii) 高准确率桶中 $\mathrm{ITE}_Y$ 随模型预测趋同而收缩，$\mathrm{ITE}_E$ 范围不变，$\mathrm{corr}(\mathrm{ITE}_Y,\mathrm{ITE}_E)$ 对 Grad/IG 随性能上升但仍远低于 Identity 参照（图 4–5）；(iv) 直接/间接分解（图 6）显示性能越高、「理想与实际的差距」越大——越高绩效的模型，$E$ 的变异越多来自 $Y$ 之外的因素；SmoothGrad 与 Grad-CAM 的 $H\to E$ 影响主要不经由 $Y$；(v) 在 Adebayo 合理性检验中「通过」的 Grad-CAM 在本框架下表现反而更差，说明该检验不充分。附录 A.2 初步结果：仅以超参数与 $X$ 为输入的 3 层 MLP 元模型（meta-model），用 10% 模型训练即可预测其余模型的预测（准确率约 45%；若只用绩效最高 15% 模型的样本训练，约 80%），提示免重训估计处理效应的方向。
+
+## 开放问题
+
+自认局限：
+1. 分析受模型动物园构造选择约束，解释只限于所测 $H$ 的域内；架构固定为 3 层 CNN（约 $10^3$ 参数）。
+2. 应在更大更复杂的模型（Lottery Tickets、Jiang et al. 2019）、训练数据被（对抗性）更改、以及训练的不同阶段上重复分析。
+3. 所提度量与可理解性、透明度、复杂度、用户友好性等既有可解释性度量「互不蕴含」，单独依赖该度量可能误导（Identity 例）。
+4. 待推广到其他解释类型：影响样本、Shapley 值、概念类（TCAV）、代理模型、追索（recourse）类解释。
+5. 直接/间接影响的分离仅是经典中介分析的近似。
+
+本人识别的缺口：
+6. 式 (4) 隐含超参数互相独立；实际中设计者按经验成套选参，下游绩效作为共同子代会诱发 Berkson 型依赖，此时「无条件处理效应」的回答对象已改变，文中仅在附录讨论而未给出修正估计。
+7. 置换 $Y$ 同时切断 $H\to Y$ 与 $Y\to E$，无法单独归因；负归因置零对不同方法语义不同（IG/Grad 的正负各有含义），可能系统性影响跨方法比较，均未见敏感性分析。
+8. 「理想」被操作化为 $E\equiv Y$ 是规范性选择（作者自注「哪些 $H$ 不应影响 $E$ 由用户决定」）；元模型 45%/80% 的准确率距可用亦远。
+
+## 文献谱系
+
+Reichenbach (1956) 共因原理与 Rubin (2005) 潜在结果框架是两件概念工具。Unterthiner et al. (2020) 提供全部数据基础（model zoo），其「仅凭超参数预测模型精度」的能力同时是「$H$ 决定模型行为」的动机与元模型的灵感（Eilertsen et al. 2020 由权重反推超参数同理）。Adebayo et al. (2018) 的合理性检验（sanity check）是被本文「因果化扩展」的直接对象：那里比较单个训练/未训练模型对，这里跨 3 万个模型度量处理效应，其预处理协议被沿用；Srinivas & Fleuret (2021) 与 Nie et al. (2018) 的理论批评是研究动机。与 Wachter et al. (2017) 反事实解释的对照贯穿全文：对方固定模型改实例（一次前向传播），本文固定实例改超参数（一次完整重训）。KTE 的技术武器来自核方法谱系：Schölkopf & Smola (2002)、Muandet et al. (2021) 反事实均值嵌入、Park et al. (2021) 条件分布处理效应（CoDiTE）。Pearl (2022) 直接/间接效应是被近似的对象；Karimi et al. (2020) 追索综述被点名为扩展方向；Zhao & Hastie (2021) 部分依赖图作为替代被讨论并排除。
+
+## 明确不覆盖
+
+不研究生成解释的新方法，只评估既有方法与 $Y$ 的关系；不处理反事实解释（Wachter 式特征扰动）；不涉及非显著性类解释（列为未来工作）；不以模型性能、公平性等为下游目标；不评估解释对人类的可理解性与可用性（与所提度量互不蕴含）；架构与训练预算固定，不涉及大模型与训练动态。
+
+## 阅读路径
+
+先读 §1 与图 1（EGP 三阶段及其因果图，全文骨架）；§2.1–2.2（式 1–5 与假设 2.1/2.2，注意「机械设定下 ITE 可精确计算」）与 §2.3（置换法分离直接/间接影响）；§3.1 数据细节；§3.2 按图 4（分桶 ITE）、图 5（散点与相关）、图 6（直接/间接分解，最重要结果）顺序读；§4 末「Limitations and Future Work」即上文开放问题 1–5；附录 A.2（可识别性与元模型）、A.3（超参数清单与离散化标记）按需。姊妹篇对照：1605.08179（发现图像中的因果信号）把图像分类本身视为反因果学习并解释其泛化行为，本文把可解释性管线置于因果审计之下——合读可见「对视觉 ML 系统做因果解剖」的数据端与解释端。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 解释生成过程 | explanation generating process (EGP) |
+| 潜在结果 | potential outcomes |
+| 个体处理效应 | individual treatment effect (ITE) |
+| 核化处理效应 | kernelized treatment effect (KTE) |
+| 完全可交换性 | full exchangeability |
+| 无混杂 | unconfoundedness |
+| 模型动物园 | model zoo |
+| 显著图 | saliency map |
+| 合理性检验 | sanity check |
+| 中介分析 | mediation analysis |
+| 直接/间接影响 | direct / indirect influence |
+| 反事实解释 | counterfactual explanation |
+| 元模型 | meta-model |
+
+## 来源定位
+
+`papers/2212.06925.pdf`（23 页）。关键内容：EGP 与因果图 Fig 1（p.2）；ITE 及其推广式 (1)–(4)、假设 2.1（p.3）；假设 2.2 与 KTE 式 (5)（p.4）；置换分离直接/间接影响（p.4 末）；数据与预处理（§3.1，p.5；附录 A.3 p.13）；核不敏感 Fig 2（p.5）；分桶结果 Fig 4（p.6）；相关分析 Fig 5（p.7）；直接/间接分解 Fig 6（p.8）；局限与未来工作（§4 末，p.8）；可识别性与元模型初步结果（附录 A.2，p.11–12）；性能分桶边界 Table 2（p.13）。

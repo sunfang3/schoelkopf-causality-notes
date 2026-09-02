@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN" xml:lang="zh-CN"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="把因果像素模型推广为差分成像：用同历元、天体物理上因果无关联的远距像素线性预测每像素的仪器效应，残差即差分图，无需参考图像、配准核与 PSF 模型；在模拟与 K2 C9 密集星场上以近光子噪声精度探测变源。">
+
+<title>CPM 差分成像：无参考图像的时域事件发现 – Schölkopf 因果论文阅读站</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-66b4df7ba86f8287dc76b7fb130027a6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "没有结果",
+    "search-matching-documents-text": "匹配的文档",
+    "search-copy-link-title": "复制搜索链接",
+    "search-hide-matches-text": "隐藏其它匹配结果",
+    "search-more-match-text": "更多匹配结果",
+    "search-more-matches-text": "更多匹配结果",
+    "search-clear-button-title": "清除",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "取消",
+    "search-submit-button-title": "提交",
+    "search-label": "搜索"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Schölkopf 因果论文阅读站</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="搜索"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="展开或折叠导航栏" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">首页</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../schoelkopf-causality-arxiv-2008-2026.html"> 
+<span class="menu-text">全景（按年）</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../glossary.html"> 
+<span class="menu-text">术语表</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../notes.html"> 
+<span class="menu-text">逐篇笔记</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">CPM 差分成像：无参考图像的时域事件发现</h1>
+<p class="subtitle lead">Dun Wang et al., arXiv:1710.02428 (2017)</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">因果推断</div>
+    <div class="quarto-category">时域天文</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    把因果像素模型推广为差分成像：用同历元、天体物理上因果无关联的远距像素线性预测每像素的仪器效应，残差即差分图，无需参考图像、配准核与 PSF 模型；在模拟与 K2 C9 密集星场上以近光子噪声精度探测变源。
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">发布于</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">2017年10月6日</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="导览" class="level2">
+<h2 class="anchored" data-anchor-id="导览">导览</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>作者</td>
+<td>Dun Wang（纽约大学宇宙学与粒子物理中心）、David W. Hogg（纽约大学 / 马普天文所 Heidelberg / Flatiron 研究所）、Daniel Foreman-Mackey（华盛顿大学天文系，NASA Sagan Fellow）、Bernhard Schölkopf（MPI for Intelligent Systems, Tübingen）</td>
+</tr>
+<tr class="even">
+<td>出处</td>
+<td>arXiv:1710.02428 [astro-ph.IM]；v1 2017-10-06，站内 PDF 为 v2（2017-10-09）</td>
+</tr>
+<tr class="odd">
+<td>日期</td>
+<td>2017-10-06</td>
+</tr>
+<tr class="even">
+<td>页数</td>
+<td>23 页（正文约 21 页，Fig 1–11 随文分布）</td>
+</tr>
+</tbody>
+</table>
+<p>一句话定位：因果像素模型（Causal Pixel Model, CPM，站内 1508.01853）从 Kepler 系统误差校正到差分成像（difference imaging）的推广——减法发生在「图像对数据驱动预测模型」之间而非匹配图像之间，是「用因果无关预测元剥离系统效应」在时域巡天的落地。</p>
+</section>
+<section id="问题与模型" class="level2">
+<h2 class="anchored" data-anchor-id="问题与模型">问题与模型</h2>
+<p>研究问题：经典差分成像工作流为「建参考图 → 天测配准 → 拟合卷积核匹配点扩散函数（point-spread function, PSF）→ 匹配流量后相减」，从 Tomaney &amp; Crotts（1996）、Alard &amp; Lupton（1998）、Alard（2000）到给出闭式解的 Zackay et al.（2016），改进集中于核的求法（基函数、像素化核、正则化）。共同弱点：需要精确配准与 PSF 信息（欠采样数据上恶化）、必须构造参考图像且无稳健选取算法（Huckvale et al.&nbsp;2014）。</p>
+<p>模型（§2）：因果假设继承 CPM——指向、旋转与 PSF 变化由仪器与大气引起，以不同方式同时影响视场内所有像素；天体物理变源只影响局部像素，且与足够远的像素无天体物理因果联系。于是每像素 <span class="math inline">\(m\)</span> 在历元 <span class="math inline">\(t_n\)</span> 的值由远距像素线性预测（式 1–2）： <span class="math display">\[I_{m,n}=I^{*}_{m,n}+e_{m,n},\qquad I^{*}_{m,n}=\sum_{m'\in M_m}a_{m,m'}\,I_{m',n},\]</span> 系数由带 L2 正则（强度 <span class="math inline">\(\lambda_a\)</span>）的 <span class="math inline">\(\chi^2\)</span> 最小化求解（式 3，逐像素方差 <span class="math inline">\(\sigma^2_{m,n}\)</span> 加权），模型线性故有解析解；差分图 <span class="math inline">\(D_{m,n}=I_{m,n}-I^{*}_{m,n}\)</span>（式 4）。预测像素集 <span class="math inline">\(M_m\)</span>：剔除目标像素邻近 10 行/列，在距离 <span class="math inline">\(\ge 16\)</span> 像素的剩余像素中取最近 400 个；<span class="math inline">\(|M_m|\)</span> 与 <span class="math inline">\(\lambda_a\)</span> 为交叉验证超参（粗网格，明言仅为演示）。前提：配准好于约 1 个 PSF 宽度，几何与 PSF 变化处于准线性区。</p>
+</section>
+<section id="识别或主要命题" class="level2">
+<h2 class="anchored" data-anchor-id="识别或主要命题">识别或主要命题</h2>
+<p>无定理。结构性论断有二：(i) 预测元与目标像素天体物理上因果无关联，故回归只能拟合仪器/系统份额，残差保留真实变率——该论证出自 Wang et al.（2016, PASP）与 Schölkopf et al.（2016, PNAS，站内 1505.03036）；(ii) 与经典方法的本质区别是不存在参考图像：每像素的「参考值」由跨像素、跨历元联合估计。</p>
+</section>
+<section id="估计经验" class="level2">
+<h2 class="anchored" data-anchor-id="估计经验">估计/经验</h2>
+<p><strong>模拟空间数据</strong>（§3.2）：TRILEGAL 星表生成恒星，逐帧施加仿射变换（式 5）模拟指向与旋转，<span class="math inline">\(t_x,t_y\sim U(0,1)\)</span> 像素、<span class="math inline">\(\theta\sim U(0,0.5)^\circ\)</span>；高斯 PRF（式 7–8）、平场误差 <span class="math inline">\(\sim\mathcal{N}(1,0.01)\)</span>、光子噪声 <span class="math inline">\(\sigma=10^{-4}\)</span>。注入一颗周期变星后，CPM 预测精度接近光子噪声（Fig 1 直方图），变星保留于差分图，7×7 孔径合并像素即恢复折叠光变曲线（Fig 2）。<strong>模拟地面数据</strong>（§3.3）：再加 PSF 变化 <span class="math inline">\(f_x,f_y\sim U(2,3)\)</span> 像素、取向 <span class="math inline">\(\varphi\sim U(0,\pi)\)</span>，恒星仍被消去、变源仍被探测（Fig 3–4），PRF 变化略降差分质量。<strong>K2 Campaign 9 真实数据</strong>（§3.4）：银心方向密集星场 64×50 像素 patch（EPIC 200069960），常源几乎全部消去，以归一化绝对偏差均值检测变源（Fig 5），并给出 6 条 3×3 孔径光变曲线（Fig 6）。<strong>极限测试</strong>（§3.5）：指向幅度 2/5/8 像素（Fig 7）、旋转 1°/5°/10°（Fig 8，边角先退化）、中位 RMS 残差对恒星整体运动（FWHM 单位）的四条曲线（Fig 9）、PSF 变化幅度扫描（Fig 10–11）：漂移约超 1 个 FWHM 后质量显著退化，中等 PSF 变化可接受。</p>
+</section>
+<section id="开放问题" class="level2">
+<h2 class="anchored" data-anchor-id="开放问题">开放问题</h2>
+<ol type="1">
+<li><strong>需要多历元与相当稳定的指向（作者声明的主要缺陷）</strong>：图像太少或视场太小则无法优化模型。</li>
+<li><strong>预测像素选取是启发式（作者自列，§4）</strong>：按空间或亮度最近既未充分测试也非最优；作者提议按变率过滤预测元、改用 L1 正则做稀疏选择、PCA 等，均未实现。</li>
+<li><strong>超参未优化（作者自列）</strong>：<span class="math inline">\(|M_m|=400\)</span>、16 像素距离、粗网格 <span class="math inline">\(\lambda_a\)</span> 皆为演示设置。</li>
+<li><strong>准线性区边界只有经验曲线（我识别）</strong>：配准须好于约 1 FWHM、PSF 变化须温和，否则像素相关性随时间漂移、线性模型失效；Fig 9–11 只给经验曲线，无外推判据。</li>
+<li><strong>测光与检验不完整（我识别）</strong>：固定 7×7/3×3 孔径、不用 PSF 权重，作者自言「非最优测光、仅作演示」；无注入–回收实验，也未与经典方法（Zhu et al.&nbsp;2017 在同一 K2 C9 数据上做过经典差分成像）定量比较。</li>
+<li><strong>因果假设的泄漏未量化（我识别）</strong>：变源污染预测像素会扭曲预测、密集星场中空间相关的真实变率可能引入伪残差；作者承认应剔除已知变像素但未量化后果。</li>
+<li><strong>规模（后续视角）</strong>：逐像素独立解回归，LSST/TESS 量级视场的计算成本与流水线集成未讨论。</li>
+</ol>
+</section>
+<section id="文献谱系" class="level2">
+<h2 class="anchored" data-anchor-id="文献谱系">文献谱系</h2>
+<p>前作：Tomaney &amp; Crotts（1996）、Alard &amp; Lupton（1998）、Alard（2000，HOTPANTS/ISIS）、Bramich（2008）、Becker et al.（2012，正则必要性）、Zackay et al.（2016）——被统称「经典差分成像」的对照谱系，本文逐一指出其对配准/PSF/参考图的依赖；Huckvale et al.（2014）——参考图选取无稳健算法的证据；Wang et al.（2016, PASP，站内 1508.01853）——CPM 原文，本文模型「几乎相同」的直接出处，差别在用途（系统误差校正 → 变源差分探测）与设计（原文含自回归分量与 9 小时排除窗以保凌星信号，本文只用同历元远距像素）；Schölkopf et al.（2016, PNAS，站内 1505.03036）——半同胞回归/潜在混杂的因果理论，本文假设的来源；微透镜/超新星巡天先例（Alcock et al.&nbsp;2000 等）——经典差分成像的成功应用；Zhu et al.（2017）——同一 K2 C9 数据上的经典差分成像，事实上的比较对象；LSST/TESS/Euclid/WFIRST——动机所述未来时域巡天。后续：像素级自校准路线面向 K2/TESS 数据处理讨论，成为「已知因果结构做去混杂」的天文示范。</p>
+</section>
+<section id="明确不覆盖" class="level2">
+<h2 class="anchored" data-anchor-id="明确不覆盖">明确不覆盖</h2>
+<p>不做绝对测光（只输出差分测光与差分图）；不显式建模或估计 PSF；无参考图像故也不涉其选取；不处理大畸变、大漂移（超约 1 FWHM）；不做变源分类、周期分析或微透镜建模；不适用于少历元/小视场；不与经典方法系统定量对比。</p>
+</section>
+<section id="阅读路径" class="level2">
+<h2 class="anchored" data-anchor-id="阅读路径">阅读路径</h2>
+<p>先读 §1.1 经典工作流与缺陷清单，再读 §2 式 (1)–(4) 与 <span class="math inline">\(M_m\)</span> 构造（全文唯一的技术核心）；实验按 §3.2（Fig 1–2）→ §3.3（Fig 3–4）→ §3.4（Fig 5–6）看图即可；§3.5 极限测试与 §4 的适用范围、超参与预测元选取的未解问题务必读完。姊妹篇对照：站内 1508.01853（CPM 原文）——本文是其差分成像推广，重点比较预测元设计的目标差异（保凌星 vs.&nbsp;探测变源）；站内 1505.03036——「预测元与目标无因果连接 ⇒ 只能预测系统份额」的形式化出处；可再对照 Zackay et al.（2016）看模型驱动与数据驱动的分工。</p>
+</section>
+<section id="术语对照" class="level2">
+<h2 class="anchored" data-anchor-id="术语对照">术语对照</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>中文</th>
+<th>English</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>差分成像 / 图像相减</td>
+<td>difference imaging / image subtraction</td>
+</tr>
+<tr class="even">
+<td>因果像素模型</td>
+<td>Causal Pixel Model (CPM)</td>
+</tr>
+<tr class="odd">
+<td>点扩散函数</td>
+<td>point-spread function (PSF)</td>
+</tr>
+<tr class="even">
+<td>像素响应函数</td>
+<td>pixel response function (PRF)</td>
+</tr>
+<tr class="odd">
+<td>卷积核</td>
+<td>convolution kernel</td>
+</tr>
+<tr class="even">
+<td>参考图像</td>
+<td>reference image</td>
+</tr>
+<tr class="odd">
+<td>指向 / 配准</td>
+<td>pointing / (astrometric) registration</td>
+</tr>
+<tr class="even">
+<td>欠采样数据</td>
+<td>under-sampled data</td>
+</tr>
+<tr class="odd">
+<td>平场误差</td>
+<td>flat-field error</td>
+</tr>
+<tr class="even">
+<td>光子噪声</td>
+<td>photon noise</td>
+</tr>
+<tr class="odd">
+<td>半高全宽</td>
+<td>full width at half maximum (FWHM)</td>
+</tr>
+<tr class="even">
+<td>引力微透镜</td>
+<td>gravitational microlensing</td>
+</tr>
+<tr class="odd">
+<td>简单孔径测光</td>
+<td>simple aperture photometry</td>
+</tr>
+<tr class="even">
+<td>差分测光</td>
+<td>differential photometry</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="来源定位" class="level2">
+<h2 class="anchored" data-anchor-id="来源定位">来源定位</h2>
+<p><code>papers/1710.02428.pdf</code>（23 页，印刷页码 –2– 至 –23–）。关键内容：经典方法缺陷综述 §1.1（PDF p.2–3）；模型式 (1)–(4) 与 <span class="math inline">\(M_m\)</span> 构造 §2（p.4–5）；模拟数据生成式 (5)–(8) §3.1（p.5–6）；空间模拟 Fig 1–2（p.8–9）、地面模拟 Fig 3–4（p.10–11）；K2 C9 Fig 5–6（p.13–14）；极限测试 Fig 7–9（p.16–18）、Fig 10–11（p.19–20）；讨论与适用范围 §4（p.15、21）。</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "已复制");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "已复制");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

@@ -1,0 +1,90 @@
+---
+title: "结构因果模型中函数的贝叶斯主动学习"
+subtitle: "Paul K. Rubenstein et al., arXiv:1706.10234 (2017)"
+description: "在因果图已识别的前提下对未知结构函数做高斯过程贝叶斯估计，导出以期望总风险降幅价值度量的短视主动干预选择方案，含采样估计与链图动态规划两种算法。"
+date: 2017-06-30
+categories: [因果推断, 主动学习, 高斯过程]
+paper-id: 1706.10234
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Paul K. Rubenstein（MPI for Intelligent Systems, Tübingen；Machine Learning Group, University of Cambridge）、Ilya Tolstikhin、Philipp Hennig、Bernhard Schölkopf（MPI IS, Tübingen） |
+| 出处 | arXiv:1706.10234v1 [stat.ML] |
+| 日期 | 2017-06-30（仅 v1） |
+| 页数 | 13 页（正文与文献 9 页 + 附录 4 页） |
+
+一句话定位：把因果研究从「发现图结构」推进到「因果发现之后的第二步——学习机制函数」：对结构因果模型（Structural Causal Model, SCM）中的未知结构函数独立放置高斯过程先验，导出按期望总风险降幅选择下一个干预的短视（myopic）主动学习方案，并给出采样估计（任意 DAG）与动态规划（链图）两种实现。
+
+## 问题与模型
+
+研究问题（§1）：图结构已知而结构函数未知时，被动数据只能在各函数输入分布有概率质量的区域学到它们；实验者应在每步依据已有数据选择下一个干预 $i$（各有成本 $c(i)$），使估计的 SCM 尽快逼近真模型。三变量链 $X_1\to X_2\to X_3$ 已有非平凡权衡（图 1）：被动观测同时学 $f_2,f_3$ 但仅在高概率区；$\mathrm{do}(X_1)$ 精确控制学 $f_2$ 的位置、对 $f_3$ 位置不确定；$\mathrm{do}(X_2)$ 只学 $f_3$。动机是基因调控（定量预测敲低 20% 表达量的效应）与公共卫生（劝 50% 烟民戒烟 vs 全体减半需要函数形状而非仅方向）。
+
+模型（§2，**Definition 1**）：SCM $M=(S,\mathcal I,P_E)$——$S$ 为结构方程 $X_n=f_n(X_{\mathrm{pa}(n)},E_n)$；$\mathcal I$ 为干预集，干预 $i=\mathrm{do}(X_{\mathrm{var}(i)}=x_{\mathrm{val}(i)})$ 替换相应方程；$P_E$ 为外生变量分布且不随干预改变（把干预集并入模型是有意简化）。只考虑无环 SCM，每个干预诱导分布 $P_X^{\mathrm{do}(i)}$。**关键假设**：结构方程为非线性加性高斯噪声形式 $X_n=f_n(X_{\mathrm{pa}(n)})+E_n$、$E\sim N(0,\Lambda)$（$\Lambda$ 对角且设为已知）——该设定下因果图本身可识别（Peters et al. 2011）。数据 $D$ 的元素为二元组 $(i,x)$，$x$ 为 $P_X^{\mathrm{do}(i)}$ 的独立抽样。
+
+任务与损失（§3）：**Problem 1**（估计 $M$）与 **Problem 2**（选哪个 $i$）。风险泛函 $L_n(\hat f_n\|f_n)=\int(f_n-\hat f_n)^2d\Pi_n$（$\Pi_n$ 为「哪里要学得准」的重要性测度，即平均积分平方误差 MISE），总风险 $L=\sum_n\alpha_nL_n$（取 $\alpha_n=1$）。替代目标——对干预族的一致散度 $\sup_{i\in\mathcal I'}\mathrm{KL}[P_X^{\mathrm{do}(i)}\|\hat P_X^{\mathrm{do}(i)}]$ 与最大均值差异（Maximum Mean Discrepancy, MMD）版本——本文不为其导出算法，仅用于实验评估。
+
+## 识别或主要命题
+
+- **Lemma 1**：期望总风险可显式表为 $E_{f|D}[L(\hat f\|f)]=\sum_n\alpha_n\int\big[(\hat f_n(x)-\mu_{f_n|D_n}(x))^2+k_{n|D_n}(x,x)\big]d\Pi_n(x)$。**Lemma 2**：取 $\hat f=\mu_{f|D}$（各后验均值）使其最小，此时最优风险 $R(D)=E_{f|D}[L(\mu_{f|D}\|f)]$ 纯粹是数据与先验的函数——主动学习变为「选使 $R(D\cup\{(i,x)\})$ 期望最小的干预」。
+- 贝叶斯推断（§4）：对每个 $f_n$ 独立放置零均值 GP 先验 $f_n\sim\mathcal{GP}(0,k_n)$；凡 $X_n$ 未被干预的观测 $(x_{\mathrm{pa}(n)},x_n)$ 都是 $f_n$ 在该输入处带已知方差高斯噪声的函数值，GP 回归给出闭式后验（附录 A.1）。
+- **主动学习准则（式 (?)，§5）**：干预价值 $V(i|D)=\big(R(D)-E_{x\sim P_X^{\mathrm{do}(i)}}R(D\cup\{(i,x)\})\big)/c(i)$，取最大者；障碍是真实 $P_X^{\mathrm{do}(i)}$ 未知且干预集大。
+- **Algorithm 1（采样，§5.1）**：用信念分布 $\hat P_X^{\mathrm{do}(i)}$ 替代真分布。核心是分解式 ($*$)：无父变量 $X_n\sim N(\mu_{n|D_n},k_{n|D_n}+\sigma_n^2)$，有父变量 $X_n\mid X_{\mathrm{pa}(n)}\sim N(\mu_{f_n|D_n}(X_{\mathrm{pa}(n)}),\,k_{n|D_n}(X_{\mathrm{pa}(n)},X_{\mathrm{pa}(n)})+\sigma_n^2)$，逐节点高斯条件可高效联合采样；抽 $T$ 个样本平均新风险，对每个候选 $i$ 暴力搜索。
+- **Algorithm 2（动态规划，§5.2）**：限链图 $X_1\to\cdots\to X_N$ 与「干预某变量及其全部上游」型干预。关键事实：GP 后验协方差只依赖条件数据的输入而非输出，故 $R_n(D_n)=\int k_{n|D_n}(x,x)d\Pi_n(x)$ 只依赖输入点集；记 $U_n(x_{n-1})=R_n(D_n\cup\{(x_{n-1},x_n)\})$（对任意 $x_n$ 成立），期望风险按式 ($\dagger$) 分解，离散化后化为矩阵递推 $v_{N-1}=P^{N-1}u_N,\ v_n=P^n(v_{n+1}+u_{n+1})$（附录 A.3），可向量化同时算出全部干预的期望风险。附录 A.4 的 **Algorithm 3** 处理链图单变量干预的变体。
+
+## 估计/经验
+
+实验（§6，图 3）为合成数据：两个 SCM——$M_1$ 为五节点链 $X_0\to X_1\to X_2\to X_3\to X_4$（图 2a），$M_2$ 为非链图 $X_0\to X_1\to X_2$、$X_2\to X_3$、$X_2\to X_4$（图 2b）；结构方程取父变量的正余弦函数；全部噪声方差 0.1；$M_1$ 的干预集为一切 $\mathrm{do}(X_m=x_m,\dots)$、$x_m\in[-6,6]$（满足 Algorithm 2 条件），$M_2$ 为一切单变量 $\mathrm{do}(X_n=x_n)$、$x_n\in[-6,6]$；$\Pi_n$ 取 $[-6,6]^{|\mathrm{pa}(n)|}$ 上均匀分布；核全取带宽 1 的 RBF；成本相等；学习从零数据开始；离散化干预搜索集各 250 个。基线为「仅被动观测」与「随机干预」；$M_2$ 上只测采样算法（动态规划不适用）。评估指标：真实总风险（$\hat f$ 取后验均值）及离散干预集上 KL 与 MMD 的最大值与中位数。结果（图 3，多次重复、粗线为均值）：两算法在 $M_1,M_2$ 上按每项指标均显著优于两个基线；§7 注意到一个未刻意为之的现象——算法同时降低了 KL/MMD，尽管优化目标只是 $\Pi_n$ 加权平方风险。
+
+## 开放问题
+
+1. **目标函数的选择未解决**（§7 自认「更根本的问题」）：如何定义「学到了一个 SCM」本身不清楚；$\sup_{i\in\mathcal I'}L^{\mathrm{KL}}$ 与 $\sup L^{\mathrm{MMD}}_l$ 被提出为更有原则的目标，但本文未为其导出主动学习方案、未给数学保证；$\Pi_n$ 的选取被自评为「有些任意」。
+2. **加性高斯噪声假设过强**（§7 自列）：噪声分布改变后 GP 回归需近似，放松加性假设未处理——加性正是「每个观测都是 $f_n$ 的带噪函数值」的前提，去掉它回归分解失效。
+3. **Algorithm 2 适用面窄**（§7 自列）：动态规划只在链图加「干预上游全干预」结构下成立，一般 DAG 上优于暴力扫描的干预搜索未解决。
+4. **短视且无预算分析**（§7 自列）：准则只看单步风险降幅/成本比，多步前瞻与总预算约束下的最优实验设计未展开。
+5. **无真实数据验证**（§7 自认）：仅在合成玩具例子上演示；作者辩称难以找到带函数真值的真实问题，但这同时意味着对模型误设（核、噪声方差、图判错）的稳健性无证据。
+6. **理论保证缺失**：未给主动策略相对被动/随机策略的收敛率或遗憾界，优势只有实验观察；先验误设下 GP 后验的校准性未讨论。
+7. **$\Lambda$ 已知的简化**（§3 脚注自认）：噪声协方差设为已知，放宽需对 $\Lambda$ 放先验并对后验平均，代价与效果未评估。
+
+## 文献谱系
+
+前作：Pearl（2009）与 Bollen（2014）提供 SCM/SEM 语言（本文 Definition 1 有意把干预集并入模型定义）；Spirtes et al.（2000）、Tong & Koller（2001）、Eberhardt（2010）、Hyttinen et al.（2013）、Mooij et al.（2016）代表「第一步」因果图发现与实验选择文献，是本文划清边界的对象；Peters et al.（2011, UAI）的加性噪声图可识别性结果是采用该设定的直接理由。方法论亲缘：贝叶斯优化一线（Jones et al. 1998 等）提供「昂贵评估下高效采样」的思想，但目标从找极值改为学整条函数；Tong & Koller（2000）的离散变量主动参数估计是最近前身；Rasmussen & Williams（2005）供 GP 回归工具；Tsybakov（2009）与 Györfi et al.（2006）命名/对照 MISE 目标；Sriperumbudur et al.（2008）的特征核 MMD 与 KL 构成评估用替代损失族；de Jongh & Druzdzel（2009）佐证「无单一最优距离度量」。后续：本文是把 GP 贝叶斯推断与干预式实验设计结合到 SCM 函数估计上的早期参照，其后「因果模型上的主动实验设计」与「机制函数贝叶斯辨识」方向普遍引其为出发点。
+
+## 明确不覆盖
+
+不处理因果图的发现或验证（图结构视为已知）；不处理隐变量/混杂（外生变量全维可观测且分布已知）；不做非加性或非高斯噪声下的推断；不处理多步前瞻实验序贯最优性与预算约束；不给遗憾/收敛率等理论保证；不做真实数据实验；不处理干预不可行或存在伦理约束时的离策略评估。
+
+## 阅读路径
+
+先读 §1 的三变量链权衡（p.1–2，图 1）与 §2 的 Definition 1、Example 1（p.2–3）；§3（p.3–4）重点读风险泛函与 KL/MMD 替代目标的讨论——它定义了全文的评价语义。§4（p.4–5）两页即可，Lemma 1/2 是全文枢纽。§5（p.5–7）先读式 (?) 与 Algorithm 1（采样法适用任意 DAG，实践中最通用），再读 §5.2 开头关于「GP 后验协方差只依赖输入」的观察与式 ($\dagger$)；Algorithm 2 的递推细节可留给附录 A.3。§6（p.7–8）的图 3 值得细看基线差距；§7（p.8–9）的开放问题清单是后续工作的路标。姊妹篇对照：本篇是站内 Schölkopf 因果序列中「图已知后学机制」的一环，可与 1207.5136（TiMiNO——第一步：用结构方程约束判图）对照阅读以看清「两步」分工；GP 与核方法背景可参照站内核独立性检验类笔记；同批的 1705.02212（ICM 群论框架）与 1706.02744（因果公平性）分别代表同一因果纲领在「原理形式化」与「社会应用」两端的延伸。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 结构因果模型 | Structural Causal Model (SCM) |
+| 结构方程 | structural equation |
+| 干预 | intervention, do-operator |
+| 外生变量 | exogenous / noise variables |
+| 加性噪声模型 | additive noise model |
+| 风险泛函 | risk functional |
+| 平均积分平方误差 | Mean Integrated Squared Error (MISE) |
+| 重要性测度 | importance measure $\Pi_n$ |
+| 期望总风险 | expected total risk $R(D)$ |
+| 高斯过程 | Gaussian Process (GP) |
+| 后验均值 / 后验协方差 | posterior mean / covariance |
+| 短视主动学习 | myopic active learning |
+| 干预价值 | value of an intervention $V(i\|D)$ |
+| 信念分布 | belief distribution $\hat P^{\mathrm{do}(i)}_X$ |
+| 动态规划 | dynamic programming |
+| 贝叶斯优化 | Bayesian optimization |
+| 最大均值差异 | Maximum Mean Discrepancy (MMD) |
+| 特征核 | characteristic kernel |
+| RBF 核 | Radial Basis Function (RBF) kernel |
+
+## 来源定位
+
+`papers/1706.10234.pdf`。关键内容：图 1 三变量链权衡（p.2）；Definition 1 与 Example 1（p.2–3）；Problem 1/2 与风险泛函（p.3–4）；Lemma 1、Lemma 2（p.5）；价值准则式 (?)（p.5）；Algorithm 1 与分解式 ($*$)（p.6）；Algorithm 2、图 2 与式 ($\dagger$)（p.6–7）；实验设置与图 3（p.7–8）；开放问题（§7，p.8–9）；GP 后验闭式（A.1，p.10）；Lemma 1 证明（A.2，p.10）；Algorithm 2 推导（A.3，p.11）；Algorithm 3（A.4 与 p.13）。

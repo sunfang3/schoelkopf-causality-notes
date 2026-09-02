@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN" xml:lang="zh-CN"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="立场文：把可信 AI 各目标（公平、鲁棒、隐私、可解释）与精度之间的权衡统一重释为对数据生成过程施加不相容干预时的不变性要求冲突，主张因果结构是实现选择性不变、从而软化或化解冲突的必要框架。">
+
+<title>可信 AI 之痛在于不变性冲突，因果是解药 – Schölkopf 因果论文阅读站</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-66b4df7ba86f8287dc76b7fb130027a6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "没有结果",
+    "search-matching-documents-text": "匹配的文档",
+    "search-copy-link-title": "复制搜索链接",
+    "search-hide-matches-text": "隐藏其它匹配结果",
+    "search-more-match-text": "更多匹配结果",
+    "search-more-matches-text": "更多匹配结果",
+    "search-clear-button-title": "清除",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "取消",
+    "search-submit-button-title": "提交",
+    "search-label": "搜索"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Schölkopf 因果论文阅读站</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="搜索"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="展开或折叠导航栏" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">首页</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../schoelkopf-causality-arxiv-2008-2026.html"> 
+<span class="menu-text">全景（按年）</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../glossary.html"> 
+<span class="menu-text">术语表</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../notes.html"> 
+<span class="menu-text">逐篇笔记</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">可信 AI 之痛在于不变性冲突，因果是解药</h1>
+<p class="subtitle lead">Ruta Binkyte et al., arXiv:2605.02640 (2026)</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">因果推断</div>
+    <div class="quarto-category">可信AI</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    立场文：把可信 AI 各目标（公平、鲁棒、隐私、可解释）与精度之间的权衡统一重释为对数据生成过程施加不相容干预时的不变性要求冲突，主张因果结构是实现选择性不变、从而软化或化解冲突的必要框架。
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">发布于</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">2026年5月4日</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="导览" class="level2">
+<h2 class="anchored" data-anchor-id="导览">导览</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>作者</td>
+<td>Ruta Binkyte<em>、Ivaxi Sheth</em>（CISPA Helmholtz Center，同等贡献）、Zhijing Jin（MPI IS Tübingen / EuroSafeAI / Jinesis Lab, U Toronto &amp; Vector）、Mohammad Havaei（Google Research）、Bernhard Schölkopf（MPI IS / ELLIS Tübingen）、Mario Fritz（CISPA）</td>
+</tr>
+<tr class="even">
+<td>出处</td>
+<td>arXiv:2605.02640 [cs.AI]，v1 2026-05-04，v2 2026-06-01；ICML 2026 立场文（PMLR 306）</td>
+</tr>
+<tr class="odd">
+<td>日期</td>
+<td>2026-05-04</td>
+</tr>
+<tr class="even">
+<td>页数</td>
+<td>18 页（正文 9 页 + 文献 + 附录 A，pp.14–18）</td>
+</tr>
+</tbody>
+</table>
+<p>一句话定位：一篇立场文（position paper）——可信 AI 的各种权衡不是工程上的偶然副作用，而是不同目标对同一模型施加的<strong>不相容不变性要求</strong>（invariance conflicts）的结构性后果；因果模型因能区分可容许与不可容许的因果通路、实现选择性不变（selective invariance），是理解并缓和这些冲突的必要语言。</p>
+</section>
+<section id="问题与模型" class="level2">
+<h2 class="anchored" data-anchor-id="问题与模型">问题与模型</h2>
+<p>研究问题：公平、鲁棒、隐私、可解释四类可信目标为何难以同时达成、且常与效用互相挤压？这种冲突是偶然的还是结构性的？单一统计约束为何顾此失彼？</p>
+<p>统一形式化（§2）：设 <span class="math inline">\(\mathcal{D}\)</span> 为观测分布，<span class="math inline">\(\{\mathcal{D}^I\}_{I\in\mathcal{I}}\)</span> 为对数据生成过程施加可容许改变（admissible changes）<span class="math inline">\(I\)</span> 后的分布族；模型满足关于 <span class="math inline">\(I\)</span> 的不变性要求，即其行为在 <span class="math inline">\(\{\mathcal{D}^I\}\)</span> 上稳定。四个维度各对应一类干预：公平性＝对受保护属性 <span class="math inline">\(A\)</span> 的干预不变（人口平等为分布层面，机会均等为条件于 <span class="math inline">\(Y\)</span>）；鲁棒性＝跨环境族 <span class="math inline">\(\{\mathcal{D}_e\}_{e\in E}\)</span> 有界损失；隐私＝对邻接数据集 <span class="math inline">\(\mathcal{D}\to\mathcal{D}'\)</span>（增删单点）近似不变（差分隐私语义）；可解释性＝对无关改变 <span class="math inline">\(I_{irr}\)</span> 不变、对相关改变 <span class="math inline">\(I_{rel}\)</span> 可预期地敏感。与之对照，观测精度 <span class="math inline">\(\mathbb{E}_{(X,Y)\sim\mathcal{D}}[\ell(f(X),Y)]\)</span> 奖励一切（含虚假）相关，而干预精度 <span class="math inline">\(\mathbb{E}_{(X,Y)\sim\mathcal{D}^I}[\ell]\)</span> 只奖励稳定机制——冲突的根源即二者对同一依赖集施加不一致的不变性。另区分<strong>显式因果整合</strong>（以 SCM/因果图 <span class="math inline">\(\mathcal{G}\)</span> 直接约束 <span class="math inline">\(f_\theta\)</span>）与<strong>隐式因果整合</strong>（数据增强、多环境、稀疏性等归纳偏置，不显式表示 <span class="math inline">\(\mathcal{G}\)</span>），并按预训练（干预作用于分布层）/后训练（约束作用于行为层）/审计（干预式探针、激活修补）三个生命周期阶段讨论落点。</p>
+</section>
+<section id="识别或主要命题" class="level2">
+<h2 class="anchored" data-anchor-id="识别或主要命题">识别或主要命题</h2>
+<p>无形式定理（立场文），核心论证链有三步：(1) <strong>必要性条件</strong>——若只考虑单一可信目标且可容许改变受限，纯统计方法（如在固定数据集上施加独立性约束、针对特定协变量偏移训练）即够用；一旦多个不变性须同时成立，就必须区分哪些依赖是虚假的、哪些来自稳定机制，而这一区分<strong>一般不能仅凭观测数据完成</strong>，且该必要性对模型类别不变（经典 ML 与基础模型皆然；理论支柱引 Richens &amp; Everitt 2024：跨环境鲁棒的智能体必须隐式学到因果世界模型）。(2) <strong>冲突的重释</strong>——每类权衡都可改写为一对干预集上的不变性矛盾：公平—精度＝对 <span class="math inline">\(A\)</span> 的不变 vs 对一切预测信号敏感；隐私—效用＝对个体变量不变 vs 对任务通路敏感；鲁棒—精度＝跨环境不变 vs 利用环境特定捷径；可解释—性能＝对语义变量干预稳定归因 vs 依赖不可预测的分布式相关。(3) <strong>因果化解</strong>——因果图把总效应分解为通路，使不变性要求可以「靶向」而非全局施加：只压制规范上不可容许的通路（直接歧视、代理歧视），保留正当因果信号（如性别依赖的疾病风险）；同一结构还能揭示两个目标共享通路、一次干预服务两目标（如隐私与公平在代理变量 <span class="math inline">\(Z\)</span> 上合流）。</p>
+</section>
+<section id="估计经验" class="level2">
+<h2 class="anchored" data-anchor-id="估计经验">估计/经验</h2>
+<p>动机模拟（§3.5 框 + 附录 A）：30 天临床再入院 SCM——<span class="math inline">\(A\)</span> 年龄组，<span class="math inline">\(X_1\)</span> 化验（正当路径 <span class="math inline">\(A\to X_1\to Y\)</span>），<span class="math inline">\(Z\)</span> 保险类型（<span class="math inline">\(A\)</span> 的不公平代理，<span class="math inline">\(A\to Z\to Y\)</span>），<span class="math inline">\(E\)</span> 医院（既有真实政策效应 <span class="math inline">\(E\to Y\)</span>，又生伪迹 <span class="math inline">\(X_2\)</span>），<span class="math inline">\(Y=1[\mathrm{logit}(1.5X_1+1.5Z+0.2A+\mathrm{policy}(E)+\cdot)&gt;\cdot]\)</span>；<span class="math inline">\(N=6000\)</span>、70/30 分层切分、留一家医院 <span class="math inline">\(E=2\)</span> 作 OOD 测试、5 个随机种子。比较五法（按因果知识递增排列）：无干预 logistic 回归；对全部特征加 Laplace 噪声的隐私机制（<span class="math inline">\(\varepsilon=1\)</span>）；删 <span class="math inline">\(A\)</span> 加人口平等拉格朗日惩罚（<span class="math inline">\(\lambda=1\)</span>）的公平干预；部分隐式因果（对 <span class="math inline">\(Z\)</span> 做反事实数据增强 + 六环境 GroupDRO）；显式因果（按图仅留 <span class="math inline">\(X_1,E\)</span>）。结果（图 2–4）：统计公平干预无法区分 <span class="math inline">\(A\to Z\to Y\)</span> 与 <span class="math inline">\(A\to X_1\to Y\)</span>，同时衰减两者，精度与可解释性双降且无鲁棒性收益；全局加噪损失精度却未消除 <span class="math inline">\(Z\)</span> 泄漏（对手利用 <span class="math inline">\(X_1\)</span> 与 <span class="math inline">\(Z\)</span> 的总体相关），仅作副产品改善公平；显式因果法在公平、隐私、可解释性、精度四维最优；部分隐式因果次之且在 OOD 鲁棒性上反超（多环境是图方法未利用的机制）；二维 Pareto 前沿上因果方法是仅有的非支配点。作者明示此为单一风格化线性 SCM 上的概念验证。</p>
+</section>
+<section id="开放问题" class="level2">
+<h2 class="anchored" data-anchor-id="开放问题">开放问题</h2>
+<ol type="1">
+<li><strong>自认（原则性极限）</strong>：某些张力原则上不可完全消解——隐私–效用受信息论下界约束；公平冲突可能源于价值分歧，因果只能使冲突的结构根源显式化，把争论转交规范层面。</li>
+<li><strong>自认（概念叠加）</strong>：基础模型表征的多义纠缠（concept superposition，Elhage et al.&nbsp;2022）限制干预粒度，使因果控制退化为行为层约束。</li>
+<li><strong>自认（图依赖）</strong>：显式方法依赖准确因果图；错图致错不变性，专家构图有主观性、自动发现受可识别性限制；隐式方法亦非无假设，需环境多样性与干预覆盖，环境同混杂结构时收敛到「虚假但稳定」的相关。</li>
+<li><strong>自认（生态缺位）</strong>：显式因果约束随结构复杂度扩展性差；缺干预式评测基准（现有评测停留在观测性能）；高质量干预/因果数据稀缺昂贵；反事实评估带来计算开销。</li>
+<li><strong>我识别（循环评测）</strong>：模拟中的可解释性指标定义为「归因于被指定为正当特征（<span class="math inline">\(X_1,E\)</span>）的预测方差占比」，对显式因果模型按构造恒为 1.0（附录 A.5 自曝），并非经验发现；公平与隐私又经由同一变量 <span class="math inline">\(Z\)</span> 耦合、呈现「协同」而非权衡——模拟恰好回避了它声称要解释的两难局面。</li>
+<li><strong>我识别（必要性论证的外部依赖）</strong>：「多不变性并存时观测数据不够」的关键一步几乎完全依赖 Richens &amp; Everitt 2024 等外部结果的特定条件，本文未给出何时冲突可完全化解、何时只能软化的任何量化刻画，「软化」本身无形式定义。</li>
+<li><strong>我识别（单一 SCM 未扫描）</strong>：附录 A.5 承认未扫描结构参数、未变图、未测非线性机制，且显式因果法「按构造拿到真图」；结论对图错误指定、部分图的鲁棒性完全未检验。</li>
+</ol>
+</section>
+<section id="文献谱系" class="level2">
+<h2 class="anchored" data-anchor-id="文献谱系">文献谱系</h2>
+<p>前作（在本文中的角色）：Binkyte et al.&nbsp;2502.21123——同一团队的先前立场文，本文是其「不变性冲突」语言的系统化与模拟补强；Schölkopf et al.&nbsp;2021（因果表示学习）——不变性/ICM 主线，鲁棒性一节的框架来源；Kilbertus et al.&nbsp;2017、Chiappa 2019（通路特定反事实公平）、Loftus et al.&nbsp;2018——因果公平中「可容许 vs 代理歧视通路」分解的出处；Tople et al.&nbsp;2020（因果学习以更小隐私预算 <span class="math inline">\(\varepsilon\)</span> 抵御成员推断）、Tschantz et al.&nbsp;2020（差分隐私作为因果性质）、Binkyte et al.&nbsp;2024（局部隐私下因果发现）——因果—隐私线的三块基石；Richens &amp; Everitt 2024——必要性论证的理论支柱；Wachter et al.&nbsp;2017、Karimi et al.&nbsp;2021——反事实解释与算法追索，可解释性一节的落点；Elhage et al.&nbsp;2022——概念叠加作为 FM 特有障碍；Rawal et al.&nbsp;2025、Liu et al.&nbsp;2023——作为「因果解决单一可信目标」的既有综述被整合。对立面：Locatello et al.&nbsp;2019（解纠缠不可识别）、Rosenfeld et al.&nbsp;2021（IRM 失败风险）、Gulrajani &amp; Hashimoto 2022（域适应可识别性条件）——被引为隐式因果方法的适用边界而非反驳。后续：本文的四条行动呼吁（多目标重定义、因果化解权衡、可扩展因果数据整合、带因果标注的数据集）为该组「因果 × 基础模型」议程定调。</p>
+</section>
+<section id="明确不覆盖" class="level2">
+<h2 class="anchored" data-anchor-id="明确不覆盖">明确不覆盖</h2>
+<p>不提出新定理、新算法或新基准（只作呼吁）；不做任何真实数据实验（仅单一合成 SCM）；不覆盖四维之外的可信目标（安全、透明度、问责等仅在引言带过）；不分析具体差分隐私机制的形式保证（模拟中 Laplace 噪声非形式化 DP，附录 A.5 承认威胁模型仅限属性推断）；不处理因果发现本身；不给出 FM 内部因果结构的具体探测方案（只作生命周期阶段概述）。</p>
+</section>
+<section id="阅读路径" class="level2">
+<h2 class="anchored" data-anchor-id="阅读路径">阅读路径</h2>
+<p>先读 §1 的「Position」段（冲突定义的浓缩）与图 1 前的「When causality is necessary?」段（充分性/必要性分界）；§2 五个小节给出全部形式定义，干预精度（§2.4）与不变性定义（§2.1）是后续的钥匙；§3 按四个权衡逐一走「统计起源 → 不变性冲突 → 因果化解」三段式，读一节即可掌握套路，重点读 §3.5 多目标小节与动机模拟框；§4 显式/隐式整合与三阶段生命周期是面向 FM 的操作化部分；§5 挑战、§6 对立观点（IRM 失败、解纠缠不可识别、「只靠规模」立场）不可跳过——立场文的诚实度全在于此；§7 四条行动呼吁收束。附录 A 的表 3（五法定义）、A.3（指标归一化）与 A.5（六条局限，作者自己拆解了模拟的循环性）务必与正文合读。姊妹篇对照：2502.21123（同团队 2025 立场文，站内有笔记——本文的直接前驱，论点相同但缺不变性形式化与模拟）；2207.09944（Eastwood et al., QRM，站内有笔记——「跨环境不变」这一目标如何被操作化为可学习的优化问题，可视为本文鲁棒性维度的方法学对偶）。</p>
+</section>
+<section id="术语对照" class="level2">
+<h2 class="anchored" data-anchor-id="术语对照">术语对照</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>中文</th>
+<th>English</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>不变性冲突</td>
+<td>invariance conflict</td>
+</tr>
+<tr class="even">
+<td>选择性不变性</td>
+<td>selective invariance</td>
+</tr>
+<tr class="odd">
+<td>可容许改变</td>
+<td>admissible changes</td>
+</tr>
+<tr class="even">
+<td>观测精度 / 干预精度</td>
+<td>observational / interventional accuracy</td>
+</tr>
+<tr class="odd">
+<td>显式 / 隐式因果整合</td>
+<td>explicit / implicit causal integration</td>
+</tr>
+<tr class="even">
+<td>人口平等 / 机会均等</td>
+<td>demographic parity / equalized odds</td>
+</tr>
+<tr class="odd">
+<td>邻接数据集</td>
+<td>neighboring dataset</td>
+</tr>
+<tr class="even">
+<td>属性推断攻击 / 成员推断攻击</td>
+<td>attribute-inference / membership-inference attack</td>
+</tr>
+<tr class="odd">
+<td>代理变量</td>
+<td>proxy variable</td>
+</tr>
+<tr class="even">
+<td>通路特定效应</td>
+<td>path-specific effect</td>
+</tr>
+<tr class="odd">
+<td>反事实数据增强</td>
+<td>counterfactual data augmentation</td>
+</tr>
+<tr class="even">
+<td>概念叠加</td>
+<td>concept superposition</td>
+</tr>
+<tr class="odd">
+<td>激活修补</td>
+<td>activation patching</td>
+</tr>
+<tr class="even">
+<td>机制可解释性</td>
+<td>mechanistic interpretability</td>
+</tr>
+<tr class="odd">
+<td>算法追索</td>
+<td>algorithmic recourse</td>
+</tr>
+<tr class="even">
+<td>分布外鲁棒性</td>
+<td>out-of-distribution robustness</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="来源定位" class="level2">
+<h2 class="anchored" data-anchor-id="来源定位">来源定位</h2>
+<p><code>papers/2605.02640.pdf</code>（18 页）。立场陈述（§1, p.2, “Position” 段）；不变性与四维形式化（§2.1–2.2, p.3）；观测/干预精度（§2.3–2.4, p.3）；四类权衡的三段式分析（§3.1–3.4, pp.4–5）；多目标化解（§3.5, p.5）；动机模拟框与图 1–2（§3.5, p.6）；显式/隐式整合定义（§4.1, p.7）；FM 三阶段生命周期（§4.2, pp.7–8）；挑战清单（§5.1–5.2, pp.8–9）；对立观点（§6, p.9）；行动呼吁（§7, p.9）；SCM 方程与参数（附录 A.1, p.14, 表 1–2）；五法定义（附录 A.2, p.15, 表 3）；指标与归一化（附录 A.3, pp.15–16）；主结果图 3–4 与解读（附录 A.4, pp.16–17）；六条模拟局限（附录 A.5, pp.17–18）。</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "已复制");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "已复制");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

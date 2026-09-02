@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN" xml:lang="zh-CN"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="定义可识别功能模型类 IFMOC，证明数据生成过程属于 IFMOC 时可从联合分布识别完整因果 DAG（非仅 Markov 等价类），且只需因果最小性这一弱忠实性。">
+
+<title>用可识别功能模型类识别完整因果图 – Schölkopf 因果论文阅读站</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-66b4df7ba86f8287dc76b7fb130027a6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "没有结果",
+    "search-matching-documents-text": "匹配的文档",
+    "search-copy-link-title": "复制搜索链接",
+    "search-hide-matches-text": "隐藏其它匹配结果",
+    "search-more-match-text": "更多匹配结果",
+    "search-more-matches-text": "更多匹配结果",
+    "search-clear-button-title": "清除",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "取消",
+    "search-submit-button-title": "提交",
+    "search-label": "搜索"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Schölkopf 因果论文阅读站</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="搜索"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="展开或折叠导航栏" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">首页</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../schoelkopf-causality-arxiv-2008-2026.html"> 
+<span class="menu-text">全景（按年）</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../glossary.html"> 
+<span class="menu-text">术语表</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../notes.html"> 
+<span class="menu-text">逐篇笔记</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">用可识别功能模型类识别完整因果图</h1>
+<p class="subtitle lead">Peters et al., arXiv:1202.3757 (2012)</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">因果推断</div>
+    <div class="quarto-category">因果可识别性</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    定义可识别功能模型类 IFMOC，证明数据生成过程属于 IFMOC 时可从联合分布识别完整因果 DAG（非仅 Markov 等价类），且只需因果最小性这一弱忠实性。
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">发布于</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">2012年2月14日</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="导览" class="level2">
+<h2 class="anchored" data-anchor-id="导览">导览</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>作者</td>
+<td>Jonas Peters、Joris M. Mooij（兼 Radboud University Nijmegen）、Dominik Janzing、Bernhard Schölkopf（MPI for Intelligent Systems, Tübingen）</td>
+</tr>
+<tr class="even">
+<td>出处</td>
+<td>arXiv:1202.3757（UAI 2011 的扩展版）</td>
+</tr>
+<tr class="odd">
+<td>日期</td>
+<td>2012-02-14</td>
+</tr>
+<tr class="even">
+<td>页数</td>
+<td>10 页</td>
+</tr>
+</tbody>
+</table>
+<p>一句话定位：把 LiNGAM、非线性/离散 ANM、后非线性等双变量可识别结果抽象为”可识别功能模型类（Identifiable Functional Model Classes, IFMOC）“，并证明首个不限线性关系的多变量全图可识别性定理——若真实过程属于某 IFMOC，则完整因果 DAG 可由联合分布唯一恢复。</p>
+</section>
+<section id="问题与模型" class="level2">
+<h2 class="anchored" data-anchor-id="问题与模型">问题与模型</h2>
+<p>问题：给定 i.i.d. 样本来自 <span class="math inline">\(P(X_i)_{i\in V}\)</span>，推断真实因果 DAG <span class="math inline">\(G_c\)</span>。全文假设 <span class="math inline">\(G_c\)</span> 无环、因果充分性（无隐混杂）、无选择偏差。基于条件独立（CIB）的方法（PC 算法）在假设 1（Markov + 忠实性 faithfulness）下只能识别 Markov 等价类（定理 1，已知结果），且忠实性不可检验、CI 检验困难、违背忠实性时无误差保证。本文的替代路线：定义 2（F-FMOC，功能模型）<span class="math inline">\(X_i = f_i(\mathrm{PA}_i, N_i)\)</span>，噪声 <span class="math inline">\((N_i)\)</span> 联合独立，对应图无环；定义 3（双变量可识别集 B）：<span class="math inline">\((f, P_X, P_{N_Y})\in B\)</span> 且 <span class="math inline">\(Y=f(X,N_Y)\)</span>、<span class="math inline">\(N_Y\perp X\)</span> 时不存在 <span class="math inline">\(g\in\mathcal F\)</span> 使 <span class="math inline">\(X=g(Y,N_X)\)</span>、<span class="math inline">\(N_X\perp Y\)</span>，并要求 <span class="math inline">\(f(X,N_Y)\not\perp X\)</span>；定义 4（(B,F)-IFMOC）：固定其他父节点后每个 <span class="math inline">\(f_i\)</span> 作为 <span class="math inline">\((X_j,N_i)\)</span> 的二元函数仍在 <span class="math inline">\(\mathcal F\)</span> 中，且对满足 <span class="math inline">\(\mathrm{PA}_i\setminus\{j\}\subseteq S\subseteq \mathrm{ND}_i\setminus\{i,j\}\)</span> 的每个 S 存在正概率的 <span class="math inline">\(x_S\)</span> 使相应三元组属于 B。引理 1 汇集四类已知可识别集：(i) 线性 ANM + 非高斯（LiNGAM）；(ii) 模 m 加法离散 ANM；(iii) 非线性 ANM；(iv) 后非线性模型。假设 2（IFMOC 假设）：真实机制属于图为其因果图的 (B,F)-IFMOC。</p>
+</section>
+<section id="主要命题" class="level2">
+<h2 class="anchored" data-anchor-id="主要命题">主要命题</h2>
+<p>定理 2（主定理）：同一联合分布不可能由同一 (B,F)-IFMOC 中对应不同图 <span class="math inline">\(G\neq G'\)</span> 的两个功能模型诱导；推论 1：假设 2 下可从联合分布识别真实因果 DAG <span class="math inline">\(G_c\)</span>。证明骨架（第 3 节）：自底向上剥离两图共同的无孩子且同父节点的结点；对剩下的 X，将其 G-父集划分为 Y/Z/W（Z 也是 G’-父、Y 是 G’-子、W 在 G’ 中不相邻），反复使用引理 2（条件化保持函数关系：<span class="math inline">\(N\perp(Y,Z,S) \Rightarrow f(Y,Z,N)|_{Z=z,S=s} = f(Y|Z{=}z,S{=}s, z, N)\)</span>）、引理 3（噪声独立于非后代）、引理 4（IFMOC 中子不独立于父：对 <span class="math inline">\(\mathrm{PA}_B\setminus\{A\}\subseteq S\subseteq\mathrm{ND}_B\)</span> 有 <span class="math inline">\(B\not\perp A|S\)</span>），在”W∪Y 为空”与”取 G’-最年轻结点”两种情形下分别导出与引理 4 矛盾的条件独立。命题 2（附录）：引理 4 蕴含因果最小性（causal minimality），即忠实性的弱形式，故 IFMOC 假设严格弱于忠实性加 Markov；关键事实是式 (1)（<span class="math inline">\(f(X,N_Y)\not\perp X\)</span>）保证若 <span class="math inline">\(Y\perp X\)</span> 则必有反向模型，堵住平凡退化。作者还指出：IFMOC 假设违背的三种情形中，仅”过程属于图错误的 IFMOC”导致错误答案，且据 Janzing &amp; Steudel (2010) 的 Kolmogorov 复杂度论证，这种输入与机制的精确匹配被认为不典型。</p>
+</section>
+<section id="估计与实验" class="level2">
+<h2 class="anchored" data-anchor-id="估计与实验">估计与实验</h2>
+<p>算法 1：逐个识别汇点（sink）——对每个候选变量 i 以其余变量回归拟合噪声 <span class="math inline">\(\hat\varepsilon_i = \mathrm{FittedNoise}(X_{S\setminus\{i\}}, X_i)\)</span>，用 HSIC 检验残差与回归子独立（α=5%），多个候选可行时深度优先保留全部分支，最后剔除多余父边，输出所有一致 DAG；无解或多解时输出”我不知道”。回归用线性（IFMOClin）或 GP（IFMOCGP）。实验（各 100 个数据集、样本 400，除数据集 1 为 500 次、n=100–500000）：</p>
+<ul>
+<li>数据集 1（线性高斯、忠实）：偏相关检验在 n=500000 时仍有超过 10% 的情形把非零（偏）相关误判为零，随 n 下降极慢。</li>
+<li>数据集 2（linear/nonlinear 各两种结构）：IFMOCGP 在四个设置分别正确 79/86/76/86（错 2/1/1/8），PC_corr 在非线性设置几乎全错（nonlin1 仅 6/100 正确），PC_HSIC 部分设置未决率高达 100%。</li>
+<li>数据集 3（不可检测的非忠实：<span class="math inline">\(X_1\perp X_3\)</span>）：两种 PC 均 100% 输出错误 DAG；IFMOClin 89/100 正确且零错误输出。</li>
+<li>数据集 4（线性高斯、属 FMOC 不属 IFMOC）：IFMOClin 取最少边图后 94/100 恢复 Markov 等价类（6 次未决），PC_corr 仅 47/100。</li>
+<li>数据集 5（既非忠实又非 ANM）：两种 IFMOC 全部输出”不知道”，两种 PC 全部给出错误结果。</li>
+</ul>
+</section>
+<section id="开放问题" class="level2">
+<h2 class="anchored" data-anchor-id="开放问题">开放问题</h2>
+<ol type="1">
+<li>作者自陈的未来工作：与贝叶斯结构学习的关系（能否证明其一致性）；IFMOC 在假设全部满足时有限样本下仍胜过 PC 的现象值得研究；图的一部分满足假设、另一部分不满足的部分识别情形；以及在已知真值的真实数据上的检验与比较。</li>
+<li>理论缺口：定理 2 只排除”同一 (B,F)-IFMOC 内”的两个图，真实过程属 FMOC 但不属 IFMOC（如线性高斯）时只能退回 Markov 等价类；而”属 IFMOC 但图错误”的唯一失效情形仅靠 Janzing &amp; Steudel 的双变量 Kolmogorov 论证作信念支撑，多变量情形的对应定理至今未证。</li>
+<li>假设过强处：因果充分性与无环性全程假设，隐混杂、反馈循环、选择偏差均不覆盖；只适用于非确定性数据（作者明言）。</li>
+<li>经验验证空白：全部实验为模拟数据，且算法复杂度呈组合增长（深度优先多分支、每个汇点候选做一次回归+HSIC），变量数 d 稍大时的可扩展性未评估；α=5% 未做多重校正。</li>
+<li>检验”残差与回归子独立”用无条件 HSIC 而非条件独立检验，回归欠拟合时会系统性给出虚假方向结论；后续 RESIT（Peters et al.&nbsp;2014）与对 IGCI/ANM 失效模式的研究（如 Mooij et al.&nbsp;2016 的基准比较）指出此类方法在真实数据上表现远不如模拟中稳健。</li>
+</ol>
+</section>
+<section id="文献谱系" class="level2">
+<h2 class="anchored" data-anchor-id="文献谱系">文献谱系</h2>
+<ul>
+<li>Shimizu et al.&nbsp;(2006)：LiNGAM，引理 1(i) 的可识别集来源，也是此前唯一有多变量全图识别结果的线性情形——本文明确以填补其非线性空白为目标。</li>
+<li>Hoyer et al.&nbsp;(2009)、Peters et al.&nbsp;(2010)、Zhang &amp; Hyvärinen (2009)：非线性 ANM、离散 ANM、后非线性的双变量可识别性，构成引理 1(ii)–(iv)，是 IFMOC 定义的构件；GP 回归实验设置沿用 Hoyer et al.。</li>
+<li>Pearl (2009)：功能模型（结构方程）框架与其 Theorem 1.4.1（功能模型蕴含 Markov 条件），假设对比的公共基础；也指明功能模型比因果 DAG 支持更多反事实语句。</li>
+<li>Spirtes et al.&nbsp;(2001)、Meek (1995)：PC 等 CIB 方法及其 Markov+忠实性假设，本文的对照面。</li>
+<li>Zhang &amp; Spirtes (2007)：忠实性可检验性的分解（邻接忠实/方向忠实），支撑”IFMOC 假设比忠实性更可检验”的论证。</li>
+<li>Janzing &amp; Steudel (2010)、Lemeire &amp; Dirkx (2006)、Janzing &amp; Schölkopf (2010)：输入与机制独立的算法式信息论论证，为”反向拟合罕见”提供信念依据。</li>
+<li>Mooij et al.&nbsp;(2009)：回归+残差独立算法的直接基础，本文算法 1 改其为输出全部一致 DAG。</li>
+<li>Darmois (1951)：任意联合分布都有某方向的函数表示，说明限制函数类的必要性。</li>
+<li>Gretton et al.&nbsp;(2008)、Fukumizu et al.&nbsp;(2008)：HSIC 与条件依赖核度量，算法的独立检验工具。</li>
+</ul>
+</section>
+<section id="明确不覆盖" class="level2">
+<h2 class="anchored" data-anchor-id="明确不覆盖">明确不覆盖</h2>
+<p>不处理隐变量与混杂（假设因果充分性）；不处理有环/时序因果与选择偏差；不覆盖确定性过程；不给出双变量可识别集 B 的新证明（只汇编）；不涉及变量数大时的计算可扩展性；不做真实数据验证。</p>
+</section>
+<section id="阅读路径" class="level2">
+<h2 class="anchored" data-anchor-id="阅读路径">阅读路径</h2>
+<p>先读第 1 节引言与 2.3 节（定义 2–4 与引理 1，IFMOC 概念的构造动机），再读定理 2 与假设 2、推论 1；2.4 节（假设对比：忠实性 vs IFMOC、失效情形分析）是理解贡献定位的关键，应精读；第 3 节证明可先接受引理 2–4 后跳读分情形讨论；第 4–5 节算法与实验。姊妹篇对读：arXiv:1202.3775（KCI 检验，同一团队为 CIB 路线修补 CI 检验短板，与本文的 FCM 路线构成 2012 年的两条并行方案）；以及 arXiv:1202.3737（同一框架下检测”直接边 vs 低复杂度隐变量”，放松了本文的因果充分性假设但只处理两变量）。</p>
+</section>
+<section id="术语对照" class="level2">
+<h2 class="anchored" data-anchor-id="术语对照">术语对照</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>中文</th>
+<th>English</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>可识别功能模型类</td>
+<td>Identifiable Functional Model Classes (IFMOC)</td>
+</tr>
+<tr class="even">
+<td>功能模型 / 结构方程模型</td>
+<td>functional model / structural equation model</td>
+</tr>
+<tr class="odd">
+<td>双变量可识别集</td>
+<td>bivariate identifiable set</td>
+</tr>
+<tr class="even">
+<td>忠实性</td>
+<td>faithfulness</td>
+</tr>
+<tr class="odd">
+<td>因果最小性</td>
+<td>causal minimality</td>
+</tr>
+<tr class="even">
+<td>Markov 等价类</td>
+<td>Markov equivalence class</td>
+</tr>
+<tr class="odd">
+<td>加性噪声模型</td>
+<td>additive noise model (ANM)</td>
+</tr>
+<tr class="even">
+<td>后非线性模型</td>
+<td>post-nonlinear model</td>
+</tr>
+<tr class="odd">
+<td>汇点</td>
+<td>sink node</td>
+</tr>
+<tr class="even">
+<td>深度优先搜索</td>
+<td>depth-first search</td>
+</tr>
+<tr class="odd">
+<td>因果充分性</td>
+<td>causal sufficiency</td>
+</tr>
+<tr class="even">
+<td>HSIC（独立性检验）</td>
+<td>Hilbert-Schmidt independence criterion</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="来源定位" class="level2">
+<h2 class="anchored" data-anchor-id="来源定位">来源定位</h2>
+<p>来源：<code>papers/1202.3757.pdf</code>。关键结果原文编号：定义 2（F-FMOC）、定义 3（B）、定义 4（IFMOC）、引理 1（四类可识别集）、定理 2（主定理）与推论 1、假设 1–2、引理 2–4（证明三支柱）、命题 2（引理 4 ⟹ 因果最小性，附录）、算法 1；实验为数据集 1–5 及 Table 1、Figure 3。</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "已复制");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "已复制");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

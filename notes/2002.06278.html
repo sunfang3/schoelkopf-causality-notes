@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN" xml:lang="zh-CN"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="用结构因果模型证明「最近反事实解释」导出的行动一般不保证算法追索（Proposition 3.1 给出充要条件），并把追索重构为最小成本干预问题（式 3，MINT）；因果算法追索方向的奠基文。">
+
+<title>算法追索：从反事实解释到最小干预 – Schölkopf 因果论文阅读站</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-66b4df7ba86f8287dc76b7fb130027a6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "没有结果",
+    "search-matching-documents-text": "匹配的文档",
+    "search-copy-link-title": "复制搜索链接",
+    "search-hide-matches-text": "隐藏其它匹配结果",
+    "search-more-match-text": "更多匹配结果",
+    "search-more-matches-text": "更多匹配结果",
+    "search-clear-button-title": "清除",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "取消",
+    "search-submit-button-title": "提交",
+    "search-label": "搜索"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Schölkopf 因果论文阅读站</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="搜索"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="展开或折叠导航栏" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">首页</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../schoelkopf-causality-arxiv-2008-2026.html"> 
+<span class="menu-text">全景（按年）</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../glossary.html"> 
+<span class="menu-text">术语表</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../notes.html"> 
+<span class="menu-text">逐篇笔记</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">算法追索：从反事实解释到最小干预</h1>
+<p class="subtitle lead">Amir-Hossein Karimi et al., arXiv:2002.06278 (2020)</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">因果推断</div>
+    <div class="quarto-category">算法追索</div>
+    <div class="quarto-category">可解释机器学习</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    用结构因果模型证明「最近反事实解释」导出的行动一般不保证算法追索（Proposition 3.1 给出充要条件），并把追索重构为最小成本干预问题（式 3，MINT）；因果算法追索方向的奠基文。
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">发布于</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">2020年2月14日</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="导览" class="level2">
+<h2 class="anchored" data-anchor-id="导览">导览</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>作者</td>
+<td>Amir-Hossein Karimi（MPI-IS 与 ETH Zürich）、Bernhard Schölkopf（MPI-IS, Tübingen）、Isabel Valera（MPI-IS 与 Saarland University）</td>
+</tr>
+<tr class="even">
+<td>出处</td>
+<td>arXiv:2002.06278v4 [cs.LG]（站内 PDF 为 v4，2020-10-08）；刊于 ACM FAccT 2020</td>
+</tr>
+<tr class="odd">
+<td>日期</td>
+<td>2020-02-14（v1）</td>
+</tr>
+<tr class="even">
+<td>页数</td>
+<td>10 页（正文 8 页 + 附录 A 证明 2 页）</td>
+</tr>
+</tbody>
+</table>
+<p>一句话定位：把 Pearl 的结构干预与结构反事实语义引入可解释机器学习——证明现有「反事实解释即行动」的隐含假设只在独立世界成立，主张把追索从「最近的反事实解释」改写为「最小成本的可行干预集合」。</p>
+</section>
+<section id="问题与模型" class="level2">
+<h2 class="anchored" data-anchor-id="问题与模型">问题与模型</h2>
+<p>研究问题（§1）：贷款审批、保释等高风险预测场景需回答「为何得到该预测」与「如何行动才能翻转预测」。反事实解释（counterfactual explanation, CFE）是「世界须怎样不同才会出现理想结果」的陈述（Wachter et al.&nbsp;2017），最近反事实解释由式 (1) 求得：<span class="math inline">\(\boldsymbol{x}^*_{\mathrm{CFE}}\in\arg\min_{\boldsymbol{x}}\mathrm{dist}(\boldsymbol{x},\boldsymbol{x}^F)\)</span> s.t. <span class="math inline">\(h(\boldsymbol{x})\neq h(\boldsymbol{x}^F)\)</span>、<span class="math inline">\(\boldsymbol{x}\in P\)</span>。Ustun et al.&nbsp;(2019) 把它改写为 CFE 型追索问题 (2)：对 <span class="math inline">\(\boldsymbol{\delta}^*\)</span> 最小化 <span class="math inline">\(\mathrm{cost}(\boldsymbol{\delta};\boldsymbol{x}^F)\)</span>，约束 <span class="math inline">\(h(\boldsymbol{x}^{\mathrm{CFE}})\neq h(\boldsymbol{x}^F)\)</span>、<span class="math inline">\(\boldsymbol{x}^{\mathrm{CFE}}=\boldsymbol{x}^F+\boldsymbol{\delta}\)</span>。这依赖两条隐含<strong>假设</strong>（§3 开头）：假设 1——特征差 <span class="math inline">\(\boldsymbol{\delta}^*=\boldsymbol{x}^*_{\mathrm{CFE}}-\boldsymbol{x}^F\)</span> 直接翻译成最小行动集；假设 2——dist 与 cost 一一对应。二者只在「特征相互独立」或「强行冻结其余特征」时成立：例 1（工资 <span class="math inline">\(X_1\)</span>、存款 <span class="math inline">\(X_2:=\tfrac{3}{10}X_1+U_2\)</span>、<span class="math inline">\(h=\mathrm{sgn}(X_1+5X_2-225000)\)</span>）中 CFE 要求存款 +5000 美元，而在储蓄率 30% 的世界规则下加薪 10000 美元即可自动达成；例 2（稻田选址）中改海拔会经物理定律联动温度，照搬 CFE 甚至可能不翻转预测。</p>
+<p>模型（§3.1）：真实世界为 SCM <span class="math inline">\(\mathcal{M}=\langle\mathbf{F},\mathbf{X},\mathbf{U}\rangle\)</span>，假设因果充分性且 <span class="math inline">\(\mathbf{F}\)</span> 可逆；行动为结构干预 <span class="math inline">\(\mathcal{A}=do(\{X_i:=a_i\}_{i\in I})\)</span>（图手术切断入边，Fig 2 给出 <span class="math inline">\(do(X_1)/do(X_2)/do(X_1,X_2)\)</span> 三种后干预模型对照）；个体层面效果用结构反事实三步法计算：<span class="math inline">\(\boldsymbol{x}^{\mathrm{SCF}}=\mathbf{F}_\mathcal{A}(\mathbf{F}^{-1}(\boldsymbol{x}^F))\)</span>，即<strong>绑架（abduction，由事实反解外生变量）—行动（action，替换结构方程）—预测（prediction，递归重算）</strong>（式 (4)–(6) 为 Fig 3 四变量例的三步展开）。</p>
+</section>
+<section id="识别或主要命题" class="level2">
+<h2 class="anchored" data-anchor-id="识别或主要命题">识别或主要命题</h2>
+<ul>
+<li><strong>Definition 3.1（CFE 行动）</strong>：<span class="math inline">\(A_{\mathrm{CFE}}:=do(\{X_i:=x_i^F+\delta_i^*\}_{i\in I})\)</span>，<span class="math inline">\(I\supseteq\{i:\delta_i^*\neq0\}\)</span>。</li>
+<li><strong>Proposition 3.1</strong>：<span class="math inline">\(A_{\mathrm{CFE}}\)</span> 使个体 <span class="math inline">\(\boldsymbol{x}^F\)</span> 得到 <span class="math inline">\(\boldsymbol{x}^{\mathrm{SCF}}=\boldsymbol{x}^*_{\mathrm{CFE}}:=\boldsymbol{x}^F+\boldsymbol{\delta}^*\)</span>（从而保证追索）<strong>当且仅当</strong>被干预变量的后代集合为空。证明（附录 A.1）用闭式 (A.1)–(A.3)：<span class="math inline">\(x_i^{\mathrm{SCF}}=x_i^F+\delta_i^*\)</span>（<span class="math inline">\(i\in I\)</span>）、<span class="math inline">\(x_i^F+f_i(\boldsymbol{pa}_i^{\mathrm{SCF}})-f_i(\boldsymbol{pa}_i^F)\)</span>（<span class="math inline">\(i\notin I\)</span>）；有后代时其取值随父节点反事实值联动，一般 <span class="math inline">\(\boldsymbol{x}^{\mathrm{SCF}}\neq\boldsymbol{x}^*_{\mathrm{CFE}}\)</span>（分段常数结构方程等例外被显式排除，视为局部违反因果极小性）。</li>
+<li><strong>Corollary 3.1</strong>：若真实世界独立（所有特征均为根结点），CFE 行动恒保证追索——但该假设要求喂给 <span class="math inline">\(h\)</span> 的特征两两独立，不现实；而限制只干预无后代变量又剥夺个体能动性（例 1 中不许换工作）。</li>
+<li><strong>式 (3)（MINT）</strong>：<span class="math inline">\(\mathcal{A}^*\in\arg\min_{\mathcal{A}}\mathrm{cost}(\mathcal{A};\boldsymbol{x}^F)\)</span> s.t. <span class="math inline">\(h(\boldsymbol{x}^{\mathrm{SCF}})\neq h(\boldsymbol{x}^F)\)</span>、<span class="math inline">\(\boldsymbol{x}^{\mathrm{SCF}}=\mathbf{F}_\mathcal{A}(\mathbf{F}^{-1}(\boldsymbol{x}^F))\)</span>、<span class="math inline">\(\mathcal{A}\in\mathcal{F}\)</span>。<strong>Proposition 4.1</strong>：若存在能实现追索的 CFE 行动，则 <span class="math inline">\(\mathrm{cost}(\mathcal{A}^*;\boldsymbol{x}^F)\le\mathrm{cost}(A_{\mathrm{CFE}};\boldsymbol{x}^F)\)</span>（由 <span class="math inline">\(\mathcal{A}^*\)</span> 是 <span class="math inline">\(\mathcal{F}\)</span> 上最优解直接得）。注意 <span class="math inline">\(\boldsymbol{x}^{*\mathrm{SCF}}\)</span> 不必是最近反事实解释——MINT 的解可能离事实更远但更便宜。</li>
+<li><strong>式 (7)</strong>：加性噪声模型下结构反事实的闭式 <span class="math inline">\(x_i^{\mathrm{SCF}}=\mathbb{1}[i\in I](x_i^F+\delta_i)+\mathbb{1}[i\notin I]\big(x_i^F+f_i(\boldsymbol{pa}_i^{\mathrm{SCF}})-f_i(\boldsymbol{pa}_i^F)\big)\)</span>，可代入 (3) 用既有 CFE 求解器（梯度、进化、启发式、SMT）优化；脚注 5 说明只需 <span class="math inline">\(\mathbf{F}\)</span> 可逆、不必加性。</li>
+<li><strong>§5（迈向现实的干预）</strong>：(i) 形式——加性/软干预（式 8，不切断入边、保留父节点影响，如借钱增存款而不放弃储蓄习惯）与结构/硬干预二分，须按变量语义在求解 (3) 前选定；(ii) 可行性三分类——不可变（须对祖先关系封闭，如种族⇒出生地不可变，平行于反事实公平中受保护属性的祖先闭包）、可变但不可直接干预（如信用分，只随父节点联动）、可行动（其可行性可条件化于干预前后的自身/他变量取值，给出年龄只增、签证先于信贷、心脏手术先戒烟/先稳血压四个约束样例）；(iii) 范围——真实行动常同时干预多个变量（肥手/非原子干预，如换工作同时改收入与工龄），留待后续在不同因果层级建模。</li>
+</ul>
+</section>
+<section id="估计经验" class="level2">
+<h2 class="anchored" data-anchor-id="估计经验">估计/经验</h2>
+<p>两个演示（§4.3，求解器为扩展的 MACE）：(i) 合成贷款（Fig 1 模型，<span class="math inline">\(U_1\sim\$10000\cdot\mathrm{Poisson}(10)\)</span>、<span class="math inline">\(U_2\sim\$2500\cdot N(0,1)\)</span>）：<span class="math inline">\(\boldsymbol{x}^F=[\$75000,\$25000]\)</span>，式 (3) 得 <span class="math inline">\(\mathcal{A}^*=do(X_1:=x_1^F+\$10000)\)</span>，<span class="math inline">\(\boldsymbol{x}^{*\mathrm{SCF}}=[\$85000,\$28000]\)</span>；式 (2) 得 <span class="math inline">\(\boldsymbol{\delta}^*=[0,+\$5000]\)</span>、<span class="math inline">\(\boldsymbol{x}^*_{\mathrm{CFE}}=[\$75000,\$30000]\)</span>——前者虽更远但 <span class="math inline">\(\mathrm{cost}(\boldsymbol{\delta}^*;\boldsymbol{x}^F)\approx2\,\mathrm{cost}(\mathcal{A}^*;\boldsymbol{x}^F)\)</span>。(ii) german credit（Fig 3，四特征：性别不可变、年龄可增、信贷额可行动、期限可变不可干预；结构方程由子—父线性回归拟合，<span class="math inline">\(h\)</span> 取逻辑回归或决策树）：个体 <span class="math inline">\(\boldsymbol{x}^F=[\text{Male},32,\$1938,24]\)</span>，式 (3) 给 <span class="math inline">\(\mathcal{A}^*=do(\{X_2:=33,\;X_3:=\$1138\})\)</span>（明年申请、额度 −$800），式 (2) 给 <span class="math inline">\(\boldsymbol{\delta}^*=[\mathrm{N/A},+6,0,0]\)</span>（等 6 年），努力下降 42%；扩至 50 个不利测试个体，既有 CFE 方法平均贵 39%±24%（逻辑回归）与 65%±8%（决策树）。成本取归一化 <span class="math inline">\(\ell_1\)</span>（<span class="math inline">\(\sum_{i\in I}|\delta_i|/R_i\)</span>）。</p>
+</section>
+<section id="开放问题" class="level2">
+<h2 class="anchored" data-anchor-id="开放问题">开放问题</h2>
+<ol type="1">
+<li><strong>真实 SCM 未知（§6 自列的首要局限）</strong>：式 (3) 依赖真实图与结构方程，实践中反事实约束可能不可确定性识别；作者明言这是任何「推荐真实行动」方法的通病，公平性社区对不可检验假设的警告同样适用——并明确把因果可辨识性讨论划出范围。</li>
+<li><strong>混杂与更广 SCM 类（§6 自列 future work）</strong>：加性噪声（噪声独立）之外的混杂情形、只有因果图没有方程、循环图/时序（条件干预）均未处理；学习（部分）世界模型及不完美因果知识下的低效待研究。</li>
+<li><strong>序贯追索（§6 自列）</strong>：§5.2 的条件可行性已暗示「一次干预开启下一次的前置条件」，与多阶段规划（Ramakrishnan et al.&nbsp;2019）结合生成最优行动序列是未做的方向；成本函数应满足何种性质（个体级 vs 群体级、单调性）亦未定义。</li>
+<li><strong><span class="math inline">\(h\)</span> 固定假设</strong>：全部保证都在「预测器不变」下陈述；群体层面同时行动会使 <span class="math inline">\(h\)</span> 再训练失效（追索的动态与公平问题，后续 2010.06529 正面处理），本文未触及。</li>
+<li><strong>经验验证薄弱</strong>：演示仅 1 个合成个体 + 50 个 german credit 个体；结构方程由线性回归拟合、因果方向由作者手工设定，无真实因果验证，也无显著性检验；「成本减半」依赖 <span class="math inline">\(\ell_1/R_i\)</span> 的成本语义，与人类感知努力的关系未校准。</li>
+<li><strong>肥手干预缺失</strong>：§5.3 承认一对一「行动↔︎单变量干预」映射不成立，但方法层面未给出解——后续需在不同因果一致层级建模（引 Beckers &amp; Halpern 2019）。</li>
+</ol>
+</section>
+<section id="文献谱系" class="level2">
+<h2 class="anchored" data-anchor-id="文献谱系">文献谱系</h2>
+<p>前作（在本文中的角色）：Wachter et al.&nbsp;(2017)——CFE 的定义与 GDPR 动机，本文的出发点兼批评对象（「不依赖因果结构」的 CFE 更宜称对比性解释）；Ustun et al.&nbsp;(2019)——式 (2) 的可行动追索，被本文证明只在独立世界成立并被推广；Pearl (2000; 2013) 与 Pearl, Glymour &amp; Jewell (2016)——do-算子、结构反事实三步法，全部技术工具箱；Eberhardt &amp; Scheines (2007)、Korb et al.&nbsp;(2004)——硬/软干预类型学，§5.1 术语来源；Kusner et al.&nbsp;(2017)——受保护属性祖先闭包，§5.2 不可变集封闭条件的平行；Karimi et al.&nbsp;(2020, MACE)——实验所扩展的 SMT 求解器；Barocas et al.&nbsp;(2020)、Kohler-Hausmann (2018)——CFE 隐含假设的法理批评，讨论部分的支撑。对照相关工作：Joshi et al.&nbsp;(2019, REVISE)——混杂下生成「反事实实例」而非行动，被指出未优化行动本身；Mahajan et al.&nbsp;(2019)——因果正则化 CFE，被详细批评（正则惩罚偏离结构方程的干预，系统性偏向根结点即敏感属性；且无绑架步、无结构方程形式假设时反事实计算不明）。后续：Karimi et al.&nbsp;(2020, 站内 2006.06831) 直接回应开放问题 1，在因果知识不完美时给概率式追索；von Kügelgen et al.&nbsp;(2020, 站内 2010.06529) 追索的群体公平；MINT 的期刊扩展与肥手、序贯干预是其后数年的活跃线。</p>
+</section>
+<section id="明确不覆盖" class="level2">
+<h2 class="anchored" data-anchor-id="明确不覆盖">明确不覆盖</h2>
+<p>因果模型未知时的可辨识性与学习方法（明确划出范围）；混杂与非独立噪声、循环结构、时序条件干预；成本函数的规范性理论；群体层面/重复交互下的追索与 <span class="math inline">\(h\)</span> 更新；监管合规细节；不主张抛弃 CFE（仍认可其在数据审计、模型行为预测中的价值）；不给任何「权威」的变量语义与干预类型定义（明言留待跨学科工作）。</p>
+</section>
+<section id="阅读路径" class="level2">
+<h2 class="anchored" data-anchor-id="阅读路径">阅读路径</h2>
+<p>先读 Fig 1–2 与例 1–2（两页讲清全部动机）；§3 按假设 1–2 → Definition 3.1 → Proposition 3.1 → Corollary 3.1 精读，附录 A.1 的闭式 (A.1)–(A.3) 是证明核心；§4 式 (3) 与式 (7) 连读（MINT 的定义与可解性），§4.3 核对数字；§5 按干预形式 → 可行性三分类 → 范围读，重点是不可变集的祖先封闭与条件可行性编码；§6 对 Mahajan et al.&nbsp;的批评值得细读——它示范了「因果正则」与「显式优化行动」的差别。姊妹篇对照：站内 2006.06831（不完美因果知识下的概率式追索——开放问题 1 的后续）；2010.06529（追索的公平性——开放问题 4 的后续）；1706.02744（因果公平先驱，其受保护属性祖先闭包被 §5.2 借用）；1911.10500（§8 策略行为一段是本文问题意识在纲领文中的伏笔）。</p>
+</section>
+<section id="术语对照" class="level2">
+<h2 class="anchored" data-anchor-id="术语对照">术语对照</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>中文</th>
+<th>English</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>算法追索</td>
+<td>algorithmic recourse</td>
+</tr>
+<tr class="even">
+<td>（最近）反事实解释</td>
+<td>(nearest) counterfactual explanation, CFE</td>
+</tr>
+<tr class="odd">
+<td>对比性解释</td>
+<td>contrastive explanation</td>
+</tr>
+<tr class="even">
+<td>CFE 行动</td>
+<td>CFE-based actions</td>
+</tr>
+<tr class="odd">
+<td>最小干预</td>
+<td>minimal interventions (MINT)</td>
+</tr>
+<tr class="even">
+<td>结构干预 / 硬干预</td>
+<td>structural / hard intervention</td>
+</tr>
+<tr class="odd">
+<td>加性干预 / 软干预</td>
+<td>additive / soft intervention</td>
+</tr>
+<tr class="even">
+<td>结构反事实</td>
+<td>structural counterfactual</td>
+</tr>
+<tr class="odd">
+<td>绑架—行动—预测三步法</td>
+<td>abduction–action–prediction</td>
+</tr>
+<tr class="even">
+<td>可行性 / 可信性</td>
+<td>feasibility / plausibility</td>
+</tr>
+<tr class="odd">
+<td>不可变 / 可变不可干预 / 可行动</td>
+<td>immutable / mutable but non-actionable / actionable</td>
+</tr>
+<tr class="even">
+<td>肥手（非原子）干预</td>
+<td>fat-hand (non-atomic) interventions</td>
+</tr>
+<tr class="odd">
+<td>因果充分性</td>
+<td>causal sufficiency</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="来源定位" class="level2">
+<h2 class="anchored" data-anchor-id="来源定位">来源定位</h2>
+<p><code>papers/2002.06278.pdf</code>（10 页，FAccT 双栏排版）。关键内容：Fig 1 与例 1–2（p.1–2）；式 (1)–(2) 与假设 1–2（p.2–3）；Definition 3.1、Proposition 3.1（p.3）；Corollary 3.1 与式 (3)、Fig 3、三步法式 (4)–(6)（p.4）；式 (7) 与演示数字（p.5）；软干预式 (8) 与可行性三分类（p.6–7）；肥手干预（p.7）；§6 讨论（p.7–8）；附录 A.1–A.3 三个证明（p.9–10）。</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "已复制");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "已复制");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

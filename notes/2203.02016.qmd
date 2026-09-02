@@ -1,0 +1,76 @@
+---
+title: "CBED：同时选干预目标与干预取值的主动因果发现"
+subtitle: "Panagiotis Tigas et al., arXiv:2203.02016 (2022)"
+description: "把 DiBS 的变分后验接入贝叶斯最优实验设计，首次在 50 节点非线性 SCM 上联合批量选择干预目标（where）与干预取值（how），并证明 AIT 的差异分数是高斯情形下互信息近似的蒙特卡洛估计。"
+date: 2022-03-03
+categories: [因果推断, 主动因果发现, 贝叶斯实验设计]
+paper-id: 2203.02016
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Panagiotis Tigas*、Andrew Jesson、Yarin Gal（OATML, Oxford）；Yashas Annadani*、Stefan Bauer（KTH Stockholm；Bauer 兼 CIFAR Azrieli Global Scholar）；Bernhard Schölkopf（MPI IS, Tübingen） |
+| 出处 | arXiv:2203.02016（站内 PDF 为 v3, 2022-10-21）；NeurIPS 2022；实现 github.com/yannadani/cbed |
+| 日期 | 2022-03-03（v1） |
+| 页数 | 26 页（正文+文献 12 页 + 附录 A–I 14 页） |
+
+一句话定位：主动因果发现此前要么假设线性 SCM、要么只选干预目标而把取值钉死在 0；本文用贝叶斯优化在「每个候选目标的一维取值曲线」上寻优互信息，把「在哪里干预、取什么值」两问在批量设定下一次回答（方法名 CBED，读作 seabed）。
+
+## 问题与模型
+
+研究问题（§1–§3）：给定观测数据 $\mathcal{D}$，SCM $\phi=(g,\theta)$（图 $g$ 与机制参数 $\theta=(\gamma,\sigma^2)$，式 1–2，加性高斯噪声 ANM）只能从观测数据识别到马尔可夫等价类，且有限样本加剧不确定；要用后验 $p(\phi|\mathcal{D})$（以 DiBS 为后验引擎，§2）选择干预 $\xi=\{(j,v)\}:=do(X_j=v)$，使结果 $Y$ 对 $\Phi$ 的信息量最大。全文假设（As. 1–4，§1）：因果充分性、有限样本、非线性条件期望＋加性高斯噪声、单目标原子干预；另设图稀疏、批大小 $B$ 固定。既有方法（ABCD、AIT）不选值，而图 2a 显示互信息随值显著变化，固定值次优。
+
+## 识别或主要命题
+
+本文无新可识别性定理，命题是两个「框架统一＋近似保证」结果。**Theorem 3.1（AIT 的信息论解读）**：设结果 $Y$ 为高斯随机变量，则 Scherrer et al. (2021) AIT 的差异分数 $D_j\equiv V^j_{BG}/V^j_{WG}$（式 21，组间/组内方差比）是互信息近似式 (4) 的蒙特卡洛估计——AIT 被纳入 BOECD 框架（证明附录 B.6，用 Jensen 不等式把条件熵之差下界化为方差对数）。**次模近似保证**：条件互信息 $I(Y;\omega|X)$ 子模且非减（附录 B.4，Theorem B.2，仿 BatchBALD 证明），故贪心批选择可达最优的 $(1-1/e)\approx0.64$（Greedy-CBED）；批互信息按式 (11)（附录 B.3）分解为各单设计 MI 之和。
+
+## 估计/经验
+
+单设计（§3.1）：目标 $\arg\max_{j,v} I(Y;\Phi|\{(j,v)\},\mathcal{D})$（式 3）；MI 用 BALD 型熵差估计器（式 4，蒙特卡洛化见附录 B.2）——直觉是选「模型对结果分歧最大」的干预；对每个目标 $j$ 把 MI 视为值 $v$ 上的一维黑箱函数，用 GP-UCB（Matern 核，长度尺度 1.0，域 $[-k,k]$）寻值，各目标可并行。批量（§3.2）：Greedy-CBED 需 $O(Bd)$ 次 GP-UCB（Algorithm 1）；Soft-CBED 从 $d\times T$ 个 GP-UCB 候选按 MI 分数 softmax 不放回抽 $B$ 个（Algorithm 2），GP-UCB 次数降为 $O(d)$。实验（§5–§6）：合成 ER/Scale-Free 图 $d\in\{20,50\}$、线性与非线性 SCM、$\sigma^2=0.1$、期望每节点 1 条边、批 10、100 seeds、E-SID 指标（图 3）：Soft-CBED+GP-UCB 全面最优；softAIT 使 AIT 收敛快至 4 倍。取值消融（图 3b）：GP-UCB > 固定值 0 > 从观测支撑采样（高密度区认知不确定性低故更少信息）。Soft 与 Greedy 质量相当但快约 12 倍（表 1：24.17s vs 284.98s）。DREAM 单细胞基因调控网（GeneNetWeaver v3.15 稳态+单基因敲除、50 维、批 10、6 seeds、图 4）：敲除只能取值 0，Ecoli1/Ecoli2 上优于 softAIT 与 Random，但 Random 在部分场景仍具竞争力。附录 I 补全其余指标与维度（其中一组以后验模型换为 DAG Bootstrap+GIES，图 6–9）。
+
+## 开放问题
+
+1. **结论只在 As. 1–4 下成立（§1 自列）**：无隐混杂、加性高斯噪声、原子单目标干预、稀疏图，任一失守即出界，作者明示这是方法边界。
+2. **取值选择优势未在真实任务检验（§6 自认）**：DREAM 只能模拟基因敲除（固定值 0），GP-UCB 的收益仅有合成证据。
+3. **依赖后验模型质量（§6 隐含）**：Random 在部分 DREAM 场景仍具竞争力，作者未讨论 DiBS 后验失准（如非线性误设）时 MI 估计的系统性偏差。
+4. **批 MI 的可分解性是近似（我识别）**：式 (11) 把批 MI 写成单设计 MI 之和，隐含各实验结果在 $\Phi,\mathcal{D}$ 下条件独立、无冗余交互；Soft-CBED 仅靠随机采样隐式获得多样性，贪心的次模保证也建立在精确 MI 上。
+5. **取值域 $[-k,k]$ 与外推风险（我识别）**：域须先验指定；在观测支撑外取值时，MI 估计依赖 DiBS 的神经网络机制在无数据区域外推，其可靠性未量化（附录 G 仅双变量示意）。
+6. **无样本复杂度与 regret 分析（我识别）**：BALD 型嵌套蒙特卡洛估计的方差随后验粒子数、外样本数的变化未分析，静态批设计也不做跨批非短视规划。
+
+## 文献谱系
+
+前作（在本文中的角色）：Lindley (1956)——BOED 效用框架；Tong & Koller (2001)、Murphy (2001)——BOECD 起点（有序图、线性、离散设定，被超越）；Agrawal et al. (2019, ABCD)——批量 BOECD 直接前身：线性、值固定、DAG-bootstrap 采样图，本文自定位为其「非线性+取值+软批量」扩展（附录 B.5 证明其 MI 估计与本文化归相同）；Scherrer et al. (2021, AIT, 站内 2109.02429)——F 分数目标选择，被 Theorem 3.1 收编；Lorch et al. (2021, DiBS, 站内 2105.11839)——后验引擎，本文选它正因其可扩展到非线性 SCM；Annadani et al. (2021, VCN)、Cundy et al. (2021, BCD-Nets)——变分后验家族备选；von Kügelgen et al. (2019, 站内 1910.03962)——GP-BOED 选值思想但限于双变量（多维 GP 条件分布不可扩展），本文把它推到 50 节点；Kirsch et al. (2019 BatchBALD、2021 soft top-k)——批策略与次模证明模板；Krause & Guestrin、Nemhauser et al.——贪心 $(1-1/e)$ 保证；Houlsby et al. (BALD)——MI 估计器形式；Zheng et al. (2018, NOTEARS)——无环性约束（经由 DiBS）；Peters & Bühlmann (2015)——E-SID 评估指标；Greenfield et al. (2010)、Schaffter et al. (2011)——DREAM/GeneNetWeaver 基准栈。后续：Hägele et al. (2022, 2206.01665, BaCaDI)（站内有精读摘要）把同一可微后验框架推广到干预目标未知的被动多环境数据，是 CBED「主动选干预」的对偶方向。
+
+## 明确不覆盖
+
+不处理隐混杂与测量误差（As. 1）；机制限加性高斯噪声（非加性、异方差噪声不适用）；不做多目标、软/非完美干预；批内非自适应（静态批设计，一次选完 $B$ 个再执行），也不做跨批非短视规划；不讨论后验近似的理论误差（DiBS 粒子近似纯算法性使用）；不做摊销式设计（与 DAD/IDD 线的对照只列文献）；不涉及因果表示学习或时序图。
+
+## 阅读路径
+
+先读 §1（假设 1–4 务必先看）与图 1–2（干预-推断-设计闭环、MI 随值变化的直觉）；§2 背景只需 SCM/ANM 定义（式 1–2）与 BOED 效用；§3 是核心：式 (3)–(4) 两步（估计 MI、GP-UCB 寻值）＋ Algorithms 1–2（Greedy/Soft 的差别就在 $O(Bd)$ vs $O(d)$）；§3.3 与 Theorem 3.1 说明 ABCD/AIT 如何被统一；实验按图 3(a→b→c) 顺序读——总体对比、取值消融、批量消融——再看表 1 与图 4（DREAM）；理论补遗在附录 B（估计器 B.1–B.2、次模 B.4、AIT 证明 B.6）。姊妹篇对照：2105.11839 DiBS（站内笔记，本文的后验供应方，其粒子质量直接决定 MI 估计质量）；2109.02429 AIT（站内笔记，被 Theorem 3.1 收编的目标选择前驱）；1910.03962（站内笔记，双变量 GP-BOED 前身）；2206.01665 BaCaDI（站内精读摘要，干预目标未知方向的延伸）。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 因果发现的贝叶斯最优实验设计 | Bayesian optimal experimental design for causal discovery (BOECD) |
+| 干预目标 / 干预取值 | intervention target / intervention value |
+| 互信息 | mutual information (MI) |
+| BALD 型估计器 | Bayesian active learning by disagreement (BALD) estimator |
+| 贝叶斯优化 | Bayesian optimization (BO) |
+| GP-UCB 采集函数 | Gaussian process upper confidence bound |
+| 贪心批策略 / 软 top-k 批策略 | Greedy-CBED / Soft-CBED (soft top-k) |
+| 次模性 | submodularity |
+| 加性噪声模型 | additive noise model (ANM) |
+| 因果贝叶斯网络 | causal Bayesian network (CBN) |
+| 期望结构干预距离 | expected structural interventional distance (E-SID) |
+| 马尔可夫等价类 | Markov equivalence class (MEC) |
+| 基因敲除 | gene knockout |
+| 基因网络模拟器 | GeneNetWeaver |
+
+## 来源定位
+
+`papers/2203.02016.pdf`（26 页，v3）。关键内容：假设 1–4（§1, p.2）；SCM/ANM 式 (1)–(2)（§2, p.3）；MI 目标式 (3) 与 BALD 估计器式 (4)（§3, p.5）；GP-UCB 与域 $[-k,k]$（§3.1, p.6）；批量设计与 Algorithms 1–2（§3.2, p.6）；Theorem 3.1（§3.3, p.6，证明附录 B.6, pp.19–20）；合成实验图 3 与运行时表 1（§6, p.9）；DREAM 图 4（§6, p.10）；批 MI 式 (11) 与次模 Theorem B.2（附录 B.3–B.4, pp.17–18）；DREAM 设置 Table 2–3（附录 D.2, p.21）；GP 超参（附录 E, p.22）；双变量 MI-值示意（附录 G, p.23）；20 维线性完整结果（附录 I, pp.23–26）。

@@ -1,0 +1,75 @@
+---
+title: "独立机制分析的压力测试：混合函数违背假设时还灵吗"
+subtitle: "Joanna Sliwa et al., arXiv:2207.06137 (2022)"
+description: "用随机初始化 MLP 作为不满足 IMA 假设的通用混合函数，系统检验 IMA 对比度区分真解与 Darmois 伪解的鲁棒性：一定层数内区分度与正则化收益仍在且为 L1/L2 所无，但区分度随深度消退、且对初始化敏感。"
+date: 2022-07-13
+categories: [因果推断, 非线性独立成分分析]
+paper-id: 2207.06137
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Joanna Sliwa（MPI IS, Tübingen / Univ. of Tübingen）、Shubhangi Ghosh（MPI IS / ETH Zürich）、Vincent Stimper（MPI IS / Cambridge）、Luigi Gresele（MPI IS）、Bernhard Schölkopf（MPI IS / ETH Zürich） |
+| 出处 | arXiv:2207.06137 [stat.ML]；UAI 2022 因果表示学习工作坊（UAI CRL 2022） |
+| 日期 | 2022-07-13 |
+| 页数 | 10 页（正文约 6 页 + 附录 A–B） |
+
+一句话定位：为站内已笔记的独立机制分析（independent mechanism analysis, IMA，arXiv:2106.05200）补上缺失的一环——此前所有刻画都在假设精确成立时给出，本文用 MLP 通用混合函数量化假设违背程度，检验 $C_{IMA}$ 的判别力与 IMA 正则化的收益是否依然存在、是否特有。
+
+## 问题与模型
+
+研究问题：非线性 ICA $x=f(s)$（$f$ 光滑可逆、源独立）不可辨识，Darmois 构造（条件 CDF 递归，雅可比下三角）给出独立却不解混的伪解（spurious solution）。IMA 假设各源对观测的贡献（$J_f$ 的列）正交：$\log|J_f|=\sum_i\log\|\partial f/\partial s_i\|$，违背程度由 $C_{IMA}=\mathbb E_s[\sum_i\log\|\partial f/\partial s_i\|-\log|J_f|]\ge0$ 度量（零当且仅当 $J_f=O(s)D(s)$，对源置换与逐元素重参数化不敏感）。两个待检问题：1) $f$ 偏离 IMA 原理时，$C_{IMA}$ 还能否区分真解与 Darmois 伪解？2) 正则化极大似然 $\mathcal L(g;x)=\mathbb E_x[\log p_g(x)-\lambda C_{IMA}(g^{-1},p_y)]$ 的收益是 IMA 特有，还是任何复杂性正则都行？实验设定：混合为 leaky_tanh 激活、正交权重初始化 + 正态偏置的 MLP（可逆），$n\in\{2,5\}$、层数 $L\in\{2,\dots,20\}$；学伪解用三角雅可比残差流 + 高斯基分布，学解混用全雅可比残差流 + 逻辑斯蒂基分布，均训练 100 000 步、20 个混合；指标为 $C_{IMA}$、KLD、MCC（Spearman 相关经匈牙利算法匹配）。
+
+## 识别或主要命题
+
+无正式定理；理论贡献是 §3.3 与附录 B 的 $n=2$ 几何论证：IMA 正则化似然在单点分解为 $\mathcal L(g;x)=\underbrace{\log p_y(y)}_{(i)}-\underbrace{(\log\|a\|+\log\|b\|)}_{(ii)}-\underbrace{(1-\lambda)\log|\sin\theta|}_{(iii)}$，其中 $a,b$ 为 $J_{g^{-1}}(y)$ 的列、$\theta$ 为夹角（雅可比行列式即二者张成的平行四边形面积 $\|a\|\|b\||\sin\theta|$）。在拟合相同（$(i)$ 最优、面积元相等）的模型间比较：无正则（$\lambda=0$）时最小化 $(iii)$ 促使列共线，且 $\log|\sin\theta|$ 在 $\theta\approx0$ 附近梯度陡峭、经链式法则主导训练；$(ii)$ 则由等周定理（等面积平行四边形中矩形周长最短）反向鼓励列正交。故 $0<\lambda<1$ 时正交性受鼓励，$\lambda=1$ 时 $(iii)$ 消失、最优解列正交。这解释两条经验规律：无正则 MLE 的 $C_{IMA}$ 随似然上升系统性增长；IMA 正则化压低 $C_{IMA}$ 并改进源恢复。
+
+## 估计/经验
+
+四组实验：(1) 区分度——正交初始化下真混合的 $C_{IMA}$ 随层数单调上升（违背累积），但至约 10–12 层伪解的 $C_{IMA}$ 仍高于真混合、可区分（Fig 1）；文献常用混合不超过 5 层。(2) 源恢复——$n=5$、4 层时 $\lambda\in\{0.5,1\}$ 显著提高 MCC、压低 $C_{IMA}$、KLD 仅轻微变差（Fig 2–3）；层数增大 MCC 总体下降、分布重叠，但高 $\lambda$ 均值仍更高，且小 $L$ 时正则化的 MCC 方差远小于 $\lambda=0$（Fig 4）。(3) 训练动态——$\lambda=0$ 时 $C_{IMA}$ 随迭代与似然同步上升，$\lambda\in\{0.5,1\}$ 时基本不涨（Fig 5；$n=2$ 见附录 Fig 12）。(4) 对照正则——对权重施 L1/L2（$\beta,\gamma\in\{0,10^{-4},5\times10^{-4},10^{-3}\}$，$n=5$、$L=4$、10 个混合）：学得模型的 $C_{IMA}$ 与 MCC 几乎不变，唯 $C_{IMA}$ 正则显著提升 MCC（Fig 6）——收益特属于 IMA。附录补充：均匀初始化（如 Hyvärinen & Morioka 2016）下 $L\in\{2,\dots,5\}$ 的伪解 $C_{IMA}$ 反而更低、真假不可分（Fig 8）；深混合下 Darmois 解拟合变差（KLD 升高，Fig 7），作者猜测需更长训练或更深流但未做。
+
+## 开放问题
+
+1. **对初始化敏感（实验自曝）**：均匀初始化下 2–5 层混合的伪解 $C_{IMA}$ 低于真混合、不可区分；正交初始化是作者自选设定，真实数据对应哪种初始化无从判定，判别力的适用范围不明。
+2. **深度边界约 10–12 层（实验自曝）**：超过后区分度与 MCC 优势消退；「违背随层数单调增长」只有经验曲线，无正交层与逐元素非线性复合的定量理论。
+3. **理论论证仅 $n=2$、单点（自认）**：附录 B 只是「理论直觉」——固定 $(i)$ 的比较与等周论证均限二维逐点分解，无一般 $n$ 的定理。
+4. **伪解学习失败是混淆因素（自认猜测，未验证）**：深混合下 Darmois 解 KLD 升高，区分度消失可能部分因为伪解没学好而非对比度失效；延长训练/加深流的对照未做。
+5. **$C_{IMA}$ 的实践可用性（我识别）**：用对比度挑真解需真混合的 $C_{IMA}$ 作参照，而无监督场景既无真解也无 $\lambda$ 的数据侧选择准则（实验固定 $\lambda\in\{0.5,1\}$，评估靠真源算 MCC）。
+6. **混合族单一（我识别）**：仅 leaky_tanh MLP、无真实数据，且只考察 Darmois 型伪解，未触及保测自同构（MPA）类伪解下的鲁棒性。
+
+## 文献谱系
+
+前作（在本文中的角色）：Gresele et al. (2021, arXiv:2106.05200)——被检验的方法本体，其「假设精确成立」的局限正是本文出发点；Hyvärinen & Pajunen (1999)——Darmois 构造出处；Comon (1994)——线性 ICA 可辨识性标杆（置换/重标度歧义背景）；Locatello et al. (2019)——解缠不可能性背景，其伪解类被 $C_{IMA}$ 区分；Hyvärinen & Morioka (2016/2017)、Khemakhem et al. (2020)——辅助变量可辨识性路线，兼「文献常用 ≤5 层 MLP 混合」与均匀初始化设定的来源；Peters et al. (2017)、Janzing & Schölkopf (2010)、Janzing et al. (2012)、Besserve et al. (2018)——ICM 原理及其形式化谱系；Chen et al. (2019) 残差流——估计器实现；Gresele et al. (2020)——leak_tanh 与可逆性工具；Wei et al. (2021) 正交雅可比正则与 Cunningham et al. (2022) 主流形流——引言点名的相近目标，后者关于无正则 MLE 的平行假设被本文经验与论证补强；Zhang & Chan (2008) 最小非线性畸变——引言提及的另一族正则，未做对照；Gresele et al. (2019) Rosetta Stone——多视角可辨识性参照。后续：本文为 IMA 线在更现实设定下的使用提供了稳健性背书。
+
+## 明确不覆盖
+
+不处理辅助变量/弱监督设定；不给一般维度定理或 $C_{IMA}$ 随深度增长的定量理论；不检验保测自同构类伪解；不做真实数据实验；不讨论 $\lambda$ 选择准则与 IMA 假设的可检验性；与最小非线性畸变等正则的对照（引言提及）未实验化。
+
+## 阅读路径
+
+短文可顺读：§2.3 复习 IMA 与 $C_{IMA}$ 两条性质（不熟悉先读站内 2106.05200 笔记）；§3.1 通用混合设定 + Fig 1 是第一结论；§3.2 Fig 3–4（收益随深度变化）；§3.3 的 $n=2$ 分解式与 Fig 5 是全文最有解释力的一页；§3.4 Fig 6（L1/L2 对照）；附录 A 的 Fig 8（均匀初始化失效）不可跳过，系最重要负面结果；附录 B 给推导与 $\log|\sin\theta|$ 梯度图。姊妹篇对照：站内 2106.05200（IMA 原文——本文回答其「假设仅经验检验」的开放问题，其 Fig 4d 已有 MLP 混合的初步迹象，本文系统化之）；站内 2110.15595（SIC 理论化：同属「ICM 判据何时有效」的论证工程，对照其谱域判据严格化路径与本文的经验压力测试）；多视角推广再看 Gresele et al. (2019)。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 独立机制分析 | independent mechanism analysis (IMA) |
+| 全局 IMA 对比 | global IMA contrast ($C_{IMA}$) |
+| 伪解 | spurious solution |
+| Darmois 构造 | Darmois construction |
+| 通用混合函数 | generic mixing function |
+| 泄漏 tanh 激活 | leaky_tanh activation |
+| 正交（权重）初始化 | orthogonal initialization |
+| 残差流 | residual flow |
+| 全雅可比 / 三角雅可比 | full / triangular Jacobian |
+| 平均相关系数 | mean correlation coefficient (MCC) |
+| 匈牙利算法匹配 | Hungarian matching |
+| 等周定理 | isoperimetric theorem |
+| 可辨识性 | identifiability |
+
+## 来源定位
+
+`papers/2207.06137.pdf`（10 页）。关键内容：ICM 原理与 $C_{IMA}$ 定义及性质（§2.3, pp.2–3）；通用混合与 Darmois 学习设定、区分度结果 Fig 1（§3.1, p.3）；重建质量 Figs 2–4（§3.2, pp.4–5）；训练动态与 $n=2$ 分解式 (1)、Fig 5（§3.3, p.5）；正则化对照 Fig 6（§3.4, p.6）；均匀初始化失效 Fig 8、深混合伪解拟合 Fig 7、其余层数结果 Figs 9–12（附录 A, pp.7–9）；分解式推导、等周论证与 $\log|\sin\theta|$ 梯度 Fig 14（附录 B, pp.9–10）。

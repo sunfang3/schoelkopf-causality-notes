@@ -1,0 +1,73 @@
+---
+title: "概率域泛化：分位数风险最小化与因果恢复保证"
+subtitle: "Cian Eastwood et al., arXiv:2207.09944 (2022)"
+description: "把域泛化从平均/最坏情形改写为概率问题：训练域与测试域视为同一元分布的独立抽样，最小化跨域风险分布的 α 分位数；给出一致收敛界与 α→1 恢复因果预测器的条件。"
+date: 2022-07-20
+categories: [因果推断, 域泛化]
+paper-id: 2207.09944
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Cian Eastwood（Edinburgh / MPI-IS Tübingen）、Alexander Robey（UPenn，共同一作）、Shashank Singh（MPI-IS）、Julius von Kügelgen（Cambridge / MPI-IS）、Hamed Hassani、George J. Pappas（UPenn）、Bernhard Schölkopf（MPI-IS） |
+| 出处 | arXiv:2207.09944 [stat.ML]（v1 2022-07-20，v4 2023-08-22）；NeurIPS 2022 |
+| 日期 | 2022-07-20 |
+| 页数 | 46 页（正文与参考文献 11 页 + 附录 A–H 35 页） |
+
+一句话定位：域泛化（domain generalization, DG）既非平均问题也非最坏问题，而是概率问题——训练所见的移位应提示测试时**可能**出现的移位；由此提出分位数风险最小化（Quantile Risk Minimization, QRM），学一个以约 α 概率表现好的预测器，并以 α→1 时的因果恢复保证连接不变性学习。
+
+## 问题与模型
+
+设训练环境集 $E_{tr}=\{e_1,\dots,e_m\}$，各域数据 i.i.d. 抽自 $P(X^e,Y^e)$，目标是学 $f\in\mathcal F$ 泛化到 $E_{all}\supset E_{tr}$。经典表述两支：平均情形 $\min_f \mathbb E_{e\sim Q} R_e(f)$ 与最坏情形 $\min_f\max_{e\in E_{all}} R_e(f)$；前者缺乏分布外稳健性，后者在不限制移位类型时不可解。本文的关键建模：假设环境上的元分布 $Q(e)$ 存在，训练域与测试域都是 $Q$ 的 i.i.d. 抽样；于是对每个 $f$，$R_e(f)$ 成为随机变量，$Q$ 经 $e\mapsto R_e(f)$ 推前得到**风险分布** $T_f$。QRM 定义为 $\min_f F^{-1}_{T_f}(\alpha)$，即最小化 $T_f$ 的 α 分位数（金融中的在险价值）。命题 3.1 给出端点：$\alpha=1$ 等价于本性上确界（ess sup）最坏情形；$\alpha=0.5$ 在均值与中位数重合时退化为平均情形。因果侧沿用标准设定：各域为共享结构因果模型的不同干预。
+
+## 识别或主要命题
+
+**定理 4.1**（定理 D.1 的简化版，一致收敛）：$m$ 域各 $n$ 样本时，高概率地 $\sup_{f\in\mathcal F}\big[F^{-1}_{T_f}(\alpha-\epsilon_2)-\hat F^{-1}_{\hat T_f}(\alpha)\big]\le\epsilon_1$，$\epsilon_1\to0$（$n\to\infty$）、$\epsilon_2\to0$（$m\to\infty$）——经验分位数风险一致逼近总体分位数风险，且不设移位类型假设。**定义 4.2**：不变风险预测器满足 $\mathrm{Var}_{e\sim Q}[R_e(f)]=0$。**命题 4.3**（A.4/A.5 的非正式版）：若 $\mathcal F$ 含有限风险的不变风险预测器且无任意负风险，则 $\alpha\to1$ 时高斯/核 EQRM 收敛到最小不变风险预测器；高斯情形目标为 $\hat\mu_f+\Phi^{-1}(\alpha)\hat\sigma_f$（式 A.3），$\Phi^{-1}(\alpha)\to\infty$ 迫使 $\hat\sigma_f\to0$。**定理 4.4**：设 $Y=\beta^\top X+N$ 线性 SEM、线性预测器、平方损失、因果预测器风险跨域不变（域同方差性）、且二次方程组 $x^\top\mathrm{Cov}(X,X)x+2x^\top\mathrm{Cov}(X,N)x$ 跨 $m$ 域相等仅零解（式 4.3），则最小不变风险预测器必为 $\beta$；条件弱于 Peters et al. 的 IBC 定理与 Krueger et al. 的 VREx 定理——不要求特定干预类型，只要求该一般性二次条件可解。
+
+## 估计/经验
+
+EQRM 算法：以各训练域经验风险经高斯核密度估计（Silverman 或 Gaussian-optimal 带宽）构造 $\hat T_f$，再最小化经验分位数目标（式 4.1）。核平滑的关键作用是**风险外推**——右尾超出最大训练风险，$\alpha\to1$ 时估计分位数趋于无穷，从而逼出不变风险。玩具实验（线性 SCM $X_1\leftarrow N_1,\ Y\leftarrow X_1+N_Y,\ X_2\leftarrow Y+N_2$，$\sigma_2\sim$LogNormal，$m=1000$ 域、每域 $n=200000$）：每个真实分位数上对应 α 风险最低，系数随 α→1 趋于因果值。CMNIST（ERM 预训练下）：EQRM 71.4% 对 VREx 71.6%、IRM 69.7%、oracle 72.1%；随机初始化时各惩罚类方法皆崩（EQRM 53.4%）。iWildCam（243 训练域/48 测试域）EQRM$_{0.90}$ 平均风险 0.98 低于 ERM 的 1.31，0.75/0.90 分位全面更优；OGB-MolPCBA（44,930/43,793 域、平均每域 3.6 样本）ERM 平均最低（0.051），但最坏分位风险 16.04 被 EQRM$_{0.99}$ 砍半至 7.16。DomainBed（仅 4–6 域）EQRM 平均 64.1，介于 CORAL 64.6 与 ERM 63.3 之间。作者据此提出以分位数函数刻画测试域风险分布的评估协议：DG 被「丢失」的性能可能只是平均指标下不可见。
+
+## 开放问题
+
+1. **i.i.d. 域假设是主限**（附录 H 自列）：α 要精确近似泛化概率需大量 i.i.d. 抽样的域，现实几乎不满足；作者建议随机抽样式数据收集（如随机选 100 家医院），并望以域间依赖（如时间）放松假设。
+2. **少域时 α 失去概率解释**（自认）：定理 4.1 的界在域少时不紧，α 只剩保守度旋钮；DomainBed 仅 4–6 域只能比平均，WILDS 测试域也可能非 i.i.d. 或有偏。
+3. **非线性因果恢复缺失**（自认式缺口）：定理 4.4 限于线性 SEM、线性预测器与平方损失，作者明言此为所有同类恢复结果共有，非线性未触及。
+4. **带宽选择无理论**（本人识别）：风险外推依赖 KDE 带宽，Silverman 与 Gaussian-optimal 规则隐含不同右尾厚度即不同外推风险，有限 m 下无选择理论，却直接决定 α→1 行为。
+5. **优化层面无保证**（本人识别）：经验分位数目标非光滑，算法 1 收敛性未讨论；ERM 预训练被经验证明必要但缺理论解释（与 IRM/VREx 退火难题同源而未解）。
+6. **Q 的同一性不可检验**（本人识别）：训练与测试域抽自同一 $Q$ 本质不可测试，对抗性或部署偏差下的域生成不在覆盖范围。
+
+## 文献谱系
+
+前作：Blanchard et al.（2011）与 Muandet et al.（2013）的平均式 DG 表述是被对照的起点；Schölkopf et al.（2012，站内 1206.6471）的因果/反因果学习与 SMS 假说提供「域=干预」解读，是因果设定（附录 A.1）的来源；Peters, Bühlmann & Meinshausen（2016）的不变因果预测、Arjovsky et al.（2019）的 IRM（不变函数/系数）与 Krueger et al.（2021）的 VREx（不变风险）构成「由不变性恢复因果」家族，定理 4.4 以弱化其假设为贡献，附录 A.2.1 给出高斯 EQRM 与 VREx 目标的显式对应，「风险外推」亦承自 VREx。Sagawa et al.（2021，GroupDRO）是最坏情形对照。方法论跨域输入：金融的在险价值与超分位数、控制论与平滑分析的高概率传统。基准与评估批判来自 Koh et al.（2021，WILDS）与 Gulrajani & Lopez-Paz（2021，DomainBed 的「丢失的泛化」论断，本文以分位数视角直接回应）。站内对照：1112.2738 与 1507.05333 是同一不变性脉络的线性高斯前身；2106.04619 把「域=干预」用于内容/风格可识别性。
+
+## 明确不覆盖
+
+不假设也不处理特定移位类型（协变量/标签/概念/测量移位）；不做域适应（不使用测试域数据）；无非线性 SEM 的因果恢复理论；不处理域间依赖与元分布随时间的漂移；不涉及多变量因果发现，因果侧只在线性设定下恢复预测器系数。
+
+## 阅读路径
+
+先读 §1 与图 1（训练/测试域—元分布—风险分布三联图）、§2 的两式（2.1）（2.2）；§3 的式（QRM）与命题 3.1 是定义核心；§4.1 的图 2（KDE 平滑与风险外推）是全文最关键的机制；§4.2–4.3 顺读定理 4.1、命题 4.3、定理 4.4；§6.2 的表 2–3 与图 4 展示新评估协议。附录按需：A.2（证明与 VREx 对应）、D.1（完整泛化界）、H（自列局限）。姊妹篇对照：1112.2738（不变性到因果的线性高斯源头）、1507.05333（把不变性用于域迁移的另一支）、2106.04619（同一「域=干预」观的表示学习理论版）。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 分位数风险最小化 | Quantile Risk Minimization (QRM) |
+| 概率域泛化 | probable domain generalization |
+| 元分布 | meta-distribution over domains |
+| 风险分布 | risk distribution |
+| 本性上确界 | essential supremum (ess sup) |
+| 风险外推 | risk extrapolation |
+| 不变风险预测器 | invariant-risk predictor |
+| 域同方差性 | domain homoskedasticity |
+| 在险价值 | value at risk (VaR) |
+| 核密度估计 | kernel density estimation (KDE) |
+| 分布稳健优化 | distributionally robust optimization (DRO) |
+
+## 来源定位
+
+`papers/2207.09944.pdf`（46 页）。QRM 定义与命题 3.1（p.4）；EQRM 式（4.1）与风险外推图 2（p.5）；定理 4.1（p.5）、定义 4.2/命题 4.3/定理 4.4（p.5–6）；CMNIST 表 1（p.8）；iWildCam/OGB 表 2–3 与图 4（p.9）；DomainBed 表 4（p.9–10）；讨论 §7（p.10）；完整泛化界定理 D.1、VREx 对应 A.2.1、自列局限附录 H（p.46）。

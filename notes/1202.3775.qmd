@@ -1,0 +1,89 @@
+---
+title: "核条件独立性检验 KCI 及其在因果发现中的应用"
+subtitle: "Zhang et al., arXiv:1202.3775 (2012)"
+description: "在 RKHS 中用条件交叉协方差算子构造 CI 检验统计量并导出零假设下的渐近分布，使连续变量的条件独立性检验摆脱密度估计与维数诅咒。"
+date: 2012-02-14
+categories: [因果推断, 核方法]
+paper-id: 1202.3775
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Kun Zhang、Jonas Peters、Dominik Janzing、Bernhard Schölkopf（MPI for Intelligent Systems, Tübingen） |
+| 出处 | arXiv:1202.3775（UAI 2012） |
+| 日期 | 2012-02-14 |
+| 页数 | 10 页 |
+
+一句话定位：提出核条件独立性检验（Kernel-based Conditional Independence test, KCI-test），用核岭回归剥离条件集信息后构造迹统计量，并证明其零假设渐近分布为特征值加权的 $\chi^2_1$ 之和，可直接蒙特卡洛模拟或 Gamma 近似，成为 PC 等约束型因果发现处理连续非线性数据的标准组件。
+
+## 问题与模型
+
+研究问题：检验 $X \perp Y | Z$（X、Y、Z 可以是连续变量集合）。CI 检验是基于约束的因果发现（如 PC 算法）的基石，但连续情形现有四类方法（条件密度估计、条件集离散化、单指标降维、局部置换/自助法 CIPERM）都受维数诅咒影响，在条件集较大或样本不大时不可靠。理论基础是两条 CI 刻画：引理 1（Fukumizu et al. 2008）——用特征核（characteristic kernel，如高斯核）时，条件交叉协方差算子 $\Sigma_{\ddot X Y|Z} = \Sigma_{\ddot X Y} - \Sigma_{\ddot X Z}\Sigma^{-1}_{ZZ}\Sigma_{ZY}$（$\ddot X=(X,Z)$）为零当且仅当 $X \perp Y|Z$；引理 2（Daudin 1980 偏关联）——CI 等价于"剥离 Z 后的残差函数空间"中任意函数互不相关。引理 1 将引理 2 中遍历整个 $L^2$ 空间缩小为核 RKHS，是可计算性的关键。
+
+## 主要命题
+
+构造与定理按论文顺序：
+
+- 定理 3（一般结果）：给定具离散谱的中心化核，若 $f(X)$ 与 $g(Y)$ 对所有 $f\in\mathcal H_X, g\in\mathcal H_Y$ 不相关，则基于核矩阵特征值的统计量 $S_{ij}$ 之和渐近收敛于 $\sum_k \lambda^{\circ *}_k z_k^2$（$z_k^2$ 为 i.i.d. $\chi^2_1$，$\lambda^{\circ *}_k$ 为由谱与特征函数乘积决定的矩阵特征值），且结论对 $L=n\to\infty$ 成立。这是全文的技术核心。
+- 定理 4（无条件独立性检验）：$X\perp Y$ 时 $T_{UI}=\frac1n\mathrm{Tr}(\tilde K_X \tilde K_Y)$ 与 $\frac{1}{n^2}\sum_{i,j}\lambda_{x,i}\lambda_{y,j} z_{ij}^2$ 渐近同分布；统计量与 HSIC（Gretton et al. 2008）相同，但分布只依赖两个核矩阵（二阶）特征值而非四阶张量特征值，更易计算。
+- 命题 5（核心，KCI 检验）：用核岭回归估计 $h_f^*$，得残差算子 $\tilde R_Z = \varepsilon(\tilde K_Z + \varepsilon I)^{-1}$，条件化核矩阵 $\tilde K_{\ddot X|Z} = \tilde R_Z \tilde K_{\ddot X} \tilde R_Z$、$\tilde K_{\bar Y|Z} = \tilde R_Z \tilde K_Y \tilde R_Z$；零假设下 $T_{CI} = \frac1n \mathrm{Tr}(\tilde K_{\ddot X|Z}\tilde K_{\bar Y|Z})$ 渐近分布为 $\frac1n\sum_k \lambda^{\circ}_k z_k^2$，可蒙特卡洛模拟。
+- 命题 6：给出 $T_{UI}, T_{CI}$ 在给定样本下的均值与方差（如 $E(T_{CI}|\mathcal D)=\frac1n\mathrm{Tr}(\check w\check w^T)$），据此用两参数 Gamma 分布 $\Gamma(k,\theta)$ 矩匹配近似零分布，避免特征值分解。
+
+超参数分三类：$\tilde K_{\ddot X}, \tilde K_Y$ 的核宽度用中位数距离或经验值（0.8/0.5/0.3 分档）；$\tilde K_Z$ 的核宽度与正则化 $\varepsilon$ 至关重要（过大欠拟合抬第一类错误、过小过拟合抬第二类错误），条件集大时扩展为多输出高斯过程回归、以最大化边际似然选取。
+
+## 估计与实验
+
+- 合成 CI 检验（各 1000 次重复，n=200/400，条件维数 D=1–5，α=0.01/0.05）：后非线性机制 $G(F(Z_i)+E)$ 生成数据。Case I（仅一个条件变量有效）与 Case II（全部有效）中，KCI 第一类错误率均贴近 α（Gamma 近似略轻尾）；固定 α 下第二类错误随 D 增大而升，但 n 从 200 到 400 时迅速趋零。CIPERM（500 次自助）即便 D=1 第一类错误已明显高于 α，D≥3 时第二类错误趋近 1；KCI 计算时间随 D 增长远慢于 CIPERM（对数尺度比较），且对 D 不敏感。线性高斯对照中偏相关第二类错误明显更小——KCI 为通用性付出的代价。
+- 因果发现（模拟）：随机 4 变量 DAG、函数取自 GP 先验，α=0.01、n=100–700、100 个数据集，PC+KCI 恢复正确 Markov 等价类的比例明显高于 PC+CIPERM 与偏相关版 PC。
+- 真实数据：Boston Housing（UCI），α=0.001 粗略多重校正；PC_KCI 找到房间数 RM–房价 MED、非零售商业 IND–氮氧化物 NOX 等连接，后者为 Margaritis (2005) 方法所漏（其给出 CRI–NOX 等可疑边）。
+
+## 开放问题
+
+1. 作者自陈：渐近分布中 $\lambda^{\circ}_k$ 需用经验特征值代入，定理只保证 $n\to\infty$ 成立，插 入经验特征值后的有限样本分布误差没有理论界；Gamma 近似尾部偏轻（第一类错误略超 α）也只是经验观察，无修正。
+2. 超参数选择是软肋：$\sigma_Z$ 与 $\varepsilon$ 由 GP 边际似然启发式选取，无一致性保证；文中自己指出 $\varepsilon$ 过小时 $\tilde R_Z$ 趋于消失、统计量受舍入误差支配——正则化路径对结果的影响未被理论化。
+3. 幂的损失：对线性高斯数据偏相关检验功效显著更高，说明"通用核检验"在高斯近线性场景系统性吃亏；核宽度分档（0.8/0.5/0.3）是手工经验值，对尺度敏感的实际数据无指导。
+4. 计算复杂度：需对 $n\times n$ 核矩阵做特征分解，$O(n^3)$，文中实验样本仅到 700；大样本近似的理论性质未讨论。
+5. 条件集维数仍非免疫：Case II 中 D=5、n=200 时第二类错误已明显上升；对"有效条件变量多"的高维场景（如遗传学中调整大量协变量）无系统评估。
+6. 后续文献（如 Strobl et al. 2019 的 RCIT、随机特征近似线）指出零分布近似与超参数选择可进一步改进，并给出更系统的功效比较。
+
+## 文献谱系
+
+- Fukumizu et al. (2004, 2008)：条件交叉协方差算子的 RKHS 刻画与条件依赖核度量，本文引理 1 的来源与检验构造的直接基础。
+- Daudin (1980)：偏关联的 $L^2$ 刻画（本文引理 2），提供"残差不相关"直觉。
+- Gretton et al. (2008)：HSIC 独立性检验；本文定理 4 与其统计量相同而分布形式不同，且在因果发现实验中以 HSIC 为残差独立检验的姊妹工具。
+- Baker (1977)：核矩阵特征值/特征向量收敛引理（本文引理 7），定理 3 证明的技术支柱。
+- Spirtes et al. (2001) / Pearl：PC 算法与因果 Markov 条件，本文应用的载体；文中同时强调 PC 只能识别 Markov 等价类。
+- Su & White (2007, 2008)、Margaritis (2005)、Huang (2010)、Linton & Gozalo (1997)、Song (2009)：作为四类既有 CI 检验的代表被对照批评（密度估计、离散化、单指标、局部置换）。
+- Zhang & Hyvärinen (2009)：后非线性数据生成过程，实验的数据机制来源。
+- Tillman et al. (2009)：CIPERM 在 PC 中的使用，本文的主要实验对手。
+
+## 明确不覆盖
+
+不给出因果方向的完整识别（只提供 PC 的 CI 检验组件，输出仍是 Markov 等价类）；不处理离散变量或混合类型（默认连续）；不处理隐混杂与选择偏差；不涉及时序或非 i.i.d. 数据；不讨论特征核选择失效的情形。
+
+## 阅读路径
+
+先读第 2 节（引理 1–2 两条 CI 刻画），再读 3.3 节（残差算子构造与命题 5，KCI 的本体），跳过 3.1 的定理 3 一般形式先看其推论，3.4–3.5（Gamma 近似与超参数）在实现时回看；第 4 节实验重点看图 2（与 CIPERM 的两类错误及 CPU 时间对比）与图 3（PC 中嵌入）。姊妹篇对读：arXiv:1202.3757（IFMOC，其算法 1 恰以 HSIC 检验残差独立，与本文互补）；arXiv:1202.3737（同期的隐混杂检测，同样依赖核嵌入）。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 条件独立性 | conditional independence (CI) |
+| 核条件独立性检验 | kernel-based conditional independence test (KCI) |
+| 特征核 | characteristic kernel |
+| 条件交叉协方差算子 | conditional cross-covariance operator |
+| 偏关联 | partial association |
+| 核岭回归 | kernel ridge regression |
+| 中心化核矩阵 | centralized kernel matrix |
+| 矩匹配 Gamma 近似 | moment-matched Gamma approximation |
+| HSIC（希尔伯特–施密特独立性准则） | Hilbert-Schmidt independence criterion |
+| 后非线性 | post-nonlinear |
+| CIPERM（局部置换法） | local permutation CI test |
+
+## 来源定位
+
+来源：`papers/1202.3775.pdf`。关键结果原文编号：引理 1（Fukumizu 刻画）、引理 2（Daudin 偏关联）、定理 3（$S_{ij}$ 渐近分布）、定理 4（独立性检验）、命题 5（KCI 零分布）、命题 6（Gamma 矩匹配）；实验为 Figure 1（KCI 两类错误）、Figure 2（CIPERM 对照与 CPU 时间）、Figure 3（PC 恢复等价类比例）、Figure 4（Boston Housing 的 PC 输出）。

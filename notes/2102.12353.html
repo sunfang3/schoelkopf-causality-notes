@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN" xml:lang="zh-CN"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="把 IRM 的双层优化拆成「先辨识表示、再找直接原因、后学分类器」三个独立子问题：以条件非因子化指数族先验扩展 iVAE（NF-iVAE），证明隐变量可辨识至置换与逐分量变换、目标的全部直接原因可发现，首次在非线性表示+非线性分类器设定下给出 OOD 泛化保证。">
+
+<title>iCaRL：用可辨识因果表示解非线性不变风险最小化 – Schölkopf 因果论文阅读站</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-66b4df7ba86f8287dc76b7fb130027a6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "没有结果",
+    "search-matching-documents-text": "匹配的文档",
+    "search-copy-link-title": "复制搜索链接",
+    "search-hide-matches-text": "隐藏其它匹配结果",
+    "search-more-match-text": "更多匹配结果",
+    "search-more-matches-text": "更多匹配结果",
+    "search-clear-button-title": "清除",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "取消",
+    "search-submit-button-title": "提交",
+    "search-label": "搜索"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Schölkopf 因果论文阅读站</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="搜索"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="展开或折叠导航栏" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">首页</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../schoelkopf-causality-arxiv-2008-2026.html"> 
+<span class="menu-text">全景（按年）</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../glossary.html"> 
+<span class="menu-text">术语表</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../notes.html"> 
+<span class="menu-text">逐篇笔记</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">iCaRL：用可辨识因果表示解非线性不变风险最小化</h1>
+<p class="subtitle lead">Chaochao Lu et al., arXiv:2102.12353 (2021)</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">因果推断</div>
+    <div class="quarto-category">分布外泛化</div>
+    <div class="quarto-category">可辨识表示学习</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    把 IRM 的双层优化拆成「先辨识表示、再找直接原因、后学分类器」三个独立子问题：以条件非因子化指数族先验扩展 iVAE（NF-iVAE），证明隐变量可辨识至置换与逐分量变换、目标的全部直接原因可发现，首次在非线性表示+非线性分类器设定下给出 OOD 泛化保证。
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">发布于</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">2021年2月24日</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="导览" class="level2">
+<h2 class="anchored" data-anchor-id="导览">导览</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>作者</td>
+<td>Chaochao Lu（Cambridge / MPI IS, Tübingen）、Yuhuai Wu（Toronto / Vector）、José Miguel Hernández-Lobato（Cambridge / Alan Turing Institute，与下者同等指导）、Bernhard Schölkopf（MPI IS）</td>
+</tr>
+<tr class="even">
+<td>出处</td>
+<td>arXiv:2102.12353（站内 PDF 为 v6, 2022-10-18）；后以题「Invariant Causal Representation Learning for Out-of-Distribution Generalization」发表于 ICLR 2022</td>
+</tr>
+<tr class="odd">
+<td>日期</td>
+<td>2021-02-24（v1）</td>
+</tr>
+<tr class="even">
+<td>页数</td>
+<td>58 页（正文与文献 37 页 + 附录 A–J 21 页）</td>
+</tr>
+</tbody>
+</table>
+<p>一句话定位：2102.11107「因果表示学习」纲领的第一批定理化落地——将不变风险最小化（Invariant Risk Minimization, IRM）与可辨识变分自编码器（iVAE）对接，用「识别表示 + 发现 <span class="math inline">\(\mathrm{Pa}(Y)\)</span>」替代 IRM 的双层优化，从而把 OOD 泛化保证从线性世界推广到非线性世界。</p>
+</section>
+<section id="问题与模型" class="level2">
+<h2 class="anchored" data-anchor-id="问题与模型">问题与模型</h2>
+<p>研究问题（§1–§3.1）：IRM 与 IRMG 的泛化保证只在表示 <span class="math inline">\(\Phi\)</span> 与分类器 <span class="math inline">\(w\)</span> 均线性时成立（Arjovsky et al.&nbsp;Thm 9）；不变因果预测（ICP）不许干预 <span class="math inline">\(Y\)</span> 且要求变量给定。Model 1 给出最小反例：<span class="math inline">\(X_1\leftarrow N(0,\sigma_1(E))\)</span>，<span class="math inline">\(Y\leftarrow X_1+N(0,\sigma_2(E))\)</span>，<span class="math inline">\(X_2\leftarrow Y+N(0,\sigma_3(E))\)</span>——三元回归系数随 <span class="math inline">\(e\)</span> 变化，只有对 <span class="math inline">\(X_1\)</span> 单独回归是不变相关；而 ERM 必败、ICP 因 <span class="math inline">\(\sigma_2\)</span> 随环境变化失效。更现实的困难是变量被混叠：真实 <span class="math inline">\(X=(X^p,X^c)\)</span>（<span class="math inline">\(r\)</span> 个因果、<span class="math inline">\(k\)</span> 个非因果分量，<span class="math inline">\(n\le d\)</span>）经非线性 <span class="math inline">\(O=g(X)\)</span> 观测，ICP 在 <span class="math inline">\(O\)</span> 上连边都找不出。因果图假设（Assumption 1，Fig 1c）：(a) 每个 <span class="math inline">\(X_i\)</span> 依赖 <span class="math inline">\(Y\)</span> 或 <span class="math inline">\(E\)</span>；(b) 含 <span class="math inline">\(X,Y\)</span> 的图为 DAG；(c) <span class="math inline">\(O\perp\!\!\!\perp Y,E\mid X\)</span>（生成机制 <span class="math inline">\(p(O|X)\)</span> 跨环境不变）；(d) <span class="math inline">\(Y\perp\!\!\!\perp E\mid X^p\)</span>，可放松为 <span class="math inline">\(E[Y|X^p]\)</span> 不变（<span class="math inline">\(E\)</span> 只调噪声幅度）；环境 <span class="math inline">\(E\)</span> 调制结构方程噪声。可辨识性关键假设（Assumption 2）：先验 <span class="math inline">\(p(X|Y,E)\)</span> 属一般指数族 <span class="math inline">\(=Q(X)/Z(Y,E)\exp[T(X)^\top\lambda(Y,E)]\)</span>（式 5），充分统计量 <span class="math inline">\(T=[T_f^\top,T_{NN}^\top]^\top\)</span> 由「因子化部分 <span class="math inline">\(T_f\)</span>（各维统计量维数 <span class="math inline">\(\ge 2\)</span>）拼接 ReLU 网络输出」构成——因 <span class="math inline">\(T_{NN}\)</span> 具普遍逼近力，允许 <span class="math inline">\(X_i\not\!\perp\!\!\!\perp X_j\mid Y,E\)</span>，严格弱于 iVAE/ICE-BeeM 的条件因子化先验（对照本文 Table 3）。</p>
+</section>
+<section id="识别或主要命题" class="level2">
+<h2 class="anchored" data-anchor-id="识别或主要命题">识别或主要命题</h2>
+<p><strong>Theorem 1（可辨识性）</strong>：在 Assumption 2 及 (i) 噪声特征函数零集测度为零、(ii) <span class="math inline">\(f\)</span> 单射且具全部二阶交叉导数、(iii) <span class="math inline">\(T_f\)</span> 二阶可微、(iv) 存在 <span class="math inline">\(k+1\)</span> 个点 <span class="math inline">\((Y,E)\)</span> 使自然参数差矩阵 <span class="math inline">\(L\)</span>（<span class="math inline">\(k\times k\)</span>）可逆等条件下，<span class="math inline">\(\theta=(f,T,\lambda)\)</span> 可辨识至隐变量<strong>置换与逐分量简单变换</strong>（使各恢复的 <span class="math inline">\(T_i(X_i)\)</span> 线性等价于真值）；若 <span class="math inline">\(Y\)</span> 自身提供 <span class="math inline">\(k+1\)</span> 个可分辨点则 <span class="math inline">\(E\)</span> 非必需。<strong>Theorem 2（估计一致性）</strong>+<strong>Theorem 3</strong>：识别网络族包含真后验且处处为正、联合最大化目标 (10) 时，无穷数据极限下学到真参数、真 <span class="math inline">\(X^\*\)</span>（同上歧义）。<strong>Proposition 1（OOD 最优性）</strong>：Assumption 1 + Thms 1–2 下，iCaRL 在 <span class="math inline">\(\mathcal{E}^{tr}\)</span> 上学得的预测器在无穷数据极限下于 <span class="math inline">\(\mathcal{E}^{all}\)</span> 达最优 OOD 泛化——证明援引 Arjovsky (2021) Thm A.1：最优 OOD 预测器只用 <span class="math inline">\(\mathrm{Pa}(Y)\)</span>、<span class="math inline">\(w\)</span> 可由任一满支撑环境估计、且最优预测器跨 <span class="math inline">\(\mathcal{E}^{all}\)</span> 不变。<strong>Phase 2 原理</strong>：当且仅当两个隐变量同为 <span class="math inline">\(Y\)</span> 的原因时，其依赖在给定 <span class="math inline">\(Y\)</span> 后增强，故可用核独立性（HSIC）与条件独立性（KCI）检验逐对筛出全部 <span class="math inline">\(\mathrm{Pa}(Y)\)</span>；单原因情形退回附录 F（MB-by-MB 局部结构、Fig 8b–8k 十种结构、Proposition 2），确定性变换退回 IGCI。</p>
+</section>
+<section id="估计经验" class="level2">
+<h2 class="anchored" data-anchor-id="估计经验">估计/经验</h2>
+<p>三阶段算法（Algorithm 1）：Phase 1 以 <span class="math inline">\((Y,E)\)</span> 为辅助变量训练 NF-iVAE，先验归一化常数未知，故联合 ELBO (8) 与得分匹配 (9) 成复合目标 (10)；Phase 2 逐对检验发现 <span class="math inline">\(\mathrm{Pa}(Y)\)</span>；Phase 3 在 <span class="math inline">\(\mathrm{Pa}(Y)\)</span> 上独立最小化式 (11) 学 <span class="math inline">\(w\)</span>，测试时由不变的 <span class="math inline">\(p(O|X)\)</span> 反解 <span class="math inline">\(X^p\)</span>（式 12）。实验（均十次平均）：(i) 合成 I（<span class="math inline">\(X\)</span> 映为 10 维 <span class="math inline">\(O\)</span>，训练 <span class="math inline">\(\sigma_3=\{0.2,2\}\)</span>、测试 <span class="math inline">\(\sigma_3=100\)</span>，每环境 1000 样本，Table 1）：非线性混叠下测试 MSE <strong>28.16</strong>，对比 ERM 220.79、IRM 149.60、F/V-IRM Game 196.59/170.46；但恒等与线性混叠下 iCaRL（1.00/1.01）逊于 ERM/IRM（0.00）——「逐分量变换歧义把易问题变难」的自认；(ii) 消融（Table 2）：Phase 1 换普通 VAE 后测试 MSE 崩至 1174.96；(iii) 合成 II（双原因设定、4 环境 × 1000 样本，Fig 4）：NF-iVAE 恢复 <span class="math inline">\(X\)</span> 至置换+逐分量变换，VAE/iVAE/ICE-BeeM 全败，MCC 显著更高；(iv) CMNIST/CFMNIST（标签 25% 翻转噪声，<span class="math inline">\(p_e=0.2/0.1\)</span> 训练、0.9 测试，<span class="math inline">\(n=10\)</span>，Tables 4–5）：测试准确率 <strong>68.75/73.61</strong>，超 IRM（62.75/55.25）与 IRMG，逼近灰度上界 71.36/74.67（最优 75）；干预因果隐变量只改数字形状、非因果的只改颜色（Fig 5b）；(v) VLCS（10,729 张 224×224 图、5 类、4 域，train-domain validation 协议，Table 6）：<strong>81.8</strong>，超 ERM 77.4、DANN 78.7、LaCIM 78.4，为当时 SOTA。</p>
+</section>
+<section id="开放问题" class="level2">
+<h2 class="anchored" data-anchor-id="开放问题">开放问题</h2>
+<ol type="1">
+<li><strong>无未观测混杂（脚注 4 自设）</strong>：假设 <span class="math inline">\(X,Y,O,E\)</span> 之间无隐混杂因子，观察性 OOD 数据中常不可满足，违反后果与检验均未讨论。</li>
+<li><strong>Phase 2 需至少两个因果隐变量（§4.2 自认）</strong>：成对「依赖在给定 <span class="math inline">\(Y\)</span> 后增强」判据在单原因情形失效，须退回附录 F 的十结构判别；实践中还依赖「平均 p 值过半」类启发式阈值，无有限样本误差控制。</li>
+<li><strong>可辨识性仅至置换+逐分量变换、保证全在无穷数据极限（自认）</strong>：噪声 <span class="math inline">\(\varepsilon\)</span> 使估计带不确定性，只有 <span class="math inline">\(O\)</span> 高维、<span class="math inline">\(X\)</span> 低维时后验才集中；有限样本无任何保证，恒等/线性混叠下性能反逊 ERM/IRM。</li>
+<li><strong>Assumption 2 仍是指数族参数化（§7 自认）</strong>：作者主张以更一般的<strong>不可知假设（Agnostic Hypothesis）</strong>——存在同时影响输入与输出的隐因果因素（自然变量）<span class="math inline">\(O\leftarrow Z\to Y\)</span>——出发，发展放宽独立性假设的多视图普遍逼近（Multiview Universal Approximation, MUA）理论，自陈这是 OOD 保证的钥匙但本文只给纲领（上溯 Plato 理型论、操纵理论、Reichenbach 共同原因原理）。</li>
+<li><strong><span class="math inline">\(p(O|X)\)</span> 跨一切环境不变是强假设（我识别）</strong>：观测生成过程本身随环境变化（成像条件直接改 <span class="math inline">\(O\)</span> 分布而不经 <span class="math inline">\(X\)</span>）时 Phase 3 的式 (12) 在新环境失效；该假设不可检验，与 IRM 批评文献（Rosenfeld et al.&nbsp;2020；Kamath et al.&nbsp;2021，本文自引）指出的「环境多样性不可检验」同源。</li>
+<li><strong>表示识别依赖训练时观测到 <span class="math inline">\(Y\)</span>（我识别）</strong>：条件先验 <span class="math inline">\(p(X|Y,E)\)</span> 把标签嵌入识别过程，无法用于无监督/标签稀缺场景；任务一换（<span class="math inline">\(Y\)</span> 变）整套重训。</li>
+</ol>
+</section>
+<section id="文献谱系" class="level2">
+<h2 class="anchored" data-anchor-id="文献谱系">文献谱系</h2>
+<p>前作（在本文中的角色）：Arjovsky et al.&nbsp;(2019, IRM)——被求解的问题与双层优化形式，其 Thm 9 的线性局限即本文动机，其 2021 版 Thm A.1 反过来充当 Proposition 1 的证明引理；Ahuja et al.&nbsp;(2020, IRMG)——非线性下 Nash 均衡=不变预测器但无跨环境泛化保证，主要实验基线；Peters et al.&nbsp;(2015/2016, ICP)——不变预测传统，因不许干预 <span class="math inline">\(Y\)</span> 与变量给定两限制而被超越；Khemakhem et al.&nbsp;(2020a, iVAE) 与 Hyvärinen et al.&nbsp;(2019, TCL)——被扩展的可辨识性机器，其条件因子化先验是 Assumption 2 的直接前型；Khemakhem et al.&nbsp;(2020b, ICE-BeeM)——中间形态（基底测度任意但指数项仍因子化），Table 3 与 Fig 4 的对照；Sun et al.&nbsp;(2020, LaCIM)——最接近的先前方法，但限于 <span class="math inline">\(X,Y\)</span> 并生且 <span class="math inline">\(X^p\perp X^c|E\)</span>，VLCS 上被大幅超越；Daniušis et al.&nbsp;(2012, IGCI)——单原因/确定性情形兜底；Gretton et al.&nbsp;(2007) 与 Zhang et al.&nbsp;(2012)——Phase 2 的 HSIC/KCI 检验；Schölkopf et al.&nbsp;(2012)——§7 反因果观点的出处；Plato/Cook &amp; Campbell/Reichenbach/Vapnik/Schmidhuber/Bengio——不可知假设的思想史锚点；Gresele et al.&nbsp;(2019)——MUA 的既有部分结果。后续与站内脉络：2102.11107 提供其所属纲领（因果表示学习），1911.10500 是纲领独著版；Rosenfeld et al.&nbsp;(2020)、Kamath et al.&nbsp;(2021)、Nagarajan et al.&nbsp;(2020) 是本文自引的 IRM 批评线，读 Proposition 1 时应与之对照。</p>
+</section>
+<section id="明确不覆盖" class="level2">
+<h2 class="anchored" data-anchor-id="明确不覆盖">明确不覆盖</h2>
+<p>不处理未观测混杂与隐变量下的不变预测；不给有限样本/样本复杂度结果（Ahuja et al.&nbsp;2020b 的样本复杂度分析只作引用）；不处理环境变量 <span class="math inline">\(E\)</span> 本身不可观测或被误指定的情形；不覆盖域自适应（假设测试域数据训练时不可得）；Phase 3 只反解 <span class="math inline">\(X^p\)</span> 用于预测，不做干预/反事实查询；不处理时序或多任务在线设定。</p>
+</section>
+<section id="阅读路径" class="level2">
+<h2 class="anchored" data-anchor-id="阅读路径">阅读路径</h2>
+<p>先读 §3.1 Model 1 三情形（体会 ICP/ERM 何以失败）；§3.2 Fig 1c 与 Assumption 1、§3.3 Assumption 2 配 Table 3（与 iVAE/ICE-BeeM 先验逐项对照）；§4.1 Theorems 1–3 是理论核心（证明在附录 G），§4.3 末 Proposition 1 须连读 Arjovsky (2021) Thm A.1 才完整；Algorithm 1 与式 (10)–(12)；§5 按序看 Table 1（注意恒等/线性两行的自曝短板）、Tables 4–6；§7 不可知假设与 MUA 是作者真正想说的后半篇。姊妹篇对照：2102.11107（纲领文本，本文 §7 即其 §VI 的延伸）；1911.10500（ICM 原理与 SSL 方向性预测，即 §7 观点 1 的原始论证）；IRMG 与 LaCIM 原文作对照基线；站内 2012.09092（同第一作者的机制异质性路线，可视为「隐个体因素」思想的 RL 化）。</p>
+</section>
+<section id="术语对照" class="level2">
+<h2 class="anchored" data-anchor-id="术语对照">术语对照</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>中文</th>
+<th>English</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>不变因果表示学习</td>
+<td>invariant Causal Representation Learning (iCaRL)</td>
+</tr>
+<tr class="even">
+<td>条件非因子化先验</td>
+<td>conditionally non-factorized prior</td>
+</tr>
+<tr class="odd">
+<td>充分统计量 / 自然参数</td>
+<td>sufficient statistics / natural parameters</td>
+</tr>
+<tr class="even">
+<td>得分匹配</td>
+<td>score matching</td>
+</tr>
+<tr class="odd">
+<td>直接原因（父集）</td>
+<td>direct causes / parents, <span class="math inline">\(\mathrm{Pa}(Y)\)</span></td>
+</tr>
+<tr class="even">
+<td>因果 / 非因果隐变量</td>
+<td>causal / non-causal latent factors (<span class="math inline">\(X^p\)</span>, <span class="math inline">\(X^c\)</span>)</td>
+</tr>
+<tr class="odd">
+<td>平均相关系数</td>
+<td>mean correlation coefficient (MCC)</td>
+</tr>
+<tr class="even">
+<td>双层优化</td>
+<td>bi-leveled optimization</td>
+</tr>
+<tr class="odd">
+<td>不变预测器</td>
+<td>invariant predictor</td>
+</tr>
+<tr class="even">
+<td>不可知假设</td>
+<td>Agnostic Hypothesis</td>
+</tr>
+<tr class="odd">
+<td>自然变量</td>
+<td>Nature Variables</td>
+</tr>
+<tr class="even">
+<td>多视图普遍逼近</td>
+<td>Multiview Universal Approximation (MUA)</td>
+</tr>
+<tr class="odd">
+<td>彩色 MNIST</td>
+<td>Colored (Fashion) MNIST</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="来源定位" class="level2">
+<h2 class="anchored" data-anchor-id="来源定位">来源定位</h2>
+<p><code>papers/2102.12353.pdf</code>（58 页，v6）。关键内容：Model 1 与 Fig 1（§3.1, pp.5–6）；Assumption 1（§3.2, p.8）、Assumption 2 与式 (5)（§3.3, pp.8–9）；Algorithm 1（p.9）；NF-iVAE 目标式 (8)–(10)（§4.1, p.10）；Theorems 1–3（§4.1, pp.10–11，证明附录 G）；Phase 2 判据与 Phase 3 式 (11)–(12)（§4.2–4.3, pp.11–12）；Proposition 1（p.12）；Tables 1–2（pp.13–15）、Table 3（p.16）、Tables 4–6（pp.18–19）；不可知假设式 (13) 与 Fig 6（§7, pp.21–23）；MUA（§7.4.4, p.27）；单原因附录 F（pp.40–42，Proposition 2 与 Fig 8）。</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "已复制");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "已复制");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

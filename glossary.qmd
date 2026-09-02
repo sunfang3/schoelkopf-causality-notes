@@ -1,0 +1,55 @@
+---
+title: "术语表（站点级统一译名）"
+---
+
+- 加性噪声模型（Additive Noise Model, ANM）：Y = f(X) + N，N 与 X 独立
+- 独立因果机制（Independent Causal Mechanisms, ICM）：原因分布与因果机制互不携带信息
+- 因果方向判定（cause-effect inference）：仅凭观测分布区分 X→Y 与 Y→X
+- 核独立性检验（HSIC）：基于再生核希尔伯特空间（RKHS）交叉协方差的独立性度量
+- 核条件独立性检验（KCI）
+- 结构因果模型（Structural Causal Model, SCM）
+- 干预（intervention，do-算子）
+- 半同胞回归（half-sibling regression）
+- 协变量偏移（covariate shift）
+- 半监督学习（semi-supervised learning, SSL）
+- 因果/反因果学习（causal / anticausal learning）
+- 算法追索（algorithmic recourse）
+- 公平性（fairness）：未解决歧视 vs 代理歧视
+- 解耦表示（disentangled representation）
+- 非平稳/异质数据因果发现（causal discovery from nonstationary/heterogeneous data）
+- 机制与输入独立（independence of mechanism and input）
+- 先验概率偏移（prior probability shift）
+- 摘要时间图（summary time graph）
+- 部分因果发现（partial causal discovery）
+- 带标签平衡方程组（Labeled Equilibrium Equations, LEE）
+- 结构稳定性/结构可解性（structural stability / solvability）
+- 运动常数（constants of motion）
+- 迹的可乘性（trace multiplicativity）
+- 信息几何因果推断（Information-Geometric Causal Inference, IGCI）
+- 可识别功能模型类（Identifiable Functional Model Classes, IFMOC）
+- 纯条件分布（pure conditionals）
+- 不变集（invariant set）/ 域泛化（domain generalization）/ D 样本检验（D-sample test）
+- 因果像素模型（Causal Pixel Model）/ 自校准（self-calibration）/ 时间排除窗（time-exclusion window）/ CDPP
+- 因果模块（causal module）/ 弱因果充分性（weak causal sufficiency）/ C 特异变量（C-specific variables）/ 非平稳性封装量（nonstationarity encapsulator）/ 核非平稳可视化（KNV）
+- 动态结构因果模型（Dynamic SCM, DSCM）/ 结构动态稳定性（structural dynamic stability）
+- 核均值嵌入（kernel mean embedding）/ 特征核（characteristic kernel）/ 最大均值差异（MMD）/ 条件均值嵌入（conditional mean embedding）/ 核贝叶斯法则（kernel Bayes' rule）
+- 具身映射（embodiment mapping）
+- 通用性方程/期望通用对比（genericity equation / expected genericity contrast, EGC）
+- 解决变量（resolving variable）/ 短视主动学习（myopic active learning）
+- G-等价（G-equivalence）/ G-通用性（G-genericity）/ 通用比（generic ratio）
+- 谱密度比（Spectral Density Ratio, SDR；区别于 1503.01299 的谱依赖比）
+- 复合过参数化集（composition overparameterized set, COS）
+- CFE 行动（CFE-based actions）/ 最小干预（MINT）/ 绑架-行动-预测（abduction–action–prediction）/ 肥手干预（fat-hand interventions）
+- 因果表示学习（causal representation learning）
+- 枯叶模型（dead leaves model）/ 范围变量（scope variable）
+- 中介分析（mediation analysis）/ 自然直接/间接效应（NDE/NIE）/ 病例病死率（CFR）
+- 全时间图（full time graph）/ sg-无混杂（sg-unconfounded）/ 因果特征选择（causal feature selection）
+- 因果好奇心（causal curiosity）/ 门控因果图（gated causal graph）
+- 任务生成器/干预行为体（task generator / intervention actor）
+- 社会干预（societal intervention）/ 反事实孪生（counterfactual twin）/ 独立可操纵特征（IMF）
+- 反事实数据增广（counterfactual-based data augmentation）/ 机制异质性（mechanism heterogeneity）
+- 流式编程（Flow-Based Programming, FBP）/ 变量外泛化（out-of-variable generalization, OOV）
+- 边际一致性条件（marginal consistency）/ 核矩方法（Kernel Method of Moments, KMM）/ 数据重加权（data reweighting）/ 剖面散度（profile divergence）
+- 德尔斐不确定性（Delphic uncertainty）/ 相容世界（compatible worlds）
+- 完美干预（perfect intervention）/ 不完善干预（imperfect intervention）
+- 相关到因果推断（Corr2Cause）

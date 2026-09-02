@@ -1,0 +1,80 @@
+---
+title: "干预下的线性因果表示：一般非线性混合的可辨识性"
+subtitle: "Simon Buchholz, Goutham Rajendran et al., arXiv:2306.02235 (2023)"
+description: "在潜变量为线性高斯 SCM、混合函数为任意非线性（涵盖深度网络）的设定下，证明目标未知、非配对的单节点干预数据可将模型辨识至置换与缩放（完美干预）或因果偏序（不完美干预），并给出基于对比学习的估计算法。"
+date: 2023-12-18
+categories: [因果推断, 因果表示学习]
+paper-id: 2306.02235
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Simon Buchholz（MPI-IS 图宾根）、Goutham Rajendran（CMU）、Elan Rosenfeld（CMU）、Bryon Aragam（芝加哥大学）、Bernhard Schölkopf（MPI-IS 图宾根）、Pradeep Ravikumar（CMU）；前两位同等贡献 |
+| 出处 | arXiv:2306.02235 [cs.LG]（v1 2023-06-04，v2 2023-12-18）；NeurIPS 2023 |
+| 日期 | 2023-06-04（v2 2023-12-18） |
+| 页数 | 42 页（正文 10 页 + 参考文献 5 页 + 附录 A–H 27 页） |
+
+一句话定位：在「线性高斯潜变量 + 任意非线性混合 + 干预目标未知 + 非配对数据」这一最接近深度生成模型实践的组合下，把干预式因果表示学习（interventional causal representation learning）的可辨识性问题解决到该设定的最优粒度，是首个从非配对干预数据为深度网络嵌入建立因果可辨识性的工作。
+
+## 问题与模型
+
+观测 $X=f(Z)\in\mathbb R^{d'}$，**Assumption 1**：混合函数 $f$ 单射、可微、嵌入高维（$d\le d'$）；加性观测噪声可先去卷积再套用理论（Remark 1）。**Assumption 2**：潜变量服从线性高斯 SCM，$Z=AZ+D^{1/2}\epsilon$（式 1），等价记法 $Z=B^{-1}\epsilon$、$B=D^{-1/2}(I_d-A)$，$A$ 的非零元编码 DAG $\mathcal G$；高斯先验不损失表达能力——该模型类仍具通用逼近性。**Assumption 3**（单节点干预）：干预只改目标节点 $t_i$ 的方程（式 2）——可改已有入边权重（不添加新父）、噪声尺度与均值平移（shift），比 Squires et al. 与 Ahuja et al. 更宽；**Definition 1** 把干预分类为完美（perfect，即随机硬干预：切断全部父边）、纯噪声（pure noise，只改噪声分布）与不完美（imperfect/soft）。**Assumption 4**：干预覆盖所有节点 $\{t_i\}=[d]$；目标未知、允许重复干预同一节点、数据非配对（只有各边缘分布，无反事实对）。
+
+## 识别或主要命题
+
+**Theorem 3**（本文关键新结果，证明附录 A）：Assumptions 1–4 下模型可辨识至线性变换——$\tilde f=f\circ T^{-1}$、$\tilde Z^{(i)}=TZ^{(i)}$。**Theorem 1**：全部干预为完美时收紧至置换 $P_\omega$ 与逐分量缩放 $\Lambda$：$\tilde t_i=\omega(t_i)$、$\tilde B^{(i)}=P_\omega^\top B^{(i)}\Lambda^{-1}P_\omega$，平移 $\tilde\eta^{(i)}=\eta^{(i)}$ 精确恢复，因果图至标签置换；Remark 2 指出这是本设定的最优可能（潜变量不可观测，置换/缩放原则上不可消）。**Theorem 2**：干预不完美且均非纯噪声时，仍可辨识因果偏序 $\prec_\mathcal G$（至置换），但全图、$B$、潜变量即使线性混合也不可辨识（Remark 3）。证明直觉（§4）：线性代数路线在非线性 $f$ 下失效，改为考察对数几率 $\ln p_{X^{(i)}}-\ln p_{X^{(0)}}$——高斯性使其成为精度矩阵之差 $\Theta^{(i)}-\Theta^{(0)}$ 在 $f^{-1}(x)$ 处的二次型；单节点干预使该差秩 $\le2$（源节点秩 1），水平集流形携带 DAG 的「几何签名」，沿拓扑序归纳得线性可辨识性，再嫁接 Squires et al. 的广义 RQ 分解收紧（附录 B）。假设的紧性有系统刻画（附录 D）：**Fact 1**（$|\mathcal I|\le d-2$ 次干预不足以线性辨识）、**Lemma 7**（$d-1$ 次或许可行，留作未来）、**Fact 2**（全为纯噪声干预则任何 DAG 都相容）、**Lemma 8**（须排除非随机硬干预）、**Lemma 9**（对 $\epsilon$ 分布全无假设则结论不成立）。附录 E 另证：函数类的逼近性质不能换来更强的可辨识性。
+
+## 估计/经验
+
+**算法**（§5，式 6–9）：完美干预下对数几率有显式形式（**Lemma 1**）$c_i-\frac{\lambda_i}{2}((f^{-1}(x))_{t_i})^2+\eta^{(i)}\lambda_i(f^{-1}(x))_{t_i}+\frac12\langle f^{-1}(x),s^{(i)}\rangle^2$，据此设计参数化输出层 $g_i=\alpha_i-\beta_ih^2_{t_i}+\gamma_ih_{t_i}+\langle h,w^{(i)}\rangle^2$，以交叉熵作对比学习区分观测/干预样本——Bayes 最优分类器对应真参数，$W$ 学习 $B$，加 NOTEARS 无环正则与 $\ell_1$ 稀疏正则。**实验**（ER(d,2) 图，权重 $U(\pm[0.25,1])$）：线性混合复刻 Squires 设定（$d=5$、$d'=10$、$n=50000$，表 1）时线性对比法 MCC 0.90、$R^2$ 1.00，而通用非线性对比法 MCC 仅 0.05——附录 G.1 归因于无平移时输出层非凸（理论无矛盾，纯算法缺陷）；非线性混合（$n=10000$，表 2）：ER(5,2)、$d'=100$ 时对比法 SHD 1.0、AUROC 1.00、MCC 0.99、$R^2$ 0.98，压过 VAE（SHD 10、MCC 0.59）与线性基线；球图像渲染混合（每环境 $n_{\mathrm{int}}=25000$，表 3）：2/5/10 球 SHD 1.4/2.0/11.0、AUROC 0.95/1.00/0.98。
+
+## 开放问题
+
+1. **潜变量分布族**（自认，§7/附录 D.1）：线性高斯 SCM 是实质限制，向指数族或非参数族推广需新证明策略，且 Lemma 9 表明完全去掉分布假设不可能；线性 SCM 本身能否放松（超出加性噪声的观测情形尚多未解）也留白。
+2. **样本复杂度与鲁棒性**（自认，§7）：理论是总体层面的可辨识性，无任何有限样本保证或扰动分析。
+3. **规模化**（自认，§7/H）：向 Causal Triplet 等大规模真实数据扩展是后续方向；图像实验已现小样本过拟合，需精细正则化。
+4. **算法非凸性**（自认，附录 G.1）：无平移干预时二次型输出层非凸、梯度下降常陷局部最优（线性混合实验失败的成因）；作者只给了一维示意与「恢复出 $\hat Z=|Z|$」的诊断，未给修复算法。
+5. **观测分布标签**（自认，Remark 1）：须知道哪个数据集是观测分布，作者「预期可去除」但未去除。
+6. **干预次数的精确下界**（自示于 Lemma 7）：Thm 3 在 $d-1$ 次干预下是否成立只有弱迹象（Loewner 序条件一般不满足），未证明也未反证。
+7. **本人识别**：实验设定处处用「每节点恰一次干预、$d$ 已知」消去置换歧义，而理论允许的重复干预、目标未知、$d$ 未知在实验中从未检验——目标发现（哪些环境打同一节点）没有对应算法模块。
+8. **本人识别**：Thm 2 与 Thm 1 之间有硬缺口——不完美干预下连线性混合也只能到偏序，何种额外可观测信号（如多环境联合统计、非高斯四阶矩）能填补该缺口，文中只指出不可能性、未给部分补偿结果。
+
+## 文献谱系
+
+Squires–Seigal–Bhate–Uhler（线性混合的线性代数证明）是被直接推广的前作：其广义 RQ 分解在附录 B 被复用把线性可辨识性收紧为 Thm 1/2。Ahuja et al.（MSRL）限定多项式混合与确定性 do-干预，需每节点多次干预换近似可辨识性；本文的球图像基准沿用其设计。Varici et al.（基于分数）允许任意噪声但限定线性混合，其提出的「非线性混合」公开问题即本文所答。von Kügelgen et al.（2306.00542，同期）走双变量非参数路线，与本文以高斯潜变量换一般 $d$ 的取舍互为镜像。Schölkopf et al.（2021，站内 2102.11107）的 CRL 议程提出本文所答的干预式学习基本问题。对比学习谱系（Hyvärinen–Morioka 时间对比、Morioka–Hyvärinen 连通性对比、von Kügelgen et al. 站内 2106.04619 内容/风格）均在时间序列或配对反事实设定，本文首次迁移到非配对干预设定；Hyvärinen–Pajunen 的非线性 ICA 不可辨识反例被 Fact 1 直接引用。不变预测线（Peters–Bühlmann–Meinshausen；Heinze-Deml 等）与 Rosenfeld et al.（环境数=非因果潜维数）提供「环境即干预」的概念前身；Liu et al.（多环境 CRL）需 $2d$ 次干预与图形限制，本文压到 $d$ 次。Zheng et al.（NOTEARS）提供无环正则；Eberhardt 等的实验次数下界与 Reisach 等的 varsortability（附录 G.2 诊断对象）为外围工具。
+
+## 明确不覆盖
+
+不处理观测变量（无潜变量）的结构学习；不处理时序/多环境漂移（干预是显式的单节点机制改动）；不做非随机硬干预（do 到常数，Lemma 8 排除）与纯噪声干预（Fact 2 排除）；不覆盖不完美干预下的全图与系数辨识（Thm 2 明示不可能）；不给有限样本理论与鲁棒性保证；不处理 $d$ 未知或干预不覆盖全部节点的情形（附录 D：不覆盖即不可辨识）。
+
+## 阅读路径
+
+先读 §3（Assumptions 1–4 与 Definition 1，图 1 的三种干预示意）→ §4（Thm 1–3 与其后的证明直觉段，这是全文核心）→ §4 末「On the optimality and limitations of the assumptions」+ 附录 D.1（Fact 1–2、Lemma 7–9 反例，理解假设为何紧）→ §5（Lemma 1 与式 6–9，算法与理论的接口）→ §6（表 1–3；注意表 1 中非线性对比法在线性混合下的失败）→ 附录 C（与四篇最相关工作逐条对照）与 G.1（非凸性诊断）。姊妹篇对照：2306.01157（德尔斐不确定性离线 RL）——同面对「潜结构不可辨识」，本文以干预数据买回可辨识性、该文接受不可辨识并量化之；2106.04619（内容/风格解耦）——同用「对比学习 + 潜空间干预语义」的组合，可看成把数据增广解释为对 style 的软干预、本文则把软干预当成实在的数据生成机制；另可参 2106.05200（IMA）看约束混合函数类的另一条辨识路线。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 完美干预 | perfect intervention (stochastic hard) |
+| 不完善干预 / 软干预 | imperfect / soft intervention |
+| 纯噪声干预 | pure noise intervention |
+| 平移干预 | shift intervention |
+| 干预目标 | intervention target |
+| 非配对干预数据 | non-paired interventional data |
+| 配对反事实数据 | paired counterfactual data |
+| 混合函数 | mixing function |
+| 线性高斯 SCM | linear Gaussian SCM |
+| 精度矩阵 | precision matrix |
+| 对数几率 | log-odds |
+| 因果偏序 | causal partial order ($\prec_\mathcal G$) |
+| 线性可辨识性 | identifiability up to linear transformations |
+| 对比学习 | contrastive learning |
+| 结构汉明距离 | Structural Hamming Distance (SHD) |
+| 平均相关系数 | Mean Correlation Coefficient (MCC) |
+
+## 来源定位
+
+`papers/2306.02235.pdf`（42 页，v2）。Assumptions 1–4 与 Definition 1 在 p.3–5；Thm 1–2 p.5、Thm 3 p.6；证明直觉与假设紧性讨论 p.6–7；Lemma 1 与式 (6)–(9) p.7；表 1–3 与图 2–3 p.8–9；附录 A（Thm 3 证明，Lemma 2–6）p.16–25；附录 B（嫁接 Squires et al. 的 Thm 5）p.25–27；附录 C 相关工作对照 p.27–28；附录 D 反例（Fact 1–2、Lemma 7–9）p.28–31；附录 E 可辨识性与逼近 p.32–33；附录 G.1 对比法缺陷 p.36–37；附录 H 实现细节 p.39–42。

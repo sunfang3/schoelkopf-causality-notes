@@ -1,0 +1,77 @@
+---
+title: "无监督可辨识性的陷阱：对 Wang–Jordan 定理 11 的保测自同构反例"
+subtitle: "Shubhangi Ghosh et al., arXiv:2202.06844 (2022)"
+description: "用 Hyvärinen–Pajunen 式保测度自同构构造显式反例，证明「紧支撑＋独立支撑＋同 σ-代数」不足以把无监督表征辨识到置换与逐坐标双射，Wang–Jordan 定理 11（v1）不成立。"
+date: 2022-02-14
+categories: [因果推断, 因果表示学习, 可辨识性]
+paper-id: 2202.06844
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Shubhangi Ghosh、Luigi Gresele、Julius von Kügelgen、Michel Besserve、Bernhard Schölkopf（MPI IS, Tübingen） |
+| 出处 | arXiv:2202.06844 [stat.ML]；v1 2022-02-14（评注性质短文，未标期刊/会议） |
+| 日期 | 2022-02-14 |
+| 页数 | 5 页（§1 引言、§2 定理重述、§3 反例、§4 结论，无附录无实验） |
+
+一句话定位：五页技术评注——以非线性独立成分分析（nonlinear ICA）的保测度自同构（measure-preserving automorphism, MPA）为工具，给出 Wang & Jordan (2021) 定理 11（v1）的一个满足其全部前提却不等价于「置换＋逐坐标双射」的反例，并讨论其对可辨识表征学习的含义。
+
+## 问题与模型
+
+研究问题：无监督 i.i.d. 场景下模型可辨识性（identifiability）何时失败。Wang–Jordan《Desiderata for Representation Learning: A Causal Perspective》（arXiv:2109.03795v1，2021-09-08 提交）的定理 11 声称在弱条件下，不要求独立的潜因子也可辨识——这与非线性 ICA 的负面结果（Hyvärinen & Pajunen 1999；Darmois 构造）表面冲突，需要一个显式反例澄清。
+
+被批评的定理在文中重述为 **Theorem 2.1**：设观测 $X\in\mathbb R^m$，两个连续表征 $Z=f(X)$、$Z'=f'(X)\in\mathbb R^d$，若 (a) $f,f'$ 连续，(b) $\sigma(Z)=\sigma(Z')$（生成相同 σ-代数），(c) $Z,Z'$ 均紧支撑，(d) 二者均满足 **Definition 2.2 独立支撑条件（independent support condition）**——$\mathrm{supp}(Z_1,\dots,Z_d)=\prod_i\mathrm{supp}(Z_i)$——则 $Z$ 等于 $q_j(Z')$ 的某个分量置换，其中 $q_j$ 为 $\mathbb R$ 上具有紧定义域的连续双射。反例工具是 MPA：在固定半径上作依赖于半径的旋转，保持测度与支撑，却无法写成逐坐标变换。
+
+## 识别或主要命题
+
+无编号定理，核心结论即反例本身（§3）。构造：取潜因子 $Z\sim\mathrm{Unif}[-1,1]^2$，观测 $X=AZ$（$A\in\mathbb R^{2\times2}$ 可逆），$f\equiv A^{-1}$；定义替代表征 $Z'=h(Z)$：
+
+$$h(Z)=\begin{cases} Z, & \|Z\|>c\\ Z\exp(ia(\|Z\|-c)), & \|Z\|\le c\end{cases}$$
+
+其中 $c\in(0,1)$、$a\neq 0$——即半径 $\le c$ 的圆盘内逐半径旋转扭曲，圆盘外恒等；$f'=h\circ f$，且 $Z'$ 仍服从 $\mathrm{Unif}[-1,1]^2$。§3.1 逐条验证 Thm 2.1 前提：(i) $f$ 线性连续、$h$ 连续、复合连续；(ii) $h$ 保半径，在每个固定半径上要么恒等要么旋转，故为连续双射且逆连续（把 $a$ 换成 $-a$ 即得逆），从而 $Z$ 与 $Z'$ 互为连续函数，$\sigma(Z)=\sigma(Z')$；(iii) 支撑均为紧集 $[-1,1]^2$；(iv) 超矩形支撑自动满足独立支撑条件。然而 $h$ 是 MPA，一般不能表示为置换＋逐坐标双射（Fig. 1 以 $a=3.6$、$c=0.9$ 可视化扭曲）。故定理 11（v1）不成立：满足其全部前提的两个表征可以只相差一个非平凡 MPA。
+
+## 估计/经验
+
+无任何实验、算法或数据：全文为存在性论证。唯一图示 Fig. 1（p.3）用参数 $a=3.6$、$c=0.9$ 渲染观测散点与两个潜表征 $Z$、$Z'$ 的样貌，直观展示 MPA 扭曲的非逐坐标性，属构造可视化而非实证。
+
+## 开放问题
+
+1. **排除反例 ≠ 可辨识（自认）**：作者强调「排除一族反例」只是可辨识的必要而非充分条件；其 IMA 工作（Gresele et al. 2021）靠约束混合函数类排除典型反例，仍只是第一步而非完整可辨识性定理。
+2. **Wang–Jordan v2 修复的评价悬置（自认）**：v2（2022-02-10 上传）在定理 11 中新增假设 2，约束的是两个表征 $Z,Z'$ 之间的关系而非数据生成过程；该假设如何用生成过程语言解释、有何可检验蕴含，作者明言不清楚、需要更多工作。
+3. **非独立潜因子的可辨识性概念（自认）**：潜变量之间由非平凡因果关系相连时，合适的可辨识性概念仍待发展（引 von Kügelgen et al. 2021 为雏形）。
+4. **未对 v2 给出判定（我识别）**：本文只反驳 v1，既未证明 v2 新假设足以恢复可辨识性，也未构造针对 v2 的反例——修复后的定理地位完全开放。
+5. **失败边界未刻画（我识别）**：反例是二维均匀源＋特定旋转构造；独立支撑条件与同 σ-代数之外，何种针对生成过程的最弱附加条件（如对混合函数类的约束强度）恰好排除全部 MPA 型歧义，文中未给出任何刻画。
+6. **无算法面（我识别）**：不提供任何从有限数据检测、度量所学表征非唯一性的方法，「陷阱」只停在存在性层面，对实践者无诊断工具。
+
+## 文献谱系
+
+前作（在本文中的角色）：Wang & Jordan 2021 v1——被批评对象，其定理 11 是非线性 ICA 负面结果表面的例外；Hyvärinen & Pajunen 1999（§2.2）——MPA 构造与非线性 ICA 不可辨识性的出处，作者明言反例无新意、取自该文；Darmois 1951、Comon 1994、Hyvärinen–Karhunen–Oja 2001——独立成分分析谱系与负面结果背景；Locatello et al. 2019——解耦不可能性，文中列为「其他反例」；Khemakhem et al. 2020——辅助变量可辨识路线，其附录 D 的论断「带任何形式无条件先验的模型均不可辨识」被引作普适化依据；Gresele et al. 2021（IMA，同组）——作者自己的排除性修复路线；von Kügelgen et al. 2021（2106.04619）——潜变量有因果联系时的辨识路线；Hyvärinen & Morioka 2016/2017、Hyvärinen et al. 2019、Gresele et al. 2019（Incomplete Rosetta Stone）、Locatello et al. 2020、Hälvä et al. 2021、Zimmermann et al. 2021——以辅助变量、时序结构、多视图恢复可辨识性的平行路线，§4 一并综述。后续：Wang & Jordan v2 的假设 2 即对本文的直接回应；本文属 Schölkopf 组因果表征学习主线中的「可辨识性批判」环节。
+
+## 明确不覆盖
+
+不提出修正后的可辨识性定理；不处理辅助变量、时序/空间结构、多视图等非纯无监督设定（仅引用）；不讨论非 i.i.d. 数据；无任何实验或算法；不分析 WJ v2 新假设的充分性；不涉及因果发现或表征的下游任务性能。
+
+## 阅读路径
+
+全文仅五页，可一次读完：先 §1 两段弄清「定理 11 与非线性 ICA 负面结果的表面矛盾」；§2 的 Thm 2.1 与 Def 2.2（p.2）是被检验命题；§3 的构造式 (3) 与 Fig. 1（p.3）是核心；§3.1 逐条验证可略读，只须确认「连续双射＋逆连续 ⇒ 同 σ-代数」这一步；§4 结论与 WJ v2 的互动值得细读。姊妹篇对照：站内 2106.05200（IMA：如何通过约束混合函数类雅可比列的正交性排除本文所用 MPA 反例，是「破」之后的「立」）；2106.04619（增广即干预：换一条增广数据换取内容可辨识的修复路线）；二者与本文构成「反例—排除—利用结构」的三部曲。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 可辨识性 | identifiability |
+| 保测度自同构 | measure-preserving automorphism (MPA) |
+| 独立支撑条件 | independent support condition |
+| 紧支撑 | compact support |
+| σ-代数 | σ-algebra |
+| 逐坐标双射 | coordinate-wise bijective transformation |
+| 混合函数 | mixing function |
+| 无条件先验 | unconditional prior |
+| 表征学习 | representation learning |
+
+## 来源定位
+
+`papers/2202.06844.pdf`（5 页）。关键内容：Thm 2.1 与 Def 2.2（§2, p.2，重述 Wang–Jordan 定理 11 v1）；反例构造式 (3) 与 Fig. 1（§3, p.3，参数 $a=3.6$、$c=0.9$）；前提逐条验证（§3.1, p.3）；结论与 v2 假设 2 的讨论（§4, p.4）；Hyvärinen–Pajunen 构造出处为其文 §2.2。

@@ -1,0 +1,77 @@
+---
+title: "最小可辨识工具空间：为核最大矩约束系统选核"
+subtitle: "Rui Zhang et al., arXiv:2106.03340 (2021)"
+description: "为核最大矩约束（KMMR）这一核化 IV 估计框架补上被中值启发式随意处理的核（工具空间）选择问题：定义辨识性与复杂度兼优的最小可辨识工具空间（LIIS），用辨识性检验（ITC）加核有效信息准则（KEIC）两步选出，并证明选择相合性。"
+date: 2021-06-07
+categories: [因果推断, 工具变量, 核方法]
+paper-id: 2106.03340
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Rui Zhang（Australian National University）、Krikamol Muandet（MPI for Intelligent Systems, Tübingen）、Bernhard Schölkopf（MPI IS）、Masaaki Imaizumi（University of Tokyo） |
+| 出处 | arXiv:2106.03340 [cs.LG]，v1 2021-06-07（Preprint, Under review） |
+| 日期 | 2021-06-07 |
+| 页数 | 18 页（正文 9 页 + 文献、审稿清单与附录 A–C） |
+
+一句话定位：把计量经济学的矩/工具选择难题转译为 KMMR 框架下的 RKHS 选择问题，以「可辨识 + 复杂度最小」为最优性原则给出带相合性保证的两步选择程序。
+
+## 问题与模型
+
+条件矩约束（conditional moment restriction, CMR）指 $\mathrm{CMR}(\theta_0)=\mathbb{E}[\varphi_{\theta_0}(X)\mid Z]=0$（$P_Z$-几乎处处，式 1），$\varphi_\theta$ 为广义残差函数；IV 回归取 $X=(\tilde X,Y)$、$Z$ 为工具、$\varphi_\theta(X)=Y-f(\tilde X;\theta)\in\mathbb R$。CMR 蕴含连续无穷多无条件矩，故估计须选定工具空间 $\mathcal H$，即最大矩约束（maximum moment restriction, MMR）$R_{\mathcal H}(\theta):=\sup_{h\in\mathcal H,\|h\|=1}\mathbb{E}^2[\varphi_\theta(X)^\top h(Z)]$（式 2）。取 $\mathcal H$ 为与核 $k$ 相伴的再生核希尔伯特空间（RKHS）并加 Ivanov 正则化 $\|h\|=1$ 后得核最大矩约束（kernel MMR, KMMR）的闭式（式 3）：$R_{\mathcal H}(\theta)=\mathbb{E}[\varphi_\theta(X)k(Z,Z')\varphi_\theta(X')]$，$(X',Z')$ 为独立副本，估计量 $\hat\theta=\arg\min_\theta\hat R_{\mathcal H}(\theta)$。核心张力：$\mathcal H$ 过小则欠辨识（多个 $\theta$ 使 $R_{\mathcal H}=0$，MSE 上界随空间临界半径单调增加），过大则有限样本误差上升；且损失 $R_{\mathcal H}$ 依赖 $\mathcal H$ 自身（Mercer 分解 $R_{\mathcal H}=\sum_i\lambda_i\mathbb{E}[\varphi_\theta\phi_i]^2$ 显示空间越小损失越小），交叉验证必然选中过小空间。在候选 $\mathcal H_1,\dots,\mathcal H_M$ 上设：假设 1（全局辨识，CMR 有唯一解 $\theta_0$）、假设 2（存在非空可辨识候选集 $\mathcal M$），随后定义 1（最小可辨识工具空间，least identifiable instrument space, LIIS）$\mathcal H^*:=\arg\min_{\mathcal H_j:j\in\mathcal M}\Omega(\mathcal H_j)$，$\Omega$ 为复杂度度量。
+
+## 识别或主要命题
+
+定理 1（承 Zhang et al. 2020 / Muandet et al. 2020）：$k$ 连续、有界且积分严格正定（ISPD）时 $R_{\mathcal H}(\theta)=0\iff\mathrm{CMR}(\theta)=0$——RKHS 工具空间充分但不最优。选择程序 LISC 分两步。第一步辨识性检验准则（identification test criterion, ITC）：考察 Hessian 型矩阵 $F_{\mathcal H}(\theta^*)=\mathbb{E}[u_{\theta^*}(S)]$，$u_\theta(S)=\nabla_\theta\varphi_{\theta^*}(X)\,k(Z,Z')\,\nabla_\theta\varphi_{\theta^*}(X')$；其满秩是线性模型全局辨识、非线性模型局部辨识的充分条件（Hall 假设 2.3/3.6）。检验 $H_0:\mathrm{rank}=c-1$ 对 $H_1:\mathrm{rank}=c$，统计量 $\hat T=\hat\lambda_c^2$（最小特征值平方），数据对分算 $\hat\Lambda=(\hat C\otimes\hat C)^\top\hat\Omega(\hat C\otimes\hat C)$，当 $\mathrm{ITC}(\mathcal H)=n\hat T/\hat\Lambda>Q_{1-\alpha}$ 时选入。附录定理 6 给出 $H_0$ 与秩条件（假设 3）下 $n\hat T\to\Lambda Z^2$，定理 7 给出第一类错误渐近为 $\alpha$，定理 2 给出对固定备择相合，定理 3 断言 ITC 选中的空间以趋于 1 的概率可辨识。第二步核有效信息准则（kernel effective information criterion, KEIC）：$\mathrm{KEIC}(\mathcal H)=n\hat R_{\mathcal H}(\hat\theta)+\mathrm{Tr}(K_z)\mathrm{Tr}(K_z^2)^{-1/2}\log n$，惩罚项是核有效维数 $\mathcal E_k=(\sum_i\lambda_i^k)(\sum_i(\lambda_i^k)^2)^{-1/2}$ 的相合估计（定理 4）；首项可滤除无零风险的无效空间（注 1）；定理 5：在可辨识候选集内 KEIC 以概率 $\to1$ 选中复杂度最小者（依赖「唯一最小复杂度可辨识空间存在」），注 2 合并得两步法对 LIIS 相合。无可辨识空间时（如神经网络）退化为最小化比值 $\mathrm{KEIC}/\mathrm{ITC}$。
+
+## 估计/经验
+
+三组实验（每设定重复 10 次，种子 527，KEIC 风险用二折交叉验证）。其一（§6.1）：合成 IV 数据 $Y=f^*(X)+e+\delta,\ X=Z+e+\gamma$，$Z\sim U[-3,3]$，$e\sim N(0,1)$，$\delta,\gamma\sim N(0,0.1^2)$；多项式基 $f_m$（$m\in\{2,4\}$）配线性/多项式/高斯核候选，真 LIIS 为 $f_2$ 配 P2-1、$f_4$ 配 P4-1。ITC 把不可辨识空间（$f_2$ 的 L；$f_4$ 的 L、P2-1、P2-2）全部正确拒斥并随 $n\in\{100,500,1000\}$ 增大显著度上升，但 $f_4$ 参数多、小样本时 LIIS 检验不显著（作者自认局限）。其二（§6.2，表 1，$n=500$）：线性 $f_4$，四种真函数（abs/linear/quad/sin）×三场景（LS 强工具；LW 六个线性弱工具，类孟德尔随机化；NS 非线性 $\sin$ 型工具）。本文方法 MSE 全程 0.006–0.039；LW 下中值启发式退化至 0.214±0.019（abs，本文 0.024±0.010），NS 下 Silverman 法则最差 7.384±18.271（本文 0.039±0.019）。其三（§6.3，表 2，弱工具 $d=2$，$n=500$）：NN10/NN55（sigmoid）用比值法选核、ITC 仅取末层 $(W_0,b_0)$ 梯度近似；本文 MSE 0.006–0.058，基线最差 0.63（NN55-sin，Silverman）。
+
+## 开放问题
+
+1. **适用面窄（作者）**：只考虑 IV 回归型标量残差模型 $\varphi_\theta\in\mathbb R$；分位数回归、条件矩检验、近端因果学习、离线 RL 等其他 CMR 场景留作未来工作。
+2. **多参数小样本下 ITC 失效（作者）**：$f_4$ 在 $n=100$ 时 LIIS 无法被显著判定，只能退化为 KEIC/ITC 比值法，而比值法没有任何一致性理论。
+3. **NN 情形的 ITC 是启发式（作者）**：仅用末层参数梯度近似全参数梯度，无误差刻画。
+4. **最优性论证缺位（我识别）**：KEIC 是 BIC 的类比构造，定理 5 依赖「唯一最小复杂度可辨识空间存在」与固定候选集；若 LIIS 不在候选中、或存在多个同复杂度候选，方法只能给次优解，也无相对于 Donald–Newey 高阶渐近方法的效率比较。
+5. **秩检验只覆盖相邻备择（我识别）**：$H_0$ 为 $\mathrm{rank}=c-1$，$\hat\Lambda$ 的构造依赖单一零特征向量 $C$；真实秩亏更深（$\le c-2$）或 $c$ 较大时的分布与水平控制未讨论，对 $M$ 个候选同时检验亦无多重校正。
+6. **弱工具与真实数据（我识别）**：LW 场景只有经验稳健性，无弱辨识下的渐近理论；全部实验为合成数据，无真实（如孟德尔随机化）验证；$\hat R_{\mathcal H}$ 为 $O(n^2)$ 成对统计量、ITC 需特征分解与数据对分，可扩展性未评估。
+
+## 文献谱系
+
+Newey (1993) 与 Ai & Chen (2003) 的 CMR 传统、Hansen (1982) 的 GMM 构成问题来源；Carrasco–Florens (2000) 等的「矩条件连续统」是式 3 的计量对照（KMMR 相当于去掉再加权矩阵的 OWGMM）。工具选择文献三类中被明确对标：Donald–Newey (2001)、Donald et al. (2009)、Newey–Smith (2004) 的高阶渐近（Nagar 型）路线复杂、计算重且要求「候选全有效」，是本文的对照面；Andrews (1999) 与 Hall et al. (2007) 的信息准则路线是 KEIC 的直系；Robin–Smith (2000) 的秩检验直接充当 ITC 的检验内核。核方法侧：有效维数取自 Zhang (2003)、Caponnetto–De Vito (2007)；KMMR 框架本身出自 Muandet et al. (2020, UAI) 与 Zhang et al. (2020, arXiv:2010.07684)，本文定理 1 即改写自二者——本文补的是其核选择短板。DeepGMM（Bennett et al. 2019）、对抗 GMM（Lewis–Syrgkanis 2018）、Dikkala et al. (2020) 用灵活工具但均未处理 IV 估计器的矩选择；KernelIV/DeepIV/DualIV 是两阶段近邻；Mastouri et al. (2021) 近端因果学习与 Liao et al. (2021) 离线 RL 是 KMMR 的应用动机。Gretton et al. (2012) 的 MMD 最优核（最大化检验功效）被显式排除：本文目标是估计而非检验。
+
+## 明确不覆盖
+
+不处理向量残差与其他 CMR 场景（分位数回归、CM 检验、近端因果学习、离线 RL）；不选择结构函数的模型族（多项式阶、网络结构视为给定）；不给出估计量本身的弱工具稳健推断与置信区间构造；不做真实数据实验；不与高阶渐近方法做经验对比。
+
+## 阅读路径
+
+先读 §1 与 Fig 1（p.3，under-/identification/over-/weak 四类空间的图示，全文纲目所在）；再读 §3 的假设 1–2 与定义 1（LIIS，p.4）；§4.1 的 ITC 与定理 2–3（p.5）、§4.2 的 KEIC 与定理 4–5（p.5–6）是方法核心，统计细节（引理 1、假设 3、定理 6–7）在附录 A（p.15）；实验按表 1（p.8）→ 表 2（p.9）→ 附录 C.1（LIIS 的手工推导，p.17）的顺序读。本站尚无 KMMR/IV 估计线的其他笔记，可与其上位纲领笔记 1911.10500（Schölkopf《Causality for Machine Learning》，站内有笔记）对照，理解核均值嵌入—MMD 一脉如何接入因果估计工具链。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 条件矩约束 / 无条件矩约束 | conditional / unconditional moment restriction (CMR / UMR) |
+| 最大矩约束 | maximum moment restriction (MMR) |
+| 核最大矩约束 | kernel maximum moment restriction (KMMR) |
+| 工具空间 | instrument space |
+| 最小可辨识工具空间 | least identifiable instrument space (LIIS) |
+| 最小辨识选择准则 | least identification selection criterion (LISC) |
+| 辨识性检验准则 | identification test criterion (ITC) |
+| 核有效信息准则 | kernel effective information criterion (KEIC) |
+| 有效维数 | effective dimension |
+| 积分严格正定核 | integrally strictly positive definite (ISPD) kernel |
+| 欠辨识 / 弱辨识 | under-identification / weak identification |
+| 临界半径 | critical radius |
+| 中值启发式 / Silverman 经验法则 | median heuristic / Silverman's rule of thumb |
+| 秩检验 | test of rank |
+| 孟德尔随机化 | Mendelian randomization |
+
+## 来源定位
+
+`papers/2106.03340.pdf`（18 页，v1）。关键内容：式 1–2（p.2）、式 3 与定理 1（p.3）、Fig 1（p.3）、假设 1–2 与定义 1（p.4）、ITC 与定理 2–3（p.5）、式 4 与定理 4（p.5）、定理 5 与注 1–2（p.6）、表 1（p.8）、表 2（p.9）、引理 1/假设 3/定理 6–7（附录 A，p.15）、LIIS 推导（附录 C.1，p.17）、表 3（p.18）。

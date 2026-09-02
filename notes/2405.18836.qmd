@@ -1,0 +1,78 @@
+---
+title: "Do-Finetti：可交换数据上的因果效应"
+subtitle: "Siyuan Guo et al., arXiv:2405.18836 (2024)"
+description: "为满足独立因果机制的可交换（ICM 生成）过程重新定义 do 干预并证明广义截断因子化定理，使多环境数据在无先验图假设下同时完成因果发现与效应识别；配套因果 Pólya 坛模型与 Do-Finetti 算法。"
+date: 2024-05-29
+categories: [因果推断, 可交换性, 多环境数据]
+paper-id: 2405.18836
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Siyuan Guo*（MPI for Intelligent Systems, Tübingen）、Chi Zhang（Toyota Research Institute）、Karthika Mohan（Oregon State University）、Ferenc Huszár（University of Cambridge）、Bernhard Schölkopf（MPI IS；与 Huszár 共同指导） |
+| 出处 | arXiv:2405.18836 [stat.ME]（站内 PDF 为 v1, 2024-05-29；NeurIPS 2024） |
+| 日期 | 2024-05-29（v1） |
+| 页数 | 28 页（正文与文献 11 页 + 附录 A–L 与检查表 17 页） |
+
+一句话定位：把因果效应理论从 i.i.d. 推广到可交换（exchangeable）数据：为满足独立因果机制（Independent Causal Mechanisms, ICM）的 ICM 生成过程重新定义 do-干预，证明广义截断因子化（truncated factorization）定理，并给出多环境数据下同时做因果发现与效应估计的 Do-Finetti 算法——2203.15756 因果 de Finetti 的干预层续篇。
+
+## 问题与模型
+
+研究问题（§1）：Pólya 坛、中餐馆过程、Dirichlet 过程及多环境数据等可交换非 i.i.d. 过程中，干预的含义、可行目标与效应可识别性在 SCM/do-演算框架下均无定义；前作 Guo et al. 2023a 只解决图结构识别。记 $X_{i;n}$ 为序列第 $n$ 位上的第 $i$ 个变量。**Definition 1** 可交换序列（任意置换不改有限维分布）。**Definition 2（ICM 生成过程）**：$\{\boldsymbol X_{:;n}\}$ 无限可交换且 $X_{i;[n]}\perp\!\!\!\perp\bar{ND}_{i;[n]},\bar{ND}_{i;n+1}\mid PA_{i;[n]}$，由因果 de Finetti 定理等价于 $P=\iint\prod_n\prod_i p(x_{i;n}\mid pa^G_{i;n},\theta_i)\,d\nu_1\cdots d\nu_d$（式 4）——各机制带独立潜参数 $\theta_i$。关键差异（§3，图 3）：SCM 中固定外生噪声即固定观测值，ICM 过程中固定 $\theta,\psi$ 只固定采样分布，故 **Definition 3** 把 $\mathrm{do}(\boldsymbol X=\boldsymbol x)$ 定义为将被干预变量的条件密度换成 $\delta(X_{i;n}=x_{i;n})$ 并在其余条件分布中代入 $x$。此时 $P(y\mid\mathrm{do}(x))=\int p(y\mid x,\psi)p(\psi)\,d\psi$：i.i.d. 是 $p(\psi)=\delta(\psi=\psi_0)$ 的特例（式 5–6）；干预须落在带位置指标的 $X_n,Y_n$ 层面（边缘 $P(X,Y)$ 不再完全刻画联合分布，式 8），但 **Corollary 1** 证明不同位置上的相同干预有相同的边缘干预后分布，故仍可省略位置指标。
+
+## 识别或主要命题
+
+**Theorem 1（ICM 生成过程中的截断因子化，式 12）**：干预 $\boldsymbol X=\hat{\boldsymbol x}$ 后密度为 $\prod_{i\notin I_X}p(x_{i;[\neg N_i]}\mid pa^G_{i;[\neg N_i]})\cdot\prod_{i\in I_X}p(x_{i;[N_i]}\mid pa^G_{i;[N_i]})|_{\boldsymbol X=\hat{\boldsymbol x}}$（$I_X$ 为被干预变量指标集、$N_i$ 为相应位置集）——Markovian（无未测混淆）下因果效应可识别；i.i.d. 截断因子化（式 2）是其特例，直接套用会错：式 (10)$\neq$(11) 只要 $p(\psi)\neq\delta$。**Lemma 1**：$P(\boldsymbol X_{\neg I;n}\mid\mathrm{do}(\boldsymbol X_{I;n}=\hat{\boldsymbol x}),\boldsymbol X_{:;S})=\prod_{i\notin I}P(X_{i;n}\mid X_{i;S},PA_{i;S\cup\{n\}})|_{\hat{\boldsymbol x}}$——其他位置的观测（如碰撞节点 $Y_2$）携带 de Finetti 参数的信息，此性质 i.i.d. 中不存在（式 13 对 14）。**Lemma 2/3**：对与目标不同位置的干预无影响（$P(\boldsymbol Y\mid\mathrm{do}(\boldsymbol X))=P(\boldsymbol Y)$）；跨位置一致干预时父集调整公式 $P(\boldsymbol Y\mid\mathrm{do}(\hat{\boldsymbol x}))=\sum_{pa_X}P(\boldsymbol Y\mid\hat{\boldsymbol x},pa_X)P(pa_X)$ 成立。**Theorem 2（效应识别）**：在 ICM 生成过程类中，仅凭分布 $P$（无先验图假设）$P(\boldsymbol Y\mid\mathrm{do}(\boldsymbol X=\boldsymbol x))$ 即可识别——因 Guo et al. 2023a 的 Thm 5 保证 $G$ 从 $P$ 唯一识别，再由 Thm 1 边缘化。配套因果 Pólya 坛模型（§3.2）：左右两坛各置 $\alpha$ 白 $\beta$ 黑球，暗箱机制按左球颜色输出 $X_n$、按两球是否异色输出 $Y_n$，放回并按 $X_n$ 与 $Z_n$ 加球——以玩具示例演示条件干预分布随观测而变。
+
+## 估计/经验
+
+**Algorithm 1（Do-Finetti，附录 I）**：对多环境数据（每环境 $N\ge2$ 观测），Step 1 跑 Causal-de-Finetti 算法估计 $\hat G$；Step 2 直方图/核密度估计 $\hat P$；Step 3 按式 12 边缘化；Step 4 输出 $P(\boldsymbol Y\mid\mathrm{do}(\boldsymbol X=\boldsymbol x))$。**合成实验**（§5，图 4，附录 K）：按 $\theta^e,\psi^e\sim\mathrm{Beta}(1,3)$、$X\to Y$ 取 $X_i^e=\mathrm{Ber}(\theta^e),Y_i^e=\mathrm{Ber}(\psi^e)\oplus X_i^e$（另有 $Y\to X$ 与独立两图），每环境观测两对变量，环境数 $0$–$5000$、100 次重复：Do-Finetti 的效应估计 MSE 趋近 0 且图识别准确率趋近 1；i.i.d. 基线（PC + 式 2）即使给真 DAG、无限数据也达不到解析解——附录 K.1 给出 $P(y_1=0\mid\mathrm{do}(x_1=0))=\frac14$ 而条件版本为 $\frac45$，i.i.d. 公式给不出后者。实验可在笔记本 CPU 上 5 分钟复现。
+
+## 开放问题
+
+1. **只迈出第一步**（自认，§6 与附录 L）：从干预到反事实查询、从 Markovian 到半 Markovian（含未测混淆）均未解决。
+2. **理论与实践鸿沟**（自认）：实验仅是二元合成数据的概念验证（直方图/核密度估计），需要能规模化的算法。
+3. **更多形式化方向**（自认）：可连接多环境隐混杂检测（Karlsson & Krijthe 2024）、de Finetti 框架下的非线性 ICA（Reizinger et al. 2022）与干预式表示学习。
+4. **伦理风险**（自认）：更强的因果控制能力也可能带来更精确的操纵。
+5. **无有限样本理论**（我识别）：识别依赖无限可交换与忠实性；需要多少环境、每环境几个观测才能以给定误差估计效应，无收敛速率或样本复杂度结果，实验止于二值变量。
+6. **部分位置干预无一般公式**（我识别）：Def 3 允许对任意位置子集干预，但 Lemma 3 只覆盖跨位置一致干预；「只干预部分环境的 $X$、关心跨位置联合目标」的查询落在定理缝隙里。
+7. **环境独立性假设**（我识别）：环境被设为潜参数的 i.i.d. 抽样；环境间相关（时间漂移、层级结构、干预型环境）不在模型内，而真实多环境数据常如此，文中未放松该假设。
+
+## 文献谱系
+
+前作（在本文中的角色）：Schölkopf et al. 2012 与 Peters et al. 2017《Elements》——被形式化的 ICM 原理；Guo et al. 2023a（2203.15756，因果 de Finetti，站内有笔记）——ICM 生成过程的定义、图唯一识别定理（其 Thm 5 是本文 Thm 2 的引理）与 Do-Finetti 第一步算法；de Finetti 1931——表示定理原形；Pearl 2009/2012、Robins 1986、Spirtes et al. 1993——被推广的 i.i.d. 截断因子化与 do-演算；Haavelmo 1944、Aldrich 1989——机制自主性史脉；Peters & Meinshausen 2016（ICP）、Bareinboim & Pearl 2016（transportability）、Jaber et al. 2019（MEC 下的识别）——多环境估计的对照物，本文证明可交换框架反而同时给出图与效应；Dawid 2021、Rubin 2005——§6 关于可交换性与因果的对话对象；Guo et al. 2023b（2304.07896，out-of-variable 泛化，站内有笔记）——§3.3 变量可观测性问题的出处；Karlsson & Krijthe 2024、Reizinger et al. 2022——附录 L 点名的延伸方向；BRUNO 等可交换深度模型——应用侧展望（临床、微阵列、点云、主题模型）。
+
+## 明确不覆盖
+
+不处理反事实查询；不做半 Markovian（未测混杂）模型；不覆盖时序与非可交换的非 i.i.d. 数据；不给有限样本理论；不做连续高维变量的可扩展算法与真实数据实验；不处理环境间相关与环境内干预数据；不讨论干预由谁执行的可实现机制。
+
+## 阅读路径
+
+先读 §1 与图 1（A/B 两块对比干预效应与条件干预分布在 i.i.d. 与 ICM 过程下的差异）→ §2.1 式 (1)–(2) → §2.2 Def 1–2 → §3 图 3 与 Def 3（干预的操作含义：为何 SCM 的图手术不能照搬）→ 式 (10) 对 (11)（旧公式为何失效）→ Thm 1 → §3.2 Pólya 坛 → §3.3 Lemma 2/3 → §4 多环境解释与 Thm 2 → §5 图 4 → 附录 I（算法）、K（解析解）、L（局限）。姊妹篇：2203.15756（站内笔记，须先读——本文 Def 2 继承其定理，其 Thm 5 是本文识别性的全部来源）；2304.07896（out-of-variable 泛化，§3.3 简化规则的动机）；对观 2306.02235（干预式因果表示学习：同样以干预为学习信号，但走表征学习路线）。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 可交换序列/数组 | exchangeable sequence/array |
+| ICM 生成过程 | ICM generative process |
+| 独立因果机制 | independent causal mechanisms (ICM) |
+| 因果 de Finetti 定理 | causal de Finetti theorem |
+| （因果）de Finetti 参数 | (causal) de Finetti parameters |
+| 截断因子化 | truncated factorization |
+| 图手术 | graph surgery |
+| g-计算公式 | g-computation formula |
+| 位置指标 / 变量指标 | position index / variable index |
+| ICM 算子 | ICM operator |
+| 无环有向混合图 | acyclic directed mixed graph (ADMG) |
+| 因果 Pólya 坛模型 | causal Pólya urn model |
+| 多环境数据 | multi-environment data |
+| 马尔可夫性 / 忠实性 | Markov property / faithfulness |
+| 识别性 | identifiability |
+
+## 来源定位
+
+`papers/2405.18836.pdf`（28 页，v1）。图 1 i.i.d. 对比 ICM p.2；Def 1–2 与式 (4) p.4；Def 3、图 3、式 (5)–(8) p.5；Corollary 1、Thm 1（式 12）、反例式 (10)–(11) p.6；Lemma 1 与 Pólya 坛 p.7；§3.3 Lemma 2/3 概述 p.7（证明附录 G/H, pp.18–19）；Thm 2 与 Do-Finetti p.8（算法附录 I、证明附录 J, p.20）；图 4 实验 p.9（附录 K, pp.20–21，解析解 K.1 p.21）；讨论 p.9–10；局限与影响附录 L, p.21。

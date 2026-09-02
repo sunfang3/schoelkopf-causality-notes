@@ -1,0 +1,74 @@
+---
+title: "iSCM：把标准化写进生成过程，消除基准伪迹"
+subtitle: "Weronika Ormaniec et al., arXiv:2406.11601 (2024)"
+description: "在 SCM 生成过程的每个变量处加 z-标准化得到 iSCM，构造上不具 Var-可排序性、经验上对常用图族基本不具 R²-可排序性；并证明事后标准化反而使线性 SCM 在森林图上部分可识别、深层系统退化为近确定性，而 iSCM 两者皆无。"
+date: 2024-06-17
+categories: [因果推断, 因果发现基准]
+paper-id: 2406.11601
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Weronika Ormaniec、Scott Sussex、Lars Lorch（均 ETH Zürich，同等贡献）、Bernhard Schölkopf（MPI for Intelligent Systems，Tübingen）、Andreas Krause（ETH Zürich） |
+| 出处 | arXiv:2406.11601 [cs.LG]；ICLR 2025；站内 PDF 为 v3（2025-03-17） |
+| 日期 | 2024-06-17（v1） |
+| 页数 | 43 页（正文 10 页 + 附录 A–F 33 页） |
+
+一句话定位：把「基准批判」转化为可操作的生成模型修正——内部标准化结构因果模型（internally-standardized SCM, iSCM），并证明事后标准化并非无害：它带来部分可识别性与深层确定性退化，iSCM 两者皆无。
+
+## 问题与模型
+
+研究问题：加性噪声 SCM 的方差与两两相关沿因果序递增，产生 Var-可排序性（Var-sortability, Reisach et al. 2021）与 R²-可排序性（R²-sortability, 2024）两类伪迹（artifact）；现有度量只量化不消除，事后标准化（post-hoc standardization）$x^s_i=(x_i-\mathbb E[x_i])/\sqrt{\mathrm{Var}[x_i]}$ 只除方差伪迹。如何不对机制 $f_i$、噪声 $\varepsilon_i$ 施加限制地生成无两类伪迹的数据，并理解标准化对可识别性的影响？
+
+模型：iSCM（式 (iSCM)）在生成过程内部对每个变量做标准化 $x_i:=f_i(\tilde x_{\mathrm{pa}(i)},\varepsilon_i)$，$\tilde x_i:=(x_i-\mathbb E[x_i])/\sqrt{\mathrm{Var}[x_i]}$，潜变量 $x_i$ 不可观测、$\tilde x_i$ 可观测（算法 1 按拓扑序采样）。机制因此尺度自由（scale-free）：噪声与机制的相对尺度不随变量在因果序中的位置改变，且天然满足单位协变性（unit covariance, Villar et al. 2023）。把标准化吸入机制可得「隐含 SCM」（implied SCM，式 2）$\tilde x_i=\tilde g_i(\tilde x_{\mathrm{pa}(i)})+\tilde\theta_i\varepsilon_i$，于是 iSCM/标准化 SCM 均可按普通 SCM 分析。理论限于等方差零均值加性噪声的线性系统、总体层面；分析工具为引理 1（即 Wright 1934 的 trek 规则）：单位方差线性 SCM 的协方差等于两节点间所有无阻塞路径（无碰撞节点的路径）上权重乘积之和。干预推迟到附录 B：替换潜变量机制而标准化统计量保持观测分布的值，故干预后观测变量不再零均值单位方差。
+
+## 识别或主要命题
+
+**定理 2（CEV 上界）**：设每节点至多 $m$ 个父、$\bar w=\max|w_{i,j}|$、噪声方差 $\sigma^2$，则线性 iSCM 的原因解释方差份额（fraction of cause-explained variance, CEV，式 4）满足 $\mathrm{CEV}_f[\tilde x_i]\le 1-\sigma^2/(m^2\bar w^2+\sigma^2)$——深图不会塌缩到确定性机制，而标准化 SCM 会（Reisach et al. 2024）。**定理 3（标准化 SCM 的部分可识别性，此类首个结果）**：森林 DAG（无环骨架）、$|w_{i,j}|>1$ 时，给定 $p(x^s)$ 与马尔可夫等价类（Markov equivalence class, MEC）的 CPDAG $\tilde G$，每个无向连通分量中至多一条边外全部边向可识别——权重支集有下界这一基准惯例本身使标准化基准可被游戏。**定理 4（iSCM 不可识别）**：线性高斯 iSCM 在森林 DAG 上不可识别超出 MEC——MEC 中任一 DAG 都存在同观测分布、同噪声方差、同对应边权重的 iSCM；但此结论不推广到一般图（附录 C.4.2、图 12 给出三节点骨架的反例）。三节点链例子（图 3）给出定理 3 的直觉：标准化 SCM 中下游协方差依 $|w|>1$ 单调增大，而 iSCM 三种边向共享同一协方差矩阵。
+
+## 估计/经验
+
+可排序性实验（图 4）：ER(d,2)/SF(d,2)，$d\in\{100,200\}$，权重 Unif±[0.3,0.8]/±[0.5,2.0]/±[1.3,3.0]，每格 100 个系统、$n=1000$：iSCM 数据 R²-可排序性≈0.5（无伪迹），标准化 SCM 显著偏离。结构学习（图 5）：ER(20,2)/ER(100,2)，线性与非线性（平方指数核高斯过程）机制，$\varepsilon_i\sim N(0,1)$、$w_{i,j}\sim$ Unif±[0.5,2.0]，每设定 20 个系统、$n=1000$，以 F1 评测：Var-/R²-SortNRegress 与在标准化 SCM 上预训练的 AVICI 在 iSCM 上失效；NOTEARS/GOLEM-EV 在 iSCM 上反优于标准化 SCM；PC/GES 在大系统上于 iSCM 更优；不假设等噪声尺度的 CAM/GOLEM-NV 两类数据皆好。归因实验（图 6）：标准化 SCM 的隐含逆噪声尺度 $1/\tilde\theta_i^2$ 比 iSCM 高数个量级——深层确定性的足迹；保持 Var-可排序性（约 0.99）而换入隐含噪声统计的隔离实验证实：噪声统计而非 Var-可排序性才是主因。
+
+## 开放问题
+
+本文自认：(1) 定理 4 的不可识别性仅对森林成立，一般图有反例；(2) 不排除仍产生 R²-可排序数据的 iSCM 配置，「常用图族下大概率无伪迹」仅为经验结论；(3) 干预仅附录 B 给定义，干预后观测变量不再零均值单位方差，效用待查；(4) iSCM 作为基准之外的一般建模工具（时间序列、物理系统、能量守恒类比、共享先验下的重参数化）是推测性展望；(5) 可识别性究竟是特性还是缺陷，取决于评估所用假设是否先验可知、可验证。我另识别：(6) 理论与实验有断层——定理在森林与总体层面，实验用 ER/SF 图（稀疏但非森林），iSCM 数据 R²-可排序性≈0.5 这一核心现象并无对应定理；(7) 定理 4 依赖高斯性（协方差相等即分布相等），非高斯 iSCM 未触及而附录 F 恰有非高斯实验；(8) 非线性机制的理论完全空白（三个定理皆线性），但实验含非线性；(9) 「无伪迹」只对两种可排序性度量验证，其他可游戏信号（高阶矩、噪声形状等）未审查；(10) 用经验均值方差替代总体统计量做标准化的有限样本偏差未分析。
+
+## 文献谱系
+
+前作（在本文中的角色）：Reisach et al. (2021)——Var-可排序性、Var-SortNRegress 与事后标准化提议，本文承接并指出其不足；Reisach et al. (2024)——R²-可排序性与确定性退化结论的来源；Lorch et al. (2022) AVICI（站内 2205.12934）——被检验出在其标准化 SCM 训练分布上利用伪迹的摊销推断模型；Peters & Bühlmann (2014)——等方差高斯可识别性，标准化后失效的基准；Shimizu et al. (2006) LiNGAM——非高斯可识别性，标准化后仍成立的对照；Wright (1934)——引理 1 trek 规则的源头；Schölkopf (2022) 独立因果机制（ICM）——机制不应泄露其在因果序中位置的纲领依据；Villar et al. (2023, 站内 2301.13724)——单位协变性，iSCM 的物理动机；Ioffe & Szegedy (2015)——批规范化类比；Mooij et al. (2020)、Squires et al. (2022)——方差累积启发式，既限制依赖强度又不能同时去除两类伪迹；NOTEARS、GOLEM、PC、GES、CAM——被评测算法；Loh & Bühlmann (2014)、Seng et al. (2024)——MSE 型损失在噪声尺度失衡时最小化于错误 DAG 的解释工具。
+
+## 明确不覆盖
+
+不研究干预推断（仅附录 B 给定义）；只考虑无潜混淆的观测数据；不提出新的结构学习算法；定理层面不覆盖非线性与非高斯；不检验真实数据更接近 iSCM 还是 SCM（伪迹在现实中的普遍性）。
+
+## 阅读路径
+
+先读 §1 与图 1（链图上标准化 SCM 相邻相关从 0.75 升至 0.98 而 iSCM 恒为 0.75，问题与方案一目了然）；§2 补两类可排序性背景；§3 读式 (iSCM)、算法 1 与隐含 SCM；§4 是核心——定理 2 给确定性上界，图 3 的三节点例子是定理 3/4 的全部直觉，务必先看再读两定理；§5 先看图 4（可排序性）再图 5（结构学习），图 6 的噪声归因实验是解释 NOTEARS 行为反转的关键；§6 三条要点。附录按需：B 干预（p.17）、C 证明、C.4.2 反例（p.28）、D.1 启发式为何失败。姊妹篇对照：站内 2205.12934（AVICI——本文检验其伪迹敏感性的对象）、2301.13724（单位协变性——尺度自由的物理动机）；Reisach 两篇不在站内，读本文 §2 即可得其要点。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 内部标准化结构因果模型 | internally-standardized SCM (iSCM) |
+| 事后标准化 | post-hoc standardization |
+| 隐含 SCM / 隐含噪声尺度 | implied SCM / implied noise scale |
+| Var-可排序性 / R²-可排序性 | Var-sortability / R²-sortability |
+| 伪迹 | artifact |
+| 尺度自由 | scale-free |
+| 单位协变性 | unit covariance |
+| 森林（无环骨架 DAG） | forest |
+| 马尔可夫等价类 | Markov equivalence class (MEC) |
+| 部分可识别性 | partial identifiability |
+| 原因解释方差份额 | fraction of cause-explained variance (CEV) |
+| trek 规则 | trek rule |
+| 无阻塞路径 | unblocked path |
+| 碰撞节点 | collider |
+| 摊销推断 | amortized inference |
+
+## 来源定位
+
+`papers/2406.11601.pdf`（43 页）。关键内容：图 1 两类标准化对比（p.2）；式 (iSCM) 与 §3 定义（p.3）、算法 1（p.4）；隐含 SCM 式 2 与引理 1 trek 规则（p.4–5）；定理 2（p.6）；定理 3/定理 4 与图 3（p.6–7）；图 4 可排序性实验（p.8）；图 5 结构学习与图 6 隐含噪声归因（p.9）；§6 三条要点（p.10）；附录 A 隐含模型（p.15–16）、B 干预（p.17）、C.4.2 与图 12 非森林反例（p.28）、E 实验细节（p.31 起）。

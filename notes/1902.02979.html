@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN" xml:lang="zh-CN"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="在选择性标签设定下证明「先从已有标签学预测器再阈值化决策」必然次优（Proposition 1–2、Corollary 3），而带绝对连续性的随机探索策略经逆倾向得分加权可达最优目标值（Proposition 4）；从「学习预测」转向「学习决策」。">
+
+<title>预测不完美时的公平决策 – Schölkopf 因果论文阅读站</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-66b4df7ba86f8287dc76b7fb130027a6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "没有结果",
+    "search-matching-documents-text": "匹配的文档",
+    "search-copy-link-title": "复制搜索链接",
+    "search-hide-matches-text": "隐藏其它匹配结果",
+    "search-more-match-text": "更多匹配结果",
+    "search-more-matches-text": "更多匹配结果",
+    "search-clear-button-title": "清除",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "取消",
+    "search-submit-button-title": "提交",
+    "search-label": "搜索"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Schölkopf 因果论文阅读站</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="搜索"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="展开或折叠导航栏" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">首页</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../schoelkopf-causality-arxiv-2008-2026.html"> 
+<span class="menu-text">全景（按年）</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../glossary.html"> 
+<span class="menu-text">术语表</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../notes.html"> 
+<span class="menu-text">逐篇笔记</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">预测不完美时的公平决策</h1>
+<p class="subtitle lead">Niki Kilbertus et al., arXiv:1902.02979 (2019)</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">因果推断</div>
+    <div class="quarto-category">公平机器学习</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    在选择性标签设定下证明「先从已有标签学预测器再阈值化决策」必然次优（Proposition 1–2、Corollary 3），而带绝对连续性的随机探索策略经逆倾向得分加权可达最优目标值（Proposition 4）；从「学习预测」转向「学习决策」。
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">发布于</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">2019年2月8日</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="导览" class="level2">
+<h2 class="anchored" data-anchor-id="导览">导览</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>作者</td>
+<td>Niki Kilbertus（MPI for Intelligent Systems, Tübingen / University of Cambridge）、Manuel Gomez-Rodriguez（MPI for Software Systems）、Bernhard Schölkopf、Krikamol Muandet、Isabel Valera（均 MPI IS）</td>
+</tr>
+<tr class="even">
+<td>出处</td>
+<td>arXiv:1902.02979 [cs.LG]；v1 2019-02-08，站内 PDF 为 v4（2020-10-16）；刊于 AISTATS 2020（PMLR 108）</td>
+</tr>
+<tr class="odd">
+<td>日期</td>
+<td>2019-02-08</td>
+</tr>
+<tr class="even">
+<td>页数</td>
+<td>26 页（正文 18 页 + 附录）</td>
+</tr>
+</tbody>
+</table>
+<p>一句话定位：贷款被拒就没有还款记录——标签只对正决策存在，于是观测分布由决策策略诱导；本文证明在此设定下确定性阈值式的「学习预测后决策」结构性失败，并把问题改写为带公平约束的「学习决策」。</p>
+</section>
+<section id="问题与模型" class="level2">
+<h2 class="anchored" data-anchor-id="问题与模型">问题与模型</h2>
+<p>特征 <span class="math inline">\(X\subseteq\mathbb R^d\)</span>、敏感属性 <span class="math inline">\(Z=\{0,1\}\)</span>、真标签 <span class="math inline">\(Y=\{0,1\}\)</span>；决策规则（策略）<span class="math inline">\(\pi:\mathcal X\times\mathcal Z\to\mathcal P(\{0,1\})\)</span> 给出 <span class="math inline">\(d\sim\pi(D|x,z)\)</span>。<strong>选择性标签（selective labels）</strong>机制：只有 <span class="math inline">\(d=1\)</span> 时标签 <span class="math inline">\(y\sim P(Y|X,Z)\)</span> 才被实现（Lakkaraju et al.&nbsp;2017 命名）。效用（式 1）取期望利润 <span class="math display">\[u_P(\pi)=\mathbb E_{x,z\sim P}\big[\pi(D{=}1|x,z)\,(P(Y{=}1|x,z)-c)\big],\quad c\in(0,1),\]</span> 拒绝项 <span class="math inline">\(g(y)(1-d)\)</span> 因选择性标签不可估计（常数项可并入），故不失一般性取 <span class="math inline">\(g\equiv 0\)</span>。公平用 <span class="math inline">\(f\)</span>-收益 <span class="math inline">\(b^P_z(\pi)=\mathbb E[f(d,y)]\)</span>（给定群 <span class="math inline">\(z\)</span>）表达，群组均等（demographic parity）即 <span class="math inline">\(f(d,y)=d\)</span>、约束 <span class="math inline">\(b^P_0=b^P_1\)</span>；以罚项并入目标（式 5）<span class="math inline">\(v_P(\pi)=u_P(\pi)-\frac\lambda2(b^P_0(\pi)-b^P_1(\pi))^2\)</span>。完美知识下最优解是确定性阈值规则（式 2）<span class="math inline">\(\pi^*(D{=}1|x,z)=\mathbf 1[P(Y{=}1|x,z)\ge c_z]\)</span>（组别成本 <span class="math inline">\(c_z\)</span> 吸收公平约束，Corbett-Davies et al.&nbsp;2017）；实践中学到的只有不完美预测器 <span class="math inline">\(Q(Y|x,z)\approx P(Y|x,z)-\delta_z\)</span> 及其阈值化 <span class="math inline">\(\pi_Q\)</span>（式 3）。关键机制是<strong>诱导分布（induced distribution）</strong>（式 4）<span class="math inline">\(P_{\pi_0}(X,Z,Y)\propto P(Y|X,Z)\,\pi_0(D{=}1|X,Z)\,P(X,Z)\)</span>：<span class="math inline">\(\pi_0\)</span> 拒绝的区域在训练数据中根本不出现，ERM 的 i.i.d. 前提被破坏——这也解释了少数群体预测误差系统性偏大的常见观察。</p>
+</section>
+<section id="识别或主要命题" class="level2">
+<h2 class="anchored" data-anchor-id="识别或主要命题">识别或主要命题</h2>
+<ul>
+<li><strong>Proposition 1（诱导分布上学到的阈值规则严格次优）</strong>：若存在正测度集 <span class="math inline">\(V\subset\mathcal X\times\mathcal Z\)</span> 使 <span class="math inline">\(P(Y{=}1|V)\ge c\)</span> 但 <span class="math inline">\(P_{\pi_0}(Y{=}1|V)&lt;c\)</span>，则存在 <span class="math inline">\(v_{P_{\pi_0}}\)</span> 的最大化子 <span class="math inline">\(Q_0^*\)</span> 使 <span class="math inline">\(v_P(\pi_{Q_0^*})&lt;v_P(\pi_{Q^*})\)</span>。证明要点：确定性策略由接受/拒绝集 <span class="math inline">\(W_d\)</span> 刻画，<span class="math inline">\(v_{P_{\pi_0}}\)</span> 对 <span class="math inline">\(W_1(\pi_0)\)</span> 之外的行为完全失明（<span class="math inline">\(v_{P_{\pi_0}}(Q)=v_{P_{\pi_0}}(Q\cdot\chi_{W_1(\pi_0)})\)</span>），故可取 <span class="math inline">\(W_1(Q_0^*)\subset W_1(\pi_0)\)</span>，而 <span class="math inline">\(V\subset W_1(Q^*)\)</span>，对称差正测度导致严格损失。</li>
+<li><strong>Proposition 2（序贯不可恢复）</strong>：把学习写成三元组 <span class="math inline">\((\pi_0,\Pi_0,A)\)</span>，更新规则在 <span class="math inline">\(D\)</span> 上<strong>非探索（non-exploring）</strong>指 <span class="math inline">\(W_0(A(\pi,D))\subset W_0(\pi)\)</span>（旧策略拒绝者永不被接受；零训练误差的误差驱动算法即如此）。若初始策略过严（<span class="math inline">\(W_0(\pi_0)\supset W_0(\pi^*)\)</span>）且 <span class="math inline">\(A\)</span> 以 <span class="math inline">\(\ge 1-\delta_t\)</span> 概率非探索，则 <span class="math inline">\(\Pr[\pi_T\ne\pi^*]&gt;1-\sum_{t=0}^T\delta_t\)</span>。</li>
+<li><strong>Corollary 3</strong>：训练误差为零（<span class="math inline">\(\Pr[\pi(x,z)\ne y]=0\)</span>）且 <span class="math inline">\(\pi\ne\pi^*\)</span> 的阈值策略在误差驱动学习下以概率 1 收敛不到 <span class="math inline">\(\pi^*\)</span>。任意确定性策略都等价于某阈值规则（取 <span class="math inline">\(Q=\mathbf 1[\pi(D{=}1|x,z)=1]\)</span>），故负结果覆盖全部确定性策略类。</li>
+<li><strong>Proposition 4（探索策略的正面结果）</strong>：<strong>探索策略（exploring policy）</strong>指在任何 <span class="math inline">\(P\)</span> 正测度可测集上 <span class="math inline">\(\pi_0(D{=}1|x,z)&gt;0\)</span>，等价于 <span class="math inline">\(P\)</span> 对 <span class="math inline">\(P_{\pi_0}\)</span> 绝对连续（positivity）。此时经逆倾向得分加权（IPW，式 8）估计效用与收益，<span class="math inline">\(\sup_{\pi\in\Pi\setminus\{\pi^*\}}v\)</span> 达到 <span class="math inline">\(v(\pi^*)\)</span>。证明用序列 <span class="math inline">\(\pi_n\)</span>：在 <span class="math inline">\(W_1(\pi^*)\)</span> 上取 1、否则取 <span class="math inline">\(1/n\)</span>，被拒区域的贡献含于常数 <span class="math inline">\(C_1,C_{2z}&lt;\infty\)</span> 除以 <span class="math inline">\(n\)</span> 消失。注意 <span class="math inline">\(y\)</span> 与 <span class="math inline">\(d\)</span> 独立（决策不因果影响结果），估计对象是条件分布 <span class="math inline">\(P(Y|x,z)\)</span> 而非处理效应——这是与反事实策略学习（wIPS）文献的关键差异，本文借此同时给出 positivity 与一致性条件。</li>
+</ul>
+</section>
+<section id="估计经验" class="level2">
+<h2 class="anchored" data-anchor-id="估计经验">估计/经验</h2>
+<p><strong>算法（§4，Algorithm 1）</strong>：在可微探索策略类 <span class="math inline">\(\Pi(\Theta)\)</span> 上做随机梯度上升，log-derivative 技巧给出效用与收益梯度（式 9），实现为视野 1 的 REINFORCE；数据只含正决策样本，分母为上一策略的 <span class="math inline">\(\pi_{\theta_{t-1}}(D{=}1|x,z)\)</span>（式 10）。两个具体策略类：logistic 策略 <span class="math inline">\(\pi_\theta=\sigma(\phi(x,z)^\top\theta)\)</span>；<strong>半 logistic 策略（semi-logistic policy）</strong>——模型认为应接受处（<span class="math inline">\(\phi^\top\theta\ge0\)</span>）确定性 <span class="math inline">\(d=1\)</span>，只在存疑处随机化，以回应「对确信会还款者也掷硬币不可接受」的伦理与效用顾虑。序列分迭代（只用上一策略数据）与聚合（用全部历史数据）两种。<strong>实验（§5、附录 A）</strong>：(i) FICO 贷款例（§3.1）：80% 白人/20% 黑人，<span class="math inline">\(c=0.7\)</span>，初始阈值 <span class="math inline">\(\xi\in[500,800]\)</span> 各采 1 万训练样本（逆变换抽样 + L2 正则 logistic 回归、5 折选参）、百万样本评估——<span class="math inline">\(\xi\ge650\)</span> 时学到的 <span class="math inline">\(\pi_\xi\)</span> 效用趋近于零，且数据量再大也无济于事；(ii) 合成两设定（30 次重复取中位数，<span class="math inline">\(T=200\)</span>；第一设定 <span class="math inline">\(x\sim N(0.5-z,1)\)</span> 截断、<span class="math inline">\(P(Y{=}1|x)\)</span> 单调但未校准、<span class="math inline">\(c\approx0.142\)</span>，第二设定 <span class="math inline">\(x\sim N(3(0.5-z),3.5)\)</span>、<span class="math inline">\(P(Y{=}1|x)\)</span> 多次穿越 <span class="math inline">\(c\)</span>、<span class="math inline">\(c=0.55\)</span>）：探索策略定位最优边界而确定性阈值规则卡死，第二设定中确定性规则收敛到 <span class="math inline">\(x\approx5\)</span> 的次优阈值、永久忽略左侧应接受区间；(iii) COMPAS（ProPublica，Broward County 2013–2014；<span class="math inline">\(z=\)</span> 白人、<span class="math inline">\(y=\)</span> 两年内再捕、<span class="math inline">\(d=\)</span> 假释；80/20 划分，<span class="math inline">\(c=0.6\)</span>，<span class="math inline">\(\alpha=0.1\)</span>，<span class="math inline">\(B=64\)</span>，<span class="math inline">\(N=B^2\)</span>）：<span class="math inline">\(\lambda=0\)</span> 时探索策略的累计有效效用在 <span class="math inline">\(t&gt;100\)</span> 后占优且群组均等违反一致更低；随 <span class="math inline">\(\lambda\)</span> 增大可达完美群组均等，代价是效用下降（Fig 6、11）。作者如实声明：COMPAS 本身也经过选择性标签，真值分布需真实部署才能学到。</p>
+</section>
+<section id="开放问题" class="level2">
+<h2 class="anchored" data-anchor-id="开放问题">开放问题</h2>
+<ol type="1">
+<li><strong>自列</strong>：全程假设静态 <span class="math inline">\(P\)</span>——决策或外部性对总体的反馈（表演式预测式耦合）未建模，留作与强化学习的接口。</li>
+<li><strong>自列</strong>：如何在具体领域（司法、信贷）<strong>合乎伦理地探索</strong>未解决；Meyer et al.&nbsp;2019 记录了公众对「比较两种均无异议策略的实验」的抵制，随机化假释的现实可行性存疑。</li>
+<li><strong>无有限样本理论</strong>：Proposition 4 是关于上确界的可达性命题，Algorithm 1 没有收敛速率、遗憾界或样本复杂度；IPW 梯度在 <span class="math inline">\(\pi_0(D{=}1|x,z)\)</span> 小而 <span class="math inline">\(\pi_\theta\)</span> 常取正决策处方差大，文中只提议借用 clipped-wIPS、自归一化、双重稳健估计器，未实现亦未分析。</li>
+<li><strong>收益函数的线性限制</strong>：Proposition 4 证明中收益项极限论证要求 <span class="math inline">\(f\)</span> 对两变元线性（如 <span class="math inline">\(f(d,y)=d\)</span>）；可分性/充分性类准则需对 <span class="math inline">\(y\)</span> 或 <span class="math inline">\(d\)</span> 条件化，未必落入该框架，公平约束的一般化未证。</li>
+<li><strong>效用函数无法为拒绝定价</strong>：<span class="math inline">\(g(y)(1-d)\)</span> 不可识别导致拒绝的社会成本（如被拒贷款者的损失）进不了目标——这是选择性标签的结构性盲区，本文以「不失一般性 <span class="math inline">\(g=0\)</span>」带过。</li>
+<li><strong><span class="math inline">\(y\perp d\)</span> 假设过强</strong>：排除了决策对结果的因果影响（如监禁本身的威慑/标签效应），这与处理效应文献的设定相反；真实刑事司法中该假设难以成立。</li>
+</ol>
+</section>
+<section id="文献谱系" class="level2">
+<h2 class="anchored" data-anchor-id="文献谱系">文献谱系</h2>
+<p>前作：Corbett-Davies et al.&nbsp;2017——效用框架与式 (2) 阈值最优性的来源；Woodworth et al.&nbsp;2017——「不完美 <span class="math inline">\(Q\)</span> + 阈值化远离最优」的先行负结果，本文 Prop 1 的动机；Hardt et al.&nbsp;2016——后处理式公平化的对照兼 FICO 数据来源；Lakkaraju et al.&nbsp;2017——selective labels 术语与问题命名；Chouldechova 2017、Kleinberg et al.&nbsp;2017b——公平—精度「权衡」错觉，本文归因于把决策混同于预测；Kleinberg et al.&nbsp;2018、Rambachan et al.&nbsp;2020——主张预测与决策两阶段分离的社会规划者视角，本文指出选择性标签使两阶段不可解耦；Hu &amp; Chen 2018、Liu et al.&nbsp;2018、Mouzannar et al.&nbsp;2019——长期影响线，但假设完美预测器且忽略数据收集；Rubin 2005、Athey &amp; Wager 2017、Kallus 2018、Kallus &amp; Zhou 2018、Ensign et al.&nbsp;2018（苹果品尝问题，确定性设定下同样得出随机最优）、Lakkaraju &amp; Rudin 2017——反事实/策略学习族，本文与之划清「决策决定结果是否存在 vs 决定哪个潜在结果被观测、且无未观测混杂」的界线；Langford et al.&nbsp;2008、Dudík et al.&nbsp;2011、Agarwal et al.&nbsp;2014、Bottou et al.&nbsp;2013、Swaminathan &amp; Joachims 2015——上下文老虎机与反事实学习（wIPS）的技术亲缘；Williams 1992（REINFORCE）、Kiefer &amp; Wolfowitz 1952（SGA）、Hyvärinen 2005（得分函数）；Angwin et al.&nbsp;2016——COMPAS 数据；Perdomo et al.&nbsp;2020——表演式预测，决策扰动分布的参照。后续：同一作者群的「学习决策」与反馈式公平（decisions-feedback loops）研究把本文自列的静态 <span class="math inline">\(P\)</span> 缺口推向动力学设定。</p>
+</section>
+<section id="明确不覆盖" class="level2">
+<h2 class="anchored" data-anchor-id="明确不覆盖">明确不覆盖</h2>
+<p>不处理未观测混杂（决策不影响 <span class="math inline">\(y\)</span>，估计的是条件分布而非处理效应）；不建模策略性个体与决策—分布反馈（静态 <span class="math inline">\(P\)</span>）；决策、标签、敏感属性均限二值（敏感属性可推广到类别，未做）；公平约束限于观测群组匹配型 <span class="math inline">\(f\)</span>-收益，不处理个体公平与长期公平；不设计新的方差缩减或离线策略评估方法；不给出探索的伦理框架；不研究多值决策/部分观测特征。</p>
+</section>
+<section id="阅读路径" class="level2">
+<h2 class="anchored" data-anchor-id="阅读路径">阅读路径</h2>
+<p>先读 §1–2 建立记号与诱导分布 (4)；§3.1 是全文核心——Prop 1 的证明短而锋利，紧随的 FICO 例（Fig 1）把「初始阈值多高才安全」的直觉证伪（多低都不安全）；Prop 2 与 Corollary 3 说明失败在序贯学习下也不可恢复；§3.2 探索策略定义与 Prop 4 的构造性证明（<span class="math inline">\(\pi_n\)</span> 序列）值得精读；§4 的 Algorithm 1 与半 logistic 策略是伦理顾虑与理论的折中；实验首选 §5.2 COMPAS（Fig 5–6）与附录 Fig 8 的策略演化可视化。姊妹篇对照：站内 1603.01581（Geiger et al.，决策场景下反事实量的近似——本文把「决策即干预是否发生」推到学习理论层面）；本批 1812.00524（同第一作者：反因果学习的强泛化困难，与本文同属「预测任务的因果解剖」纲领）；站内 1206.6471（因果/反因果之分的方法论源头）。</p>
+</section>
+<section id="术语对照" class="level2">
+<h2 class="anchored" data-anchor-id="术语对照">术语对照</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>中文</th>
+<th>English</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>选择性标签</td>
+<td>selective labels</td>
+</tr>
+<tr class="even">
+<td>诱导分布</td>
+<td>induced distribution</td>
+</tr>
+<tr class="odd">
+<td>确定性阈值规则</td>
+<td>deterministic threshold rule</td>
+</tr>
+<tr class="even">
+<td>非探索更新规则</td>
+<td>non-exploring update rule</td>
+</tr>
+<tr class="odd">
+<td>探索策略</td>
+<td>exploring policy</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(f\)</span>-收益</td>
+<td><span class="math inline">\(f\)</span>-benefit</td>
+</tr>
+<tr class="odd">
+<td>群组均等</td>
+<td>demographic parity</td>
+</tr>
+<tr class="even">
+<td>逆倾向得分加权</td>
+<td>inverse propensity score (IPW) weighting</td>
+</tr>
+<tr class="odd">
+<td>得分函数</td>
+<td>score function</td>
+</tr>
+<tr class="even">
+<td>半 logistic 策略</td>
+<td>semi-logistic policy</td>
+</tr>
+<tr class="odd">
+<td>有效效用</td>
+<td>effective utility</td>
+</tr>
+<tr class="even">
+<td>表演式预测</td>
+<td>performative prediction</td>
+</tr>
+<tr class="odd">
+<td>苹果品尝问题</td>
+<td>apple tasting problem</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="来源定位" class="level2">
+<h2 class="anchored" data-anchor-id="来源定位">来源定位</h2>
+<p><code>papers/1902.02979.pdf</code>（26 页）。关键内容：效用式 (1)、最优阈值式 (2)、诱导分布式 (4)（p.4–5）；罚项目标式 (5) 与 Prop 1（p.6）；FICO 贷款例与 Fig 1（p.7）；Prop 2 式 (7) 与 Corollary 3（p.8）、Fig 2（p.9）；探索策略定义、IPW 式 (8)（p.9）、Prop 4 及证明（p.10–11）；Algorithm 1（p.12）；logistic/半 logistic 策略（p.14–15）；合成实验 Fig 3–4（p.16–17）；COMPAS Fig 5–6（p.17–18）；合成设定参数与 30 次重复说明（附录 A.1、A.3，p.23、26）。</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "已复制");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "已复制");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

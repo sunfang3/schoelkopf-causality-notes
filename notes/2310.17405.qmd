@@ -1,0 +1,76 @@
+---
+title: "平稳扩散作因果模型：核偏差目标下的无图因果建模"
+subtitle: "Lars Lorch et al., arXiv:2310.17405 (2023)"
+description: "绕开结构因果模型、因果图及无环性假设，用随机微分方程的平稳密度建模系统在干预下的行为；推导把生成元平稳性条件写进 RKHS 的「偏离平稳性的核偏差」（KDS）目标，可从多环境干预数据梯度学习 SDE 并外推到未见过干预。"
+date: 2023-10-26
+categories: [因果推断, 循环因果模型, 扩散过程]
+paper-id: 2310.17405
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Lars Lorch、Andreas Krause\*（ETH Zürich）、Bernhard Schölkopf\*（MPI for Intelligent Systems, Tübingen）；\* 共同指导 |
+| 出处 | arXiv:2310.17405 [cs.LG]（v1 2023-10-26，v2 2024-03-16）；AISTATS 2024（PMLR v238） |
+| 日期 | 2023-10-26 |
+| 页数 | 22 页（正文 9 页 + 附录 A–E 背景证明与实验细节 13 页） |
+
+一句话定位：不以结构方程与因果图为载体，而以随机微分方程（stochastic differential equation, SDE）$dx_t=f(x_t)\,dt+\sigma(x_t)\,dW_t$ 的**平稳密度** $\mu$ 建模变量分布——反馈环由隐含时间维自然消解、无需无环性假设——并为此推导可学习目标「偏离平稳性的核偏差」（kernel deviation from stationarity, KDS），把无穷小生成元的平稳性条件表达成再生核希尔伯特空间（RKHS）中的闭式泛函。
+
+## 问题与模型
+
+研究问题有二：(a) SCM 因须递归求解而限于无环系统，允许环路需强模型限制（可逆性、线性、加性噪声）；能否给出允许一般反馈机制、可从多环境干预数据梯度学习、并外推到未见过干预的建模范式？(b) 不观测时间序列、不做轨迹模拟（rollout），如何仅凭平稳分布样本拟合 SDE？模型：因果模型即 SDE（式 7）$dx_t=f_\theta(x_t)\,dt+\sigma_\theta(x_t)\,dW_t$，变量 $x$ 的分布用其平稳密度 $\mu$ 刻画；$f_j,\sigma_j$ 显式编码 $x_j$ 对其余变量的函数依赖（机制），类比结构方程，且在其他变量或机制受扰时保持不变（独立因果机制思想）。干预即机制修改 $f_{\theta,\phi},\sigma_{\theta,\phi}$，重点考察**平移–尺度干预**（shift-scale intervention，式 8）：$f_{\theta,\phi}(x)_j=f_\theta(x)_j+\delta$、$\sigma_{\theta,\phi}(x)_j=\beta\,\sigma_\theta(x)_j$。技术底座是无穷小生成元（infinitesimal generator）$A$（式 2）：对光滑紧支函数 $h$，$(Lh)(x)=f(x)\cdot\nabla h(x)+\tfrac12\mathrm{tr}\big(\sigma(x)\sigma(x)^\top\nabla\nabla h(x)\big)$（式 3）。§4.3 三条性质：**表达力**——$\sigma=\sqrt2 I$ 时取 $f=-\nabla\log\mu$（Langevin 扩散）可实现任意密度，非对角 $\sigma$ 的相关驱动噪声可建模混杂，故复杂度由 $f,\sigma$ 的函数类决定而非噪声分布族；**稳定性**——线性系统要求 $B$ 特征值实部为负，随机初始化的 $f_\theta,\sigma_\theta$ 不保证稳定；**可辨识性**——速度缩放 $sL$ 不改变平稳密度，参数不可辨识。
+
+## 识别或主要命题
+
+出发点是式 (4)（Ethier & Kurtz 1986）：$\mu$ 是扩散的平稳密度当且仅当 $\mathbb{E}_{x\sim\mu}[Ah(x)]=0$ 对生成元核（core）中一切 $h$ 成立。**Lemma 1（Riesz 表示）**：若 $f,\sigma$ 及核 $k$ 的相应二阶偏导数关于 $\mu$ 平方可积，则存在唯一表示元 $g_{\mu,L}=\mathbb{E}_\mu[L_x k(x,\cdot)]\in\mathcal H$ 使 $\mathbb{E}_\mu[Lh]=\langle h,g_{\mu,L}\rangle_{\mathcal H}$。**Theorem 2**：$\sup_{h\in\mathcal F}\mathbb{E}_{x\sim\mu}[Lh(x)]=\sqrt{\mathrm{KDS}(L,\mu;\mathcal F)}$，其中
+$$\mathrm{KDS}(L,\mu;\mathcal F)=\mathbb{E}_{x,x'\sim\mu}\big[L_xL_{x'}k(x,x')\big]=\|g_{\mu,L}\|^2_{\mathcal H}$$
+（$\mathcal F$ 为单位球；正则条件下期望与微分可交换），见证函数 $w_{\mu,L}=g_{\mu,L}/\|g_{\mu,L}\|$。**Theorem 3（一致性）**：对 $\nu>2$ 的 Matérn 核、有界 $f,\sigma$ 且 $\sigma\sigma^\top$ 正定，$\mu$ 是该 SDE 的平稳密度**当且仅当** KDS$=0$；证明靠构造 $A$ 的 core 在 Sobolev 范数下稠密于 Matérn RKHS（Lemma 4/5：Matérn RKHS 与 Sobolev 空间范数等价）。意义：KDS 既是学习目标又（在收敛后）是稳定性证书。**估计**：式 (5) 的 U 统计量给出无偏经验 KDS；$L_\theta$ 经由 $f_\theta,\sigma_\theta$ 对 $\theta$ 完全可微，学习不需要采样模型轨迹或沿时间反传梯度，$\sigma=I$ 时式 (6) 显示核项与 $\theta$ 无关、可缓存复用。**Algorithm 1**：从 $M$ 个干预数据集联合学习共享机制 $\theta$ 与各环境干预参数 $\phi_i$，每次抽环境以 $-\nabla_{\theta,\phi_i}\hat{\mathrm{KDS}}+\lambda\sum_j R(\theta_j)$ 更新（$R$ 为逐变量的 group lasso，促稀疏因果依赖）；速度缩放的不确定性靠固定部分参数（如 $f_\theta(x)_j$ 的自依赖尺度）抑制。
+
+## 估计/经验
+
+示意实验（Fig 2）：目标 $dx_t=(a+bx_t)dt+c\,dW_t$（$b<0$，闭式高斯平稳密度），高斯核、期望以 1000 样本近似；KDS 对 $a,c$ 的偏导在真参数处为零，梯度下降可恢复。基准（Fig 4）：$d=20$ 变量、Erdős-Rényi 稀疏结构（期望度 3）、50 个随机系统；每系统有观测数据与 10 训练 + 10 测试的单变量平移干预（目标变量互斥、幅度 $\delta\sim\mathrm{Unif}(-15,-5)\cup(5,15)$，**测试干预落在训练未干预过的变量上，属分布外**），每数据集 1000 样本；三类数据：循环线性 SCM（$x=Wx+b+\mathrm{diag}(\sigma)\epsilon$）、循环线性 SDE、SERGIO 基因表达模拟（无环、增益型过表达扰动）。方法侧用 KDS 学线性与 MLP 机制的扩散（$\sigma_\theta=\mathrm{diag}(\exp(\sigma))$），基线含 GIES、IGSP、DCDI（无环）与 LLC、NODAGS（循环）。结果：两个循环设定上 KDS（Linear/MLP）在 Wasserstein-2 与均值 MSE 上均最优（LLC 即使模型假设完全匹配也系统性落后）；SERGIO 上 MLP 扩散与最好的 DCDI/NODAGS 持平。附录 E（Fig 6、Table 2）：无标度结构结论类似，Wilcoxon 符号秩检验（$\alpha=0.05$）下显著优于多数基线。
+
+## 开放问题
+
+自认：(1) 对干预类的泛化能力尚无形式化理论（结论明言列为未来方向）。(2) KDS 一致性（Theorem 3）限于 $\nu>2$ 的 Matérn 核与有界 $f,\sigma$；通用核的稠密性只在上确界范数下成立、不含 $L$ 所需偏导数，一般连续函数与其他核类需更一般的 core 结果。(3) 优化过程中不保证所学 SDE 稳定（KDS$=0$ 只在收敛后充当证书），未来应经由模型类性质（如稳定神经网络参数化）直接保证稳定性。(4) 多个干预分布能否辨识平稳 SDE 参数是开放问题：速度缩放已致不辨识，线性情形需稀疏条件方可辨识至速度因子。(5) 方向性展望：学习由平稳扩散支配的**潜表示**，衔接因果表示学习。我从论证中识别：(6) Theorem 3 的有界假设与实践所用 MLP/线性机制（可无界）之间有缺口，作者仅以「平稳系统中无界只以任意小概率出现」非形式辩护；学习中间阶段机制漂移出有界类时一致性无保证。(7) Algorithm 1 联合学习干预参数 $\phi_i$ 与 $\theta$，适定性依赖「干预自由度少」；对非平移–尺度、多变量组合的干预类，联合优化的可辨识性与景观未讨论——而这恰是外推声称的核心。(8) 学习虽免 rollout，**测试时预测仍须**对学到的 SDE 做 Euler–Maruyama 采样（步长 0.01、thinning 500），对不稳定中间模型如何采样、U 统计量 $O(N^2)$ 成本（文中线性无偏变体未在主实验评估）均未处理。
+
+## 文献谱系
+
+随机分析底座：Ethier & Kurtz (1986)、Øksendal (2003) 提供生成元与平稳性条件 (4)；Hansen & Scheinkman (1995) 及计量经济学的生成元矩条件（Conley et al. 1997、Duffie & Glynn 2004）早有以特定参数化与检验函数拟合扩散的传统——KDS 把它推广为覆盖无穷测试函数类的闭式目标；Wong (1964) 是「用扩散实现给定密度」的先例。核方法主线：核均值嵌入（Smola et al. 2007）、MMD（Gretton et al. 2012）、核化 Stein 差异（Liu et al. 2016）是技术源头；与 KSD 的关系是**角色对调**——Stein 差异中算子 $S_\mu$ 由目标 $\mu$ 固定、学习的是分布，KDS 中算子是模型（$L_\theta$）、分布是目标，故可学习一般 SDE；Langevin 特例下 KDS 即得分估计（Hyvärinen 2005）。循环因果模型线：Mooij et al. (2011)、Hyttinen et al. (2012, LLC)、Mooij & Heskes (2013)、Rothenhäusler et al. (2015, backShift)、Bongers et al. (2021/2022)、Sethuraman et al. (2023, NODAGS)——均需加性噪声/线性/可解性限制，本文以时间维消解环路，其中 LLC、NODAGS 兼任实验基线；Varando & Hansen (2020) 图连续 Lyapunov 模型研究线性平稳 SDE 但只作图模型解释、不涉干预，Dettling et al. (2022) 给其可辨识性。因果观：Pearl (2009)、Peters et al. (2017)（「因果模型是时间过程的抽象」，本文援引其 §2.3.3）、Rubenstein et al. (2017) 因果一致性、Schölkopf (2022)（干预稀疏性假设）；Mooij et al. (2013)、Blom et al. (2020)、Bongers et al. (2022) 关于 ODE 均衡与 SCM 关系的理论与本文互补。干预数据因果发现：GIES（Hauser & Bühlmann 2012）、IGSP（Wang et al. 2017）、DCDI（Brouillard et al. 2020）为基线。后续：Lorch et al.（arXiv:2601.15341，Latent Causal Diffusions）把本框架推进到潜变量与单细胞扰动建模，是作者的直接延续。
+
+## 明确不覆盖
+
+不观测也不建模时间序列（Granger 因果、系统辨识等让位给既有文献）；不做因果发现（不输出图，图仅是定性摘要且 $\mu$ 不必马尔可夫于该图）；不处理离散变量；无观测噪声（SERGIO 实验关闭技术噪声）；不给干预类泛化的理论保证；无真实（非模拟）数据实验。
+
+## 阅读路径
+
+先读 §1 的四条动机（循环、免图、模型灵活、免采样梯度）与 Fig 1；§2 的生成元定义 (2)–(3) 是 KDS 的全部语言；§3 三步最紧凑：Lemma 1 → Theorem 2 → Theorem 3（第 3–4 页），配 Fig 2 的一维示意；§4 因果建模（式 7–8、Algorithm 1）；§5 的 KSD 对照讲得最清楚；§6 看 Fig 4。姊妹篇对照：站内 2112.05729（Besserve 均衡系统李群软干预——同样处理运行在均衡点的循环系统的干预建模，但保留循环 SCM 与均衡自洽求解、以深度均衡隐式层求梯度，本文把均衡泛化为平稳分布并彻底免 rollout，两篇对读可见「环必然引入时间」这一洞察的两种制度化路径）；后续 arXiv:2601.15341（Latent Causal Diffusions）把框架推广到潜表示与真实单细胞扰动筛选，可作 §7 第三条展望的兑现。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 平稳扩散 | stationary diffusion |
+| 随机微分方程 | stochastic differential equation (SDE) |
+| 漂移 | drift |
+| 扩散函数 | diffusion function |
+| 无穷小生成元 | infinitesimal generator |
+| （生成元的）核 | core (of a generator) |
+| 偏离平稳性的核偏差 | kernel deviation from stationarity (KDS) |
+| 见证函数 | witness function |
+| 核化 Stein 差异 | kernelized Stein discrepancy (KSD) |
+| 平稳密度 | stationary density |
+| 平移–尺度干预 | shift-scale intervention |
+| 速度缩放 | speed scaling |
+| 得分估计 | score estimation |
+| 组套索正则 | group lasso penalty |
+| Matérn 核 | Matérn kernel |
+| U 统计量 | U-statistic |
+| Euler–Maruyama 格式 | Euler–Maruyama scheme |
+
+## 来源定位
+
+`papers/2310.17405.pdf`：生成元与算子 $L$ 的定义 (2)–(3) 在第 2 页 §2；平稳性条件 (4)、Lemma 1 与 Theorem 2（KDS 定义）在第 3–4 页 §3.1；Theorem 3（一致性）在第 4 页 §3.2；U 统计量 (5) 在第 4 页 §3.3；KDS 可微性与示意实验（Fig 2）在第 5 页；因果模型与平移–尺度干预 (7)–(8) 在第 5–6 页 §4.1–4.2；复杂度/稳定性/可辨识性讨论在第 5–6 页 §4.3；Algorithm 1 在第 7 页 §4.4；相关工作（含 KSD 对照）在第 6–7 页 §5；实验设置与结果（Fig 4）在第 8–9 页 §6；未来方向在第 9 页 §7；证明在附录 B（Lemma 1 证明第 14 页起）；实验细节在附录 D（第 17 页起）；无标度结构与显著性检验在附录 E（Fig 6、Table 2，第 21 页）。

@@ -1,0 +1,72 @@
+---
+title: "预测器合并中的因果与反因果不对称"
+subtitle: "Sergio Hernan Garrido Mejia et al., arXiv:2501.08426 (2025)"
+description: "在二元目标加两个连续预测变量、仅知一二阶矩的最小设定下证明：因果最大熵（CMAXENT）合并预测器在因果方向退化为逻辑回归、在反因果方向退化为 LDA；部分矩缺失时两种因果假设给出不同决策边界与越变量（OOV）泛化能力。"
+date: 2025-01-14
+categories: [因果推断, 因果/反因果学习]
+paper-id: 2501.08426
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Sergio Hernan Garrido Mejia（MPI für Intelligente Systeme, Tübingen / Amazon）、Patrick Blöbaum（Amazon, Tübingen）、Bernhard Schölkopf（MPI für Intelligente Systeme, Tübingen）、Dominik Janzing（Amazon, Tübingen） |
+| 出处 | arXiv:2501.08426 [cs.LG]（v1；页脚沿用 NeurIPS 2024 模板，未见正式发表记录） |
+| 日期 | 2025-01-14 |
+| 页数 | 20 页（正文 9 页 + 文献 3 页 + 附录 A–F 8 页） |
+
+一句话定位：把因果方向假设当作预测器合并（merging of predictors）的归纳偏置，在最小可解析的设定下证明因果最大熵（Causal Maximum Entropy, CMAXENT）的两个解恰好是逻辑回归与线性判别分析（Linear Discriminant Analysis, LDA）这两部经典分类教科书算法，并用矩缺失情形揭示两者泛化行为的实质分岔。
+
+## 问题与模型
+
+研究问题：专家/预测器合并是病定问题——多个联合模型边缘化后都与各专家的边缘预测一致，需强归纳偏置；既有 MAXENT 式聚合只合并各专家给出的结果概率，不问因果结构。若建模者额外知道某预测变量是目标的原因还是结果（医疗中危险因素致病、病生症状），合并结果是否不对称？
+
+模型：目标 $Y\in\{-1,1\}$，预测变量 $X=(X_1,X_2)$ 连续；约束为一二阶矩（式 1/2）：$\hat E[Y]=q$、$\hat E[XY]=\varphi=(\varphi_1,\varphi_2)$、$\hat E[X]=0$、$\Sigma_X$（元素为 $\bar s_1^2,\bar s_2^2$ 与交叉矩 $\bar s_{1,2}$）。限定低阶矩的理由：已足以产生不对称、计算可行、高阶矩反而缩小不对称且易过拟合。归纳偏置为 CMAXENT（Janzing 2021）：按假定因果序两步优化——先对因做最大熵（MAXENT，Jaynes 1957），再在给定第一步分布下对果做最大条件熵。两个对照情景即图 1a（$X_1\to Y\leftarrow X_2$，因果方向）与图 1b（$Y\to X_1,\ Y\to X_2$，反因果方向），数据与矩完全相同。
+
+## 识别或主要命题
+
+论证链按「求解—反演—几何—缺失」四步展开。**命题 1**：因果方向下 $p(X)$ 为高斯（式 3 的解），$p_\lambda(y{=}1\mid x)=\tfrac12(1+\tanh(\lambda_0+\lambda_1x_1+\lambda_2x_2))$（式 7）——即逻辑回归；注记 2 指出证明承 Janzing–Sun–Schölkopf (2009) 的二阶指数模型。**命题 3**：反因果方向下 $p(Y)$ 为 Bernoulli、$p_\lambda(x\mid y)$ 为等协方差二元高斯混合（式 10–12）；注记 4 关键：该解**不必马尔可夫于给定 DAG**——图 1b 蕴含 $\Sigma_{X|Y}$ 对角，但边缘矩约束经全协方差定律（law of total covariance）强制条件协方差非对角，CMAXENT 只保证对 Markov 分布族的最优混合。**定理 5**：对混合做贝叶斯反演，0-1 损失下的 MAP 最优决策等价于 LDA；推论 6 把边缘矩换成类条件矩（式 15）得二次判别分析（QDA），推论 7 推广到指数族判别分析，注记 8 指出核化即核 Fisher 判别。**命题 9**：两方向决策边界的法向量分别为 $\Sigma_{X,\text{causal}}^{-1}\varphi$ 与 $\Sigma_{X|Y,\text{anticausal}}^{-1}\varphi$；**定理 10**：全矩已知时两边界斜率相同——证明用全协方差定律写 $\Sigma_X=\Sigma_{X|Y}+c\varphi\varphi^\top$（$c=1/(2^2q(1-q))$），Sherman-Morrison 公式给出 $\Sigma_X^{-1}\varphi\propto\Sigma_{X|Y}^{-1}\varphi$。故不对称不在全信息情形，而在缺失情形：**命题 11**（缺 $\varphi_2=\mathrm{Cov}(X_2,Y)$）：因果方向强制 $\lambda_2=0$，$X_2$ 被彻底丢弃；反因果方向 $p(Y)$ 不变，且由高斯熵 $\propto\log\det$ 对条件协方差行列式求导，得未观测协方差的上界 $\varphi_2\le q(1-q)\bar s_{1,2}\varphi_1/(q(1-q)\bar s_1^2-\varphi_1^2)$（式 17）——从未联合观测 $X_2$ 与 $Y$ 仍能建依赖 $X_2$ 的模型，即越变量（Out-Of-Variable, OOV）泛化。**命题 12**（缺 $\bar s_{1,2}$）：因果方向得 $X_1\perp X_2$ 边缘独立的高斯，反因果方向得 $X\mid Y$ 条件独立（注记 13：此情形恰为 Markov 于 DAG）；由全协方差定律两情形的边际 $\Sigma_X$ 不同，边界不再平行（图 2 合成数据示意）。
+
+## 估计/经验
+
+本文是理论文章，不提出算法、不做真实数据评估；唯一经验内容是图 2 的合成数据示意（缺失 $\bar s_{1,2}$ 时两方向决策边界方向不同，参数与边界斜率的解析式及斜率相等的充要条件在附录 E 式 64 一带导出）。§3.5 转而梳理已有统计文献中的经验对照：逻辑回归不对 $X$ 分布建模而 LDA 建模（判别式 vs 生成式），Efron (1975) 的渐近相对效率、Ng–Jordan (2001) 的两体制优势，以及 Blöbaum et al. (2015)「生成模型在反因果方向更优」的经验发现——为本文不对称提供间接佐证。
+
+## 开放问题
+
+本文自认：(1) 仅最小设定，推广到多维协变量、离散目标、亲代+子代混合图「容易」但只做了推导（附录 F 给混合图的因子分解式 77–81，无数值结果）；(2) 不对称仅在 CMAXENT 归纳偏置下严格证明，对其他纳入因果信息的方法只是预期；(3) 仅合成数据示意，无真实数据验证；(4) 重叠数据集、多环境与横向/纵向联邦学习的应用仅是展望。我另识别：(5) 命题 11 只给一维缺失矩的上界，未讨论界的紧性、符号信息缺失的影响，或多矩同时缺失时约束可行域的刻画；(6) 作者自己承认「阶数越高不对称越小」，却未分析矩由有限样本估计时估计误差与不对称的量级关系——小样本下矩噪声可能淹没或伪装出不对称；(7) 定理 10 的斜率相同性依赖 $\bar x=0$ 与矩精确已知，对矩扰动的稳定性（两边界何时可分辨）未触及；(8) 全文假设因果方向已知为情景输入，未讨论方向误判的后果——若把因果问题当反因果处理，OOV 泛化会以有偏上界「无中生有」地引入 $X_2$ 依赖，文中无鲁棒性分析。
+
+## 文献谱系
+
+前作（在本文中的角色）：Jaynes (1957)——MAXENT 原理的形式底座；Janzing (2021, J. Causal Inference)——CMAXENT 定义与「解可非马尔可夫」性质（注记 4）的直接来源，本文全部归纳偏置所自；Janzing–Sun–Schölkopf (2009, 站内 0910.5561)——二阶指数模型，命题 1 证明的出处；Schölkopf et al. (2012, 站内 1206.6471)——因果/反因果学习不对称纲领，本文动机段的理论谱系；Sun–Janzing–Schölkopf (2006)——「因果方向的 Markov 核更可信」，CMAXENT 合理性的支撑；Hastie et al.《ESL》——LDA/逻辑回归对照几何（§3.4 复述其 Ch. 4.4.5）；Friedman et al. (2000)——AdaBoost 即可加逻辑回归，本文进一步给出「因果方向专家合并的 CMAXENT 解」这第三重解读；Ng–Jordan (2001)、Efron (1975)、Blöbaum et al. (2015)——生成式/判别式不对称的既有统计与经验证据，被征引为非因果旁证；Janzing (2018)、Guo–Wildberger–Schölkopf (2024)——OOV 泛化概念来源，命题 11 被定位为其实例；Jin et al. (2021)、Weichwald et al. (2014)——NLP 与神经影像中数据采集方向的重要性，应用侧呼应；Peters et al. (2017)——独立因果机制（ICM）原理，§5 把两方向不对称归结为「反因果须把 $X_1,X_2$ 相关解释为共同原因所致，因果方向则不然」。
+
+## 明确不覆盖
+
+不判定因果方向（两个方向都是给定情景）；不处理预测变量之间的因果结构（$X_1,X_2$ 间无边）；不求解三阶及以上矩约束的 CMAXENT；不做任何真实数据基准，也不与 stacking、log-pooling 等既有合并方法比较预测性能；不覆盖连续目标变量；不讨论专家权重学习与元预测器的构造。
+
+## 阅读路径
+
+先读 §1（动机与医疗例）与图 1 两个 DAG；§2.2 的 MAXENT/CMAXENT 定义段必须先读；§3 是主体：式 (3)–(4)（因果两步优化）→命题 1→式 (8)–(9)（反因果两步）→命题 3 与注记 4→定理 5 与推论 6/7→§3.4 命题 9、定理 10→§3.5 差异讨论；§4 精读命题 11（式 17）与命题 12，配图 2；§5 讨论含 AdaBoost 新解读与联邦学习展望。证明细节：附录 C 的两段几何证明（因果方向用 Hilbert 空间投影、反因果方向用高斯比）与定理 10 的 Sherman-Morrison 推导（式 55–57）最值得看；附录 F 是亲代+子代混合图推广。姊妹篇对照：站内 1206.6471（因果/反因果学习纲领，本文即其在「预测器合并」任务上的具体化——纲领预言 SSL/迁移的不对称，本文补上合并的不对称）；2409.01794（从边缘干预数据估联合干预分布——同样从「变量从未联合观测」出发做推断，可视为干预版的 OOV 问题）；0910.5561（二阶指数模型判因果方向——命题 1 的技术源头，方向是「由数据推断方向」而非本文的「由方向定合并」）。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 预测器/专家合并 | merging of predictors / merging of experts |
+| 因果最大熵 | Causal Maximum Entropy (CMAXENT) |
+| 最大条件熵 | maximum conditional entropy |
+| 线性/二次判别分析 | Linear / Quadratic Discriminant Analysis (LDA/QDA) |
+| 核 Fisher 判别 | Kernel Fisher Discriminant |
+| 决策边界/法向量 | decision boundary / normal vector |
+| 越变量泛化 | Out-Of-Variable (OOV) generalisation |
+| 全协方差定律 | law of total covariance |
+| 类条件矩 | class-conditional moments |
+| 生成式/判别式模型 | generative / discriminative model |
+| 可加逻辑回归 | additive logistic regression |
+| 病定问题 | ill-defined (ill-posed) problem |
+| 横向/纵向联邦学习 | horizontal / vertical federated learning |
+
+## 来源定位
+
+`papers/2501.08426.pdf`（20 页）。关键内容：式 (1)(2) 矩约束（p.3）；命题 1 与式 (5)–(7)（p.4）；命题 3 与注记 4（p.5）；定理 5、推论 6/7 与注记 8（p.6）；命题 9（p.6–7）、定理 10（p.7）；§3.5 差异讨论（p.7）；命题 11 与式 (17)（p.8）；命题 12 与注记 13（p.8–9）；图 2 与 §5 讨论（p.9）；附录 A–B 矩关系与 $\Sigma_X=\Sigma_{X|Y}+c\varphi\varphi^\top$（p.13–14）；附录 C 命题 9/定理 10 证明（式 45–57，p.14–16）；附录 D 命题 11 界推导（p.17）；附录 E 缺失 $\bar s_{1,2}$ 的边界与相等条件（式 64，p.17–19）；附录 F 混合图与式 (77)–(81)（p.19–20）。

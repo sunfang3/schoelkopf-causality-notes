@@ -1,0 +1,83 @@
+---
+title: "生成模型外推的独立机制理论：G-等价、通用性与 SGD 漂移"
+subtitle: "Michel Besserve et al., arXiv:2004.00184 (2020)"
+description: "AAAI-21 扩展版：当因果变量隐含、两层生成模型解不唯一时，用干预群定义 G-等价与 G-通用性替代结构可辨识性作为外推判据，并证明 SGD 隐式正则使解漂移向矩阵平方根解、违反谱独立，须显式正则化。"
+date: 2020-04-01
+categories: [因果推断, 生成模型, 因果表示学习]
+paper-id: 2004.00184
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Michel Besserve（MPI for Intelligent Systems 与 MPI for Biological Cybernetics, Tübingen）、Rémy Sun（MPI-IS / ENS Rennes）、Dominik Janzing、Bernhard Schölkopf（MPI-IS, Tübingen） |
+| 出处 | arXiv:2004.00184v2 [cs.LG]（站内 PDF 为 v2，2021-12-31）；AAAI-21 机器学习轨道论文的扩展版 |
+| 日期 | 2020-04-01（v1） |
+| 页数 | 21 页（正文 8 页 + 文献 2 页 + 附录 A–C 11 页） |
+
+一句话定位：在「除样本外无任何辅助观测」的无监督设定下，把独立因果机制（ICM）原理从因果发现工具改造成深度生成模型（generative model）的训练判据——用过参数化解集上的群作用定义弱化的可辨识性（G-等价、G-通用性），并首次指出 SGD 的隐式正则会系统性破坏它。
+
+## 问题与模型
+
+研究问题（§1–§2）：让生成模型的内部计算反映真实数据生成过程的因果图，即可对各机制独立干预、外推（extrapolation，指泛化到训练分布支撑或其凸包之外）；但该图的节点（隐变量、隐层）不可观测，导致过参数化与结构不可辨识。形式化（§2.2–2.3）：把多层生成网络视作两层复合 SCM
+$$X=f_2^{\theta_2}(V)=f_2^{\theta_2}\big(f_1^{\theta_1}(Z)\big)\tag{1}$$
+因果图 $Z\to V\to X$，真参数 $\theta^*=(f_1^*,f_2^*)$；假设学习算法完美拟合分布（$\mathcal{D}_{\hat\theta}=\mathcal{D}_{\theta^*}$，通用逼近理想化），故学得解落在解集 $S_{\theta^*}=\{(f_1,f_2)\,|\,\mathcal{D}_{(f_1,f_2)}=\mathcal{D}_{\theta^*}\}$（式 2）。区分**结构可辨识性**（$\hat\theta=\theta^*$，干预预测正确）与**函数可辨识性**（复合 $f_2\circ f_1$ 唯一）；后者不保证前者。非唯一性的系统来源是**复合过参数化集（Composed Over-parameterization Set, COS）**：取右可逆函数 $\omega\in\Omega$，$S^\Omega_{\theta^*}=\{(\omega^{-1}\circ f_1^*,\,f_2^*\circ\omega)\,|\,\omega\in\Omega\}$（式 4）——内层重参数化可被相邻层补偿。**Model 1**（线性两层卷积网络，式 3）：$d,d'$ 为素数，$Z$ 为单像素置一的 $(2d{-}1)\times(2d'{-}1)$ 二值隐图像，$X=k_2\ast k_1\ast Z$（循环卷积）；**例 1**（眼睛生成器，Fig 2）：$k_2$ 编码眼形、$k_1$ 为两个非零像素编码双眼相对位置。动机实验 FluoHair（§2.1, Fig 1）：在 CelebA 训练的 VAE 最后一层卷积核通道上干预即可生成荧光发色而保持发型——层式模块化的经验证据。
+
+## 识别或主要命题
+
+- **Proposition 1**：对归一化流（normalizing flow, NF；两层皆可逆，Rezende & Mohamed 2015），$\Omega$ 是群，且对函数可辨识的真参数有 $S^\Omega_{\theta^*}=S_{\theta^*}$——COS 完全刻画非唯一性（附录 B.6 Corollary 1 把它推广到 Model 1：$\Omega$ 即可逆卷积核集）。
+- **外推的形式化（§2.4）**：取干预群 $G$（紧群，带 Haar 测度 $\mu_G$），定义 **G-外推类** $\mathcal{M}^G_{(f_1^*,f_2^*)}=\{\mathcal{D}(g\cdot f_1^*,f_2^*)\,|\,g\in G\}$（式 5）；Model 1 的自然选择是模素数 $d$ 的整数乘法群 $S$，作用为水平轴拉伸 $(g\cdot k)(m,n)=k(gm,gn)$（等价地频域反向拉伸）。**Definition 1（G-等价）**：学得解与真解诱导同一外推类。**Proposition 2**：Model 1 一维情形（$\hat\pi$ 无零元素、$d'=1$），解 G-等价于真解当且仅当存在 $\lambda\in\mathbb{C}$ 使 $(\hat k_1(u),\hat k_2(u))=(\lambda^{-1}\hat k_1^*(u),\lambda\hat k_2^*(u))$ 对所有 $u>0$ 成立（$\hat{\cdot}$ 为 DFT）——G-等价几乎就是可辨识，弱化收效甚微。
+- **Definition 2（基于对比函数的 G-通用性）**：取对比函数 $\phi$（把输出分布映为实数，捕捉 $\mathcal{D}_{\theta^*}$ 的相关属性），定义通用比 $\rho(\tilde f_1,\tilde f_2)=\phi(\mathcal{D}(\tilde f_1,\tilde f_2))/E_{g\sim\mu_G}\phi(\mathcal{D}(g\cdot\tilde f_1,\tilde f_2))$（式 6），$\rho=1$ 称 **G-通用（G-generic）**。**Proposition 3**：对在 $\mathcal{M}^G_{\theta^*}$ 上常值的 $\phi$，G-等价蕴含 G-通用（单向）。
+- **谱独立（§2.7）**：取 $\phi$ 为非零频率总功率（式 7），得**谱密度比（Spectral Density Ratio, SDR）** $\rho(V,k_2)=\langle|\hat k_2\odot\hat k_1|^2\rangle/(\langle|\hat k_1|^2\rangle\langle|\hat k_2|^2\rangle)$（**Proposition 4**（非正式），式 8）——Shajarisales et al. (2015) 谱独立准则的离散化；真解 S-通用。**Model 2**（对角线性，式 9）：$X=\mathrm{diag}(a)\mathrm{diag}(b)Z$；**Proposition 5**：对功率对比 $\tilde\phi=\tau[ABB^\top A^\top]=\langle a^2b^2\rangle$，$S$-通用比 $\rho_0(B,A)=\langle a^2b^2\rangle/(\langle a^2\rangle\langle b^2\rangle)$。
+- **SGD 漂移（§3）**：VAE 式训练目标 $\min_{a,b>0}|C(\omega)-ab|^2$（式 10–11）。**Proposition 8**（附录 B.7）：连续时间梯度下降保持 $L(a,b)=a^2-b^2$ 不变，轨迹收敛到双曲线 $S_c=\{(a,c/a)\}$ 上——无漂移。**Proposition 9**（附录 B.8）：SGD 一次迭代使 $E[L]$ 乘以因子 $\eta\in(0,1)$，故分布渐近集中到 $(\sqrt{c},\sqrt{c})$（矩阵平方根解）；异步 SGD（B.9）漂移方向又不同——漂移由算法细节决定。**Proposition 6**：Model 2 中真参数对角元 i.i.d. 抽自两个非常数分布时，SGD 近似解 $A=B=\sqrt{A^*B^*}$ 满足 $\rho_0(B,A)\to E[c_1^2]/E[c_1]^2>1$（$d\to\infty$），即**不** S-通用——SGD 自己挑选的解外推性质次优。§3.4 给解药：交替原始目标与 SDR 极大化 $(\rho-1)^2$ 项（式 13）。
+
+## 估计/经验
+
+玩具实验：Fig 3a 展示三种优化器的轨迹分岔；附录 B.12（200 次仿真、$d=5$、学习率 0.01、核在真解附近加均匀噪声初始化）：纯 SGD 的 SDR 最终漂移到远大于 1，SDR 正则将其拉回 1 且傅里叶域余弦距离更接近真解——但迭代数很大时又退化，正则只「暂时」补偿漂移。深度实验（§4，CelebA）：β-VAE（β=0.0005）与 DCGAN（架构见表 2：生成器 4 层反卷积，通道 128/64/32/16）。(i) 拉伸外推：对某隐层全部激活图做 1.5 倍水平拉伸。10000 迭代时中间层外推质量好（眼睛尺寸保持、双眼间距拉伸，符合 Model 1 预测），精细层出现竖向伪影；再加训 40000 迭代后伪影加剧为周期干涉（与 Fig 2 下行的 G-等价破坏同款），精细层拉伸的整图 MSE 随训练单调增长（Fig 4g）；SDR 交替训练（在图像/精细/中间层做式 13）在 50000 迭代时显著抑制退化（Fig 4c,f）。作者对中间层稳健的解释：多通道并行反传限制了单通道解的漂移。(ii) 方向不对称（Fig 5）：解码器（因果方向）各层「滤波器×激活图」对的 SDR 直方图众数接近 1，编码器（反因果方向）分布显著更宽——与 §2.6「机制通用则逆机制不通用」一致；GAN 的生成器/判别器给出同样对比（Suppl. Fig 5）。(iii) 定向外推（附录 B.13, Suppl. Fig 6）：只拉伸编码眼睛的通道模块，得到「卡通式大眼」人脸。
+
+## 开放问题
+
+1. **G-等价弱化失败（Proposition 2 的负面内容）**：在 Model 1 中 G-等价与可辨识几乎同样强；实际可用的松弛是 G-通用性，但 Proposition 3 只有单向蕴含——$\rho=1$ 不反推 G-等价，两个共享通用比的解仍可有不同外推行为，理论保证存在缺口。
+2. **完美拟合假设**：全部理论假设 $\hat\theta$ 精确拟合 $\mathcal{D}_{\theta^*}$（通用逼近理想化）；真实 VAE/GAN 有逼近与泛化误差，误差与漂移的交互未分析。
+3. **群 $G$ 的选择无原则**：作者明言 G 是「应用相关的归纳偏置」；当真实机制族未知时如何选 G（以及多个候选 G 的并合）没有准则，而全部结论相对 G 条件成立。
+4. **SDR 正则只有暂时效果（附录 B.12 自述）**：大迭代数下解再度退化，作者自己提出需要补充其他通用比的正则——显式强制 IM 的完整训练方案未完成。
+5. **经验验证停留在定性**：外推质量以图像外观与 64 样本的 MSE/小波直方图衡量，无下游任务收益（如零样本分类、鲁棒性提升）的定量评估，而动机恰恰来自数据增强（Locatello/Higgins 路线）。
+6. **与可辨识路线的对照未解决**：非线性 ICA（Hyvärinen et al. 2019；Khemakhem et al. 2020）在辅助变量下可得强辨识，本文设定刻意无辅助观测——无监督情形下除了弱化的通用性判据外是否还有更强结构可利用，文中未讨论；紧群的限制也排除了「设为定值」型硬干预。
+
+## 文献谱系
+
+前作（在本文中的角色）：Janzing & Schölkopf (2010, 站内 0804.3678)、Lemeire & Janzing (2012)、Peters et al. (2017)——IM 原理的三处理论来源；Besserve et al. (2018, 站内 1705.02212)——群不变性与通用性方程框架，本文 Definition 2 的直接母体（通用比、Haar 打散的思想皆出于此）；Shajarisales et al. (2015, 站内 1503.01299)——谱独立准则，SDR 的连续原型（§2.6 的判向比较亦引 Janzing et al. 2010 迹方法、2012 IGCI、Zscheischler et al. 2011）；Besserve et al. (2020, 反事实揭示生成模型模块结构)——FluoHair 与眼睛通道模块识别的方法工具；Neyshabur et al. (2017)、Zhang et al. (2016)——过参数化与隐式正则研究，本文给出其外推视角新解（SGD 收敛到最小范数/平方根解）；Rezende & Mohamed (2015)——NF，Proposition 1 的模型类；Goodfellow et al. (2014)、Kingma & Welling (2013)、Higgins et al. (2017)——实验载体；Goyal et al. (2019, RIM)、Parascandolo et al. (2018)——IM 在模块化网络中的经验应用，动机同盟；Locatello et al. (2018)——无监督解纠缠的不可识别结果与 IM 优于统计独立的论证。后续：Schölkopf et al. (2021, arXiv:2012.07398) 的因果表示学习纲领把本文的问题（隐因果变量、弱辨识）立为核心对象；显式 IM 正则训练与群等变生成模型的后续工作沿用其通用比语言。
+
+## 明确不覆盖
+
+不处理观测变量之间的因果发现或因果效应估计（深度因果推断路线仅作 related work 对照）；不使用辅助变量/标签的辨识（非线性 ICA 路线）；群框架不覆盖设为定值的不可逆硬干预（文中明言）；不做端到端的因果结构搜索或架构搜索；不评估下游任务收益；不处理循环结构与非紧群；FluoHair 的颜色干预被承认利用了 RGB 编码的特殊性，非一般机制。
+
+## 阅读路径
+
+先读 §2.1 FluoHair（Fig 1，动机）与 §2.2–2.3（式 (1)–(4)、结构 vs 函数可辨识）——语义地基；§2.4 Definition 1–2 与式 (5)–(6) 是全文枢纽，Proposition 2 要读出「弱化几乎无收益」这层负面结果；§2.7 的 SDR（式 (7)–(8)）与站内 1503.01299 对照；§3.2 三种优化动力学的轨迹分岔（Fig 3a）与 Proposition 6 是最实质的新定理，配合附录 B.7–B.9 的 Proposition 8–9 精读；§4 按「拉伸外推 → 编码器/解码器不对称」读，Fig 4g（MSE 随训练增长）与 Fig 5（SDR 直方图）是两张关键图；附录 B.12 的 200 次仿真给出 SDR 正则的边界。姊妹篇对照：站内 1705.02212（通用性方程的母框架——Definition 2 的出处）；1503.01299（SIC/SDR 连续版）；1911.10500 §9（本文所回应的因果表示学习议程）；1811.00007（干预鲁棒性的表示侧验证）；2002.06278（同批姊妹篇：同把「可干预性」当作一等公民，一个在决策解释域、一个在生成模型域）。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 外推 | extrapolation |
+| 结构可辨识性 / 函数可辨识性 | structural / functional identifiability |
+| 复合过参数化集 | Composed Over-parameterization Set (COS) |
+| G-外推类 | G-extrapolated class |
+| G-等价 | G-equivalence |
+| G-通用（性） / 通用比 | G-generic(ity) / generic ratio |
+| 对比函数 | contrast function |
+| 谱密度比 | Spectral Density Ratio (SDR) |
+| 谱独立 / 尺度独立 | spectral / scale independence |
+| 拉伸群 | stretching group $\mathbb{S}$ |
+| 通用比正则化 | genericity (SDR) regularization |
+| 连续时间梯度下降 / 异步 SGD | continuous-time gradient descent (CTGD) / asynchronous SGD |
+| 隐式正则化 | implicit regularization |
+| 归一化流 | normalizing flow (NF) |
+| 通道（滤波器/激活图） | channel (filter / activation map) |
+
+## 来源定位
+
+`papers/2004.00184.pdf`（21 页）。关键内容：FluoHair 与式 (1)–(2)（p.2）；Model 1、例 1、COS 式 (4)、Proposition 1（p.3）；G-外推类式 (5)、Definition 1、Proposition 2、Definition 2 式 (6)、Proposition 3（p.4）；功率对比式 (7)、SDR 式 (8)（Proposition 4）、Model 2 式 (9)、Proposition 5（p.5）；SGD 目标式 (10)–(11)、Proposition 6、SDR 正则式 (13)（p.5–6）；拉伸实验 Fig 4（p.7）；编码器/解码器 SDR 直方图 Fig 5 与结论（p.8）；附录 A 证明（p.11–13）；Corollary 1、Proposition 7、Corollary 2（p.14）；Proposition 8（p.14）、Proposition 9 与 ASGD（p.15）；深模型 SDR 估计式 (22)–(24) 与表 2（p.15–16）；B.12 仿真与 B.13 定向外推（p.17）；Suppl. Fig 4–6（p.20–21）。

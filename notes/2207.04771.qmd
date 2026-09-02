@@ -1,0 +1,86 @@
+---
+title: "函数化广义经验似然：条件矩约束的鞍点估计"
+subtitle: "Heiner Kremer et al., arXiv:2207.04771 (2022)"
+description: "把广义经验似然（GEL）推广到函数值（条件）矩约束：借无穷维优化的强对偶得到可插入核方法与神经网络的 FGEL 鞍点目标，证明其相合、渐近正态且达半参数有效界，VMM 的连续更新形式为特例。"
+date: 2022-07-11
+categories: [因果推断, 矩方法]
+paper-id: 2207.04771
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Heiner Kremer（MPI for Intelligent Systems, Tübingen）、Jia-Jie Zhu（Weierstrass Institute, Berlin）、Krikamol Muandet（MPI IS）、Bernhard Schölkopf（MPI IS / ETH Zürich） |
+| 出处 | arXiv:2207.04771 [cs.LG]；v1 2022-07-11，v2 2024-02-16 增收敛速率与半参数有效性（定理 3.8–3.10 源自 Kremer et al. 2023） |
+| 日期 | 2022-07-11 |
+| 页数 | 29 页（正文 13 页 + 附录 A–F） |
+
+一句话定位：以小样本高阶偏差更小著称的广义经验似然（generalized empirical likelihood, GEL）此前未与现代机器学习模型结合——本文以「矩泛函 + 强对偶 + 正则化」把它推广到条件矩约束（conditional moment restrictions, CMR）的无穷维形式，得到核与神经网络皆可用的估计器 FGEL。
+
+## 问题与模型
+
+研究问题：CMR $\mathbb E[\psi(X;\theta_0)\mid Z]=0$ 等价于不可数无穷的无条件矩约束族 $\mathbb E[\psi(X;\theta_0)^\top h(Z)]=0,\forall h\in\mathcal H$（Bierens 1982）；工具变量回归、策略学习、去偏机器学习皆属此类。既有机器学习扩展（DeepGMM、MMR、VMM）全走 GMM 路线，而高阶偏差更小、且随过度识别（over-identification）约束数增大优势愈显的 GEL——恰在约束无穷多时最该受益——尚未接通现代模型。构造：定义矩泛函（moment functional）$\Psi(X,Z;\theta):h\mapsto\psi(X;\theta)^\top h(Z)\in\mathcal H^*$，把 CMR 写成 $\|\mathbb E[\Psi]\|_{\mathcal H^*}=0$；剖面散度（profile divergence）$R(\theta)=\inf_{P\ll\hat P_n}D_\varphi(P\Vert\hat P_n)$ s.t. 该约束。无穷维约束下 GEL 经典对偶失效（Borwein 1993），须松弛为 $\le\lambda$（式 10）才得强对偶；再作两处实用化（范数项二次化、丢乘子 $\mu$——避免小批量梯度偏差且后证不损有效性），得 FGEL 目标（Definition 3.3）$G_{\lambda_n}(\theta,h)=\frac1n\sum_i\varphi(\psi(x_i;\theta)^\top h(z_i))-\frac{\lambda_n}{2}\|h\|^2_{\mathcal H}$，$\hat\theta=\arg\min_\theta\sup_h G_{\lambda_n}$，其中 $\varphi$ 凹、$\varphi_1(0)\neq0,\varphi_2(0)<0$。正则并非仅为对偶性：$\chi^2$ 情形内层最优含 $(\hat\Omega_\theta+\lambda_n I)^{-1}$，而经验协方差算子 $\hat\Omega_\theta$ 秩至多 $n$、在无穷维中必然奇异——正则化是函数化 GEL 的本质需求（承 Carrasco & Kotchoni 2017）。
+
+## 识别或主要命题
+
+**定理 3.1（强对偶）**：松弛剖面散度有强对偶形式（式 11）且 $\lambda\to0$ 时收敛回原问题；这是 Newey & Smith (2004) 对偶结果向函数值约束与一般强凸散度（不限 Cressie-Read 族）的推广。**定理 3.6/3.7（函数情形）**：在紧性、$\lambda_n=O_p(n^{-\xi}),0<\xi<1/2$、Donsker 类等假设下 $\hat\theta$ 相合且 $\sqrt n(\hat\theta-\theta_0)\xrightarrow{d}\mathcal N(0,\Sigma_\theta)$，$\Sigma_\theta=(\nabla_\theta\Psi_0\Omega_0^{-1}\nabla_\theta^\top\Psi_0)^{-1}$。**定理 3.8/3.9 + 推论 3.10（条件情形，v2 新增）**：$\mathcal H$ 足够富足以保证条件式与连续统式等价、$V_0(Z)=\mathbb E[\psi\psi^\top\mid Z]$ 非奇异等条件下，渐近方差 $\Xi_0=(\mathbb E\,m(Z)V_0^{-1}(Z)m(Z)^\top)^{-1}$（$m(Z)=\mathbb E[\nabla_\theta\psi\mid Z]$）恰达 Chamberlain (1987) 半参数有效界——FGEL 有效。**定理 3.11/推论 3.12**：通用积分严格正定（ISPD）核的 RKHS 直和满足富度条件，故核 FGEL 有效；**引理 3.13** 由表示定理把 $\sup_h$ 化为关于 $\alpha_r\in\mathbb R^n$ 的有限维凸问题。**命题 3.14**：取 $\varphi(v)=-(1+v/2)^2$（$\chi^2$ 重标度）时 FGEL 等价于 $\min_\theta\sup_h\{\mathbb E[\psi^\top h]-\frac14\mathbb E[(\psi^\top h)^2]-\frac{\tilde\lambda_n}{4}\|h\|^2\}$——VMM 的「连续更新」版本（协方差项含决策变量 $\theta$ 而非一阶段估计），一如 CUE 之于两步 GMM。
+
+## 估计/经验
+
+散度可选 $\chi^2$、经验似然 $\varphi(v)=-\log(1-v)$（高阶偏差最小、有 Bartlett 修正）、KL/指数倾斜 $\varphi(v)=-e^v$；带宽用中值启发式，超参在等大小验证集上以 MMR 目标选取。实验一：异方差回归 $y=x^\top\theta+\varepsilon,\ \varepsilon\mid x\sim\mathcal N(0,5x^2)$，$\theta=1.7$，样本 $10^2$–$10^3$，70 次重复——K/NN-FGEL 参数 MSE 最低、略胜 K/NN-VMM（Fig 1）；把散度当超参选取优于固定散度，固定散度时与对应 VMM 大致持平（Fig 2）。实验二：IV 回归（Lewis & Syrgkanis 2018 设定）$y=f_0(x)+e+\delta,\ x=z+e+\gamma$，$f_0\in\{\sin,|x|,x,\text{step}\}$，用 [20,3] 浅网络拟合属模型误设；$n=2000$ 训练/验证、测试 20000、50 次重复，MSE×10（表 2）：abs 任务 K-FGEL 最优（0.17±0.01，对 K-VMM 0.43）、linear 任务 NN-FGEL 最优（0.20）；step/sin 与 VMM 持平或略逊，sin 任务反而是筛分基线 SMD 最好（1.01 对 K-VMM 1.55）。作者据此承认 FGEL 只在部分任务上超越此前最优，无穷多矩约束下的小样本优越性「尚需更多经验证据」。
+
+## 开放问题
+
+1. **优化规模（自认）**：需更高效的鞍点优化算法以支撑大规模应用。
+2. **神经 FGEL 无理论（自认）**：$\mathcal H$ 取神经网络时「理论分析留作未来工作」；一般函数类下假设的核实亦未系统讨论。
+3. **小样本优势未验证（自认）**：GEL 的动机是高阶偏差小，但无穷维情形只有间接证据，全面评估留作未来工作——两实验均无逐步增加矩约束数的设计。
+4. **误设理论缺失（文中明言）**：IV 实验属模型误设，FGEL 与所有基线在此情形的理论均未建立。
+5. **散度选择无理论（我识别）**：$\varphi$ 当超参靠验证集挑，而各散度一阶渐近等价（同一 $\Xi_0$），差异全在有限样本与高阶项；从数据选散度与 $\lambda_n$ 的准则未给出。
+6. **验证准则的循环性（我识别）**：超参统一以 MMR 目标（GMM 型准则）调参；异方差回归有无偏 MSE 可用，一般 CMR 问题没有无偏验证度量，调参机制悬空。
+7. **鲁棒性只到散度球（我识别）**：附录 A.1 的分布鲁棒优化联系只覆盖散度球内局部歧义集，对强分布偏移的 DRO 算法作者自言留作未来工作。
+
+## 文献谱系
+
+前作（在本文中的角色）：Hansen (1982) GMM 与 Hansen et al. (1996) CUE——被推广的母体与「连续更新」类比的另一端；Owen、Qin & Lawless (1994) 经验似然，Smith (1997/2011) GEL，Newey & Smith (2004)——定理 3.1 所推广的对偶与高阶偏差理论来源；Bierens (1982)——CMR=连续统矩约束的依据；Borwein (1993)——无穷维对偶须松弛的根据；Carrasco & Florens (2000)、Carrasco et al. (2007)——连续统矩约束 RKHS 化先河；Chaussé (2012)、Carrasco & Kotchoni (2017)——最近的正则化 GEL 前作，本文以「鞍点目标 + 任意强凸散度 + 现代模型」区别于其最优性条件式求解；Chamberlain (1987)——被定理 3.9 达到的有效界；Bennett & Kallus (2023) VMM——被命题 3.14 收编为特例的强基线；Zhang et al. (2023) MMR——基线兼验证准则；Bennett et al. (2019) DeepGMM、Hartford et al. (2017)、Lewis & Syrgkanis (2018)——神经网络工具函数路线与 IV 实验设定；Ai & Chen (2003) SMD——筛分对照基线；Chernozhukov et al. DML——应用域动机。后续：同首作者 KMM（arXiv:2305.10898）指出 φ-散度把候选分布限制在样本重加权，改用 MMD 建经验似然，是本文框架的直接扬弃；Kremer et al. (2023) 提供 v2 的速率与有效性证明。
+
+## 明确不覆盖
+
+不处理无穷维冗余参数（IV 中的 $f$ 被参数化为神经网络而非非参数 nuisance）；不建误设理论；不讨论弱工具变量与可辨识性检验；假设独立同分布，不覆盖时间序列相关数据；神经 FGEL 无渐近理论；不做策略学习、离线策略评估等动机中列举的应用实验；不处理有限矩约束下的变量选择。
+
+## 阅读路径
+
+先读 §1–§2 复习 GMM（两步 vs CUE）与 GEL（剖面散度、Cressie-Read 族）对照；§3.1 是枢纽——矩泛函、式 10 的松弛、Definition 3.3 及紧随的「协方差算子必奇异」论证（正则化的双重角色）；§3.2–3.3 按定理 3.6→3.7→3.8→3.9→3.10 读；§3.4 引理 3.13 给核实现的有限维化；§3.7 命题 3.14 与散度菜单（含 Bartlett 修正）值得细读；§4 图 1–2 与表 2 看实验。姊妹篇对照：2305.10898（KMM：同首作者以 MMD 换 φ-散度、突破重加权限制，对照读最能看清 FGEL 边界）；站内 2106.03340（最小可辨识工具空间：KMMR 框架的「工具空间/核选择」问题，本文以 $h$ 对抗参数化绕开手工选核，却把选择转移到 $\lambda_n$ 与函数类上）；同属矩方法脉络可再对照 Zhang et al. (2023) MMR。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 条件矩约束 | conditional moment restrictions (CMR) |
+| 广义矩方法 | generalized method of moments (GMM) |
+| 广义经验似然 | generalized empirical likelihood (GEL) |
+| 函数广义经验似然 | functional generalized empirical likelihood (FGEL) |
+| 连续更新估计量 | continuous updating estimator (CUE) |
+| 剖面散度 | profile divergence |
+| φ-散度 | φ-divergence |
+| 矩泛函 | moment functional |
+| 强对偶 | strong duality |
+| 工具（函数） | instrument (function) |
+| 再生核希尔伯特空间 | reproducing kernel Hilbert space (RKHS) |
+| 积分严格正定核 | integrally strictly positive definite (ISPD) kernel |
+| 表示定理 | representer theorem |
+| 半参数有效界 | semiparametric efficiency bound |
+| Donsker 类 | Donsker class |
+| 鞍点问题 | saddle-point problem |
+| 变分矩方法 | variational method of moments (VMM) |
+| 核最大矩约束 | kernel maximum moment restrictions (MMR) |
+| 指数倾斜 | exponential tilting |
+| Bartlett 修正 | Bartlett correction |
+| 异方差回归 | heteroskedastic regression |
+| 工具变量回归 | instrumental variable (IV) regression |
+| 过度识别 | over-identification |
+
+## 来源定位
+
+`papers/2207.04771.pdf`（29 页）。关键内容：GMM/GEL 背景 §2（pp.2–3）；矩泛函与剖面散度式 8–10、定理 3.1（§3.1, pp.4–5）；Definition 3.3 与正则化必要性论证（pp.5–6）；定理 3.6/3.7（§3.2, pp.6–7）；定理 3.8/3.9、推论 3.10（§3.3, p.7）；定理 3.11、推论 3.12、引理 3.13（§3.4, p.8）；神经 FGEL 与其他函数类（§3.5–3.6, p.9）；散度选择与命题 3.14（§3.7, p.9）；实验 Fig 1–2、表 2（§4, pp.10–12）；DRO 视角（附录 A.1）；证明（附录 C–F）。

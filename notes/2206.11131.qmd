@@ -1,0 +1,75 @@
+---
+title: "变分因果动力学：从干预中学模块化世界模型"
+subtitle: "Anson Lei et al., arXiv:2206.11131 (2022)"
+description: "把潜空间世界模型的转移概率按可学因果图逐维因子化，与表示模型端到端联合训练，使因果发现充当塑造潜空间的归纳偏置；新环境下只需推断稀疏干预目标并重学被干预机制，实现小样本模块化自适应。"
+date: 2022-06-22
+categories: [因果推断, 世界模型]
+paper-id: 2206.11131
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Anson Lei（Applied AI Lab, Oxford）、Bernhard Schölkopf（MPI for Intelligent Systems, Tübingen）、Ingmar Posner（Applied AI Lab, Oxford） |
+| 出处 | arXiv:2206.11131 [cs.LG]，v1（2022-06-22），自署「Preprint. Under review」 |
+| 日期 | 2022-06-22 |
+| 页数 | 21 页（正文 10 页 + 文献 + 附录 A–E） |
+
+一句话定位：把稀疏机制转移（sparse mechanism shift, SMS）假说落进潜状态空间模型——转移模型按独立因果机制（independent causal mechanisms, ICM）逐维分解，图结构与干预目标由可微因果发现学出，表示与转移联合优化，在高维观测上同时得到因果表示与模块化迁移能力。
+
+## 问题与模型
+
+研究问题：潜状态空间世界模型（latent state-space model，如 RSSM）在分布偏移下只能整体重训、无法结构性复用机制；因果发现又要求先有语义化因果变量。能否从高维观测序列（含图像）直接学出因果因子化的转移模型并做模块化迁移（modular transfer）？设定：从未扰动环境与 $K$ 个干预环境的动作–观测序列学习；显式假设 1) 环境差异来自「软」干预（soft interventions，图不变、仅机制参数变）；2) 时间步内无瞬时因果（故免 DCDI 的无环约束）；3) 观测函数跨环境不变。转移模型三个构件（式 6–8）：独立机制——转移概率分解为 $\prod_i p_i(z_i^t\mid z^{t-1},a^{t-1})$，每维一个一维高斯、独立网络；稀疏依赖——二值掩码 $M^G_{ij}=1$ 表示 $[z^{t-1},a^{t-1}]_i$ 是 $z_j^t$ 的因果父节点；稀疏干预——干预掩码 $R^I_{ki}$ 在共享机制 $p_i^{(0)}$ 与环境专属机制 $p_i^{(k)}$ 之间切换。仿 RSSM 每维配独立 GRU（式 9）；潜维数 $d$ 为超参数。
+
+## 识别或主要命题
+
+本文不含可辨识性定理（脚注引 Lachapelle et al. 2021 的机制稀疏可辨识性结果充当理论背书）；其「命题」是训练目标：仿 DCDI 把图邻接与干预掩码参数化为独立 Bernoulli，$P(M^G_{ij}=1)=\sigma(\alpha_{ij})$、$P(R^I_{ki}=1)=\sigma(\beta_{ki})$，最大化期望 ELBO 减稀疏罚（式 10）$\mathcal L=\mathbb E_{G,I}[\sum_k\mathrm{ELBO}(o^{(k)},a^{(k)};\theta,\phi,G,I)]-\lambda_G|G|-\lambda_I|I|$。因果分解使 ELBO 中每步 KL 按变量解析拆成一维高斯之和（附录 A 式 20–24）；图与掩码的梯度用 straight-through Gumbel-max 估计（附录 B 式 28），整个轨迹共享一次图采样。核心论证是「稀疏因果结构只能在语义化因果变量上被发现」，因此因果发现目标反向充当表示学习的归纳偏置。自适应（式 12–13）：冻结图与共享机制，只联合推断新环境干预目标并拟合被干预机制参数，目标同式 10 而只留 $\lambda_{I'}|I'|$ 罚项。
+
+## 估计/经验
+
+环境为 2D 多体系统：4 粒子经弹簧与类静电力相互作用，动作 $a\in\mathbb R^2$ 是作用于粒子 4 的外力；观测分 mixed-state（真状态经随机仿射混合）与 $128\times128\times3$ 图像两种。训练集为 6 个环境（无扰动 + 附录 C 表 1 中的干预 1、5、11、14、17）各 2000 条轨迹、验证 400 条；$\lambda_G=\lambda_I=0.01$。基线为 RSSM（跨环境最大参数共享）与 MultiRSSM（逐环境专家）。结果：mixed-state 里 VCD 预测追平 MultiRSSM、图像上最优（Fig 4）；自适应在新环境（粒子 1 被水平约束，真目标 $y_1$）以 1–256 条（图像 10–2560 条）轨迹重训，VCD 小样本下显著占优，mixed-state 仅 1 条轨迹即把干预定位到编码 $y_1$ 的单一潜维（Fig 6）。结构恢复（附录 D 表 2）：mixed-state 因果图 42/288 边（19 条正确、漏 7、假阳 8），漏掉的 7 条全部是类静电力的 $1/\|\delta x\|^2$ 弱依赖项；干预目标 18/80（10 对、0 漏、5 假阳）；图像 73/288 边、31/80 目标，仅定性核对。表示质量：mixed-state 下真状态对潜空间的雅可比近似置换（Fig 8），图像下沿潜维 6 的重建显示蓝粒子按轴对齐坐标移动（Fig 5）。
+
+## 开放问题
+
+1. **仅限软干预与固定图（自认假设）**：环境差异必须是图不变的软干预且观测函数不变；硬干预、结构变化、观测改变均不在模型内。
+2. **无可辨识性理论（我识别）**：脚注引用的 Lachapelle et al. (2021) 假设与本文所学表示之间的蕴含关系未形式化；潜维与真状态的对应只在线性可逆混合下用雅可比检验，图像情形无定量评估。
+3. **结构恢复误差与口径（实验自曝 + 我识别）**：假阳边 8 条、弱力项依赖系统性漏检、干预目标 18 条中仅 10 条正确，且表 2 中「正确+假阳」与总边数并不吻合；评估靠人工把潜维映射回真状态，无误差条。
+4. **超参数无选择准则（我识别）**：潜维数 $d$ 与 $\lambda_G,\lambda_I$（0.01）均无数据驱动选择方法，也无敏感性分析。
+5. **与对象中心模型的结合待探索（自认）**：结论明言与 Genesis-V2、APEX、competition-of-experts 的结合是未来方向；社会影响段自认尚不能处理真实场景。
+6. **无下游任务验证（我识别）**：只评预测与自适应，未在规划或强化学习上检验因果结构的收益（脚注称可扩展到奖励预测但未做）。
+
+## 文献谱系
+
+前作（在本文中的角色）：Schölkopf et al. (2021)《Toward Causal Representation Learning》——SMS 假说与纲领来源，全文动机骨架；Peters, Janzing & Schölkopf (2017)——ICM 原理，逐维分解的依据；Brouillard et al. (2020) DCDI——训练目标被直接改造（似然换 ELBO、去无环约束）；Lachapelle et al. (2021)——机制稀疏正则可辨识性，脚注充当理论背书；Hafner et al. (2019) RSSM/PlaNet——基线、GRU 递归路径与变分训练范式；Ha & Schmidhuber (2018)、E2C、SOLAR——世界模型与「结构化转移塑造潜空间」先例（本文自称首个在高维输入上实现因果转移模型）；Goyal et al. (2021) RIM——「物理系统状态稀疏交互」直觉出处；Peters et al. (2016)、IRM（Arjovsky et al. 2019）——不变预测路线，被对照为学判别式预测子而非完整生成过程；von Kügelgen et al. (2020) competition of experts、Genesis-V2、APEX——结论点名待结合的对象中心线。后续：同作者 SPARTAN（arXiv:2411.06890）把「稀疏交互结构 + 未知目标干预自适应」迁到 Transformer 对象中心世界模型，并检验本文思路在复杂场景的局限。
+
+## 明确不覆盖
+
+不处理奖励与下游控制（无策略学习、规划实验）；不做硬干预与图结构变化；不学观测函数变化；不给可辨识性定理、不处理潜维数未知；结构是 Bernoulli 信念的点估计而非贝叶斯图后验（不同于 DiBS 路线）；实验仅限低维模拟多体环境，无真实数据；不与 IRM 类方法做经验比较。
+
+## 阅读路径
+
+先读 §1 与 Fig 1–2 建立直觉；§4.1 是核心——式 6–8 的三构件（独立机制、稀疏依赖、稀疏干预）；§4.3 式 10 与附录 A 式 20–24 的 KL 分解说明「因果结构如何进 ELBO」；§4.4 式 13 给出自适应；§5 按 Fig 4（预测）→ Fig 6（小样本自适应）→ 附录 D 表 2 与 Fig 8（结构恢复）读。姊妹篇对照：站内 2105.11839（DiBS：同样把图搬进连续空间，但做贝叶斯后验推断且作用于观测变量因果图，对照其隐图表示与本文 Bernoulli 信念）；站内 2004.12906（competition of experts：结论中待结合的对象中心因果场景模型）；2411.06890（SPARTAN，同作者后续，改用稀疏注意力并检验本文局限）；可辨识性根基回到 Lachapelle et al. (2021)。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 变分因果动力学 | variational causal dynamics (VCD) |
+| 世界模型 | world model |
+| 潜状态空间模型 | latent state-space model |
+| 软干预 | soft intervention |
+| 干预目标 | intervention target |
+| 稀疏机制转移假说 | sparse mechanism shift (SMS) hypothesis |
+| 模块化迁移/自适应 | modular transfer / adaptation |
+| 可微因果发现 | differentiable causal discovery |
+| 直通 Gumbel-max | straight-through Gumbel-max |
+| 证据下界 | evidence lower bound (ELBO) |
+| 因果图模型 | causal graphical model (CGM) |
+| 多体系统 | multi-body system |
+| 展开（轨迹预测） | rollout |
+
+## 来源定位
+
+`papers/2206.11131.pdf`（21 页）。关键内容：模型假设与式 6–8（§4.1, p.5）；递归模块式 9（§4.2, p.6）；训练目标式 10 与 Gumbel 采样式 28（§4.3, p.6；附录 B.1, p.14）；自适应式 12–13（§4.4, pp.6–7）；实验 §5 pp.7–9（Fig 4 rollout、Fig 5 表示、Fig 6 自适应）；干预清单表 1（附录 C, p.14）；结构恢复表 2 与雅可比分析 Fig 8–10（附录 D, pp.15–17）；其他干预的自适应 Fig 13–15（附录 E, pp.19–21）；ELBO 推导与 KL 分解（附录 A, p.13）。

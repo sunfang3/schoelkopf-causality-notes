@@ -1,0 +1,85 @@
+---
+title: "潜响应：用潜空间干预探测自编码器表示"
+subtitle: "Felix Leeb et al., arXiv:2106.16091 (2021)"
+description: "利用 VAE 解码器天然滤噪的局部收缩性质构造潜响应函数（解码再编码），把 do-干预搬进潜空间：响应矩阵读出学到的结构因果图，条件响应矩阵定义因果解耦分数（CDS），外在曲率响应图则指导沿流形的语义插值。"
+date: 2021-06-30
+categories: [因果推断, 表示学习]
+paper-id: 2106.16091
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Felix Leeb、Stefan Bauer、Michel Besserve、Bernhard Schölkopf（均 MPI for Intelligent Systems, Tübingen） |
+| 出处 | arXiv:2106.16091 [cs.LG]；站内 PDF 为 v4（2023-01-11），NeurIPS 2022 会议论文；代码开源（github.com/felixludos/latent-responses） |
+| 日期 | 2021-06-30（v1） |
+| 页数 | 34 页（正文+参考文献 13 页，附录 A 理论 pp.14–16、附录 B 附加实验 pp.17–34） |
+
+一句话定位：把「干预—响应」范式从数据空间移入自编码器潜空间的无标签探测框架——不训练新模型、只用解码再编码这一复合映射，同时回答表示的因果结构（哪个潜维影响哪个）与几何结构（流形长在哪里）两个问题。
+
+## 问题与模型
+
+研究问题（§1–§2）：自编码器（autoencoder, AE）与变分自编码器（Variational Autoencoder, VAE）无监督学到的低维表示通常不可解释；既有解耦指标只考察编码器输出与真值变化因子（factors of variation）的统计相关，既会被虚假相关（spurious correlation）误导，又完全忽略学到的生成过程（解码器）。如何在不改训练目标的前提下探测表示结构，并把解耦评估从相关推进到因果？
+
+模型（§3）：把潜变量分解为内生与外生分量 $Z=S+U$（式 2）：$S$ 携带重构所需语义信息（$q(S|X=x)=\delta(f_\phi(x)-s)$，式 3），$U$ 是局部噪声（$\mathcal N(0,\sigma_\phi(x))$，式 4）。代入 VAE 重构项（式 5）可见解码器被训练为把 $s^{(i)}+u$ 一律映回同一观测 $x^{(i)}$，即滤除外生分量——潜空间在 $S$ 附近局部收缩（locally contractive；该行为在无正则 AE 中也部分存在）。一阶展开（式 6，推导附录 A.2）：$\hat s=s+\underbrace{J_{f_\phi}(x)(g_\theta(s)-x)}_{\text{重构误差}}+\underbrace{J_{f_\phi}(x)J_{g_\theta}(s)u}_{\text{解码滤噪残余}}$。只要后两项小，**潜响应函数** $h_{\phi\theta}=f_\phi\circ g_\theta$（解码再编码）即近似保持 $S$、滤掉 $U$，其诱导的响应分布为 $r(\hat Z|Z;\theta,\phi)=\mathbb E_{p(\hat X|Z;\theta)}q(\hat Z|\hat X;\phi)$（式 7）；响应方差大可解释为编码器对生成样本的不确定或潜空间的「洞」（holes）。
+
+## 识别或主要命题
+
+无编号定理（式 6 的一阶展开是核心分析工具）。由 $h_{\phi\theta}$ 派生三件工具（§3.1）：
+
+1. **潜响应矩阵（latent response matrix）**：对潜维 $j$ 做干预 $\Delta^{(z_j\leftarrow\tilde z_j)}$（把第 $j$ 维重采样为边际 $\tilde z_j\sim p(Z_j)$），$M_{jk}^2=\tfrac12\mathbb E\big[|h^{\phi\theta}_k(\Delta^{(z_j\leftarrow\tilde z_j)}(z))-h^{\phi\theta}_k(z)|^2\big]$（式 8）。对角元 $M_{jj}\to0$ 指后验塌缩（posterior collapse，干预不可检测），$\to1$ 指该维几乎无外生噪声；非对角元可读作学到的结构因果图的加权邻接阵（允许环——如周期变量占两维时 $M_{j_1j_2}\approx M_{j_2j_1}>0$ 提示两维应合并处理）。
+2. **条件响应矩阵（conditioned response matrix）与因果解耦分数（Causal Disentanglement Score, CDS）**：有真值标签 $y\in\mathcal Y$ 时，把干预样本限制于只改变某因子 $Y_c$ 的样本子集（式 9），聚合为 $\mathrm{CDS}=\sum_j\max_c M^{*c}_j/\sum_{cj}M^{*c}_j$（式 10，重标到 $[0,1]$）——允许每个潜变量因果影响单一因子、惩罚多余响应。与 DCI 责任矩阵（responsibility matrix）的关键差别：后者量「编码器可预测性」（相关），CDS 量「生成侧因果链」，故能识破无因果效应的虚假相关。
+3. **响应图（response map）**：$|u(z)|\approx|h^{\phi\theta}(z)-z|$（式 11）为到潜流形的近似无符号距离（类比神经隐函数），由此计算平均曲率 $H=-\tfrac12\nabla_z\cdot\frac{u}{|u|}$（式 13，附录 A.4）与散度；沿高曲率带优化插值路径。与测地线方法估计内在曲率不同，外在曲率（extrinsic curvature）依赖具体嵌入。
+
+## 估计/经验
+
+实验（§4–§5，附录 A.6/B）：数据集 3D-Shapes、MNIST、Fashion-MNIST，附录 B 加 MPI3D；主模型 A 为 4-VAE（$\beta=4$）、$d=24$、训练于 3D-Shapes（约 500k 参数，Adam，100k 步）。(i) 双螺旋玩具例（§4）：2 维潜空间的响应图/平均曲率还原螺旋结构，沿曲率最大路径的插值在环境空间中不跳链（Figs 2–3）。(ii) CDS 随 $\beta$ 单调升：3D-Shapes 上 $d=24$ 时 1-VAE 0.52 → 8-VAE 0.78（Table 1），与 DCI-D/IRS/MIG 同向，但 DCI-D 系统性偏低——作者归因于其计入虚假相关；MPI3D Toy 上 8-VAE 的 CDS 达 1.00（Table 2）。(iii) 因果结构案例（Fig 6，全文最有说服力）：干预维 20 显著改变维 4 而反向不然，故识别因果边 20→4；DCI 责任矩阵因「维 4–scale」的相关把 scale 误派给维 4，条件响应矩阵正确识别维 20 才是 scale 的因果通道、并经维 4 间接影响 shape——虚假相关误派责任的现场演示。(iv) 3D-Shapes 潜空间可视化（Figs 4–5）：维 16/22 与 floor_hue 的聚类对应；欧氏最短路径插值产生模糊影子，沿流形的「最佳路径」重建明显更合理。
+
+## 开放问题
+
+1. **依赖潜空间轴对齐结构（§5 自列）**：响应图沿坐标轴对齐，偏离轴的结构被完全忽略——恰对解耦表示最有效，对非轴对齐表示是盲区。
+2. **曲率网格估计不可扩展（§5 自列）**：响应图靠 2D 网格有限差分，无法扩展到高保真生成模型的大潜空间；实验限于为解耦评测设计的合成数据集（附录 B 的 MPI3D/MNIST 仍是低维小模型）。
+3. **无标签时只能识别结构、不保证可解释（§3 自认）**：条件响应矩阵与 CDS 均需真值因子标签，呼应 Locatello et al. (2018) 的无监督解耦不可识别结论。
+4. **响应场与神经隐函数的类比留有工具待开发（§3.1 自列）**：$|u(z)|$ 作为距离函数可衍生 level-set 类分析，未展开。
+5. **干预算子只有「边际重采样」一种（我识别）**：$\Delta^{(z_j\leftarrow\tilde z_j)}$ 仅支持换成聚合后验支撑内的样本，没有平移、缩放等更细粒度干预，对连续因果效应的方向/形状探测能力受限。
+6. **式 (6) 误差项未量化（我识别）**：$\hat s\approx s$ 要求重构误差小且编码器对生成样本稳健，后验重叠与「洞」造成的歧义只在附录 A.1 以高阶矩定性讨论，没有可检验的判据或收敛率。
+7. **CDS 与 DCI-D 的分歧只在合成数据上演示（我识别）**：真实数据上真生成过程未知，虚假相关误派的实际频率无从估计；响应矩阵的蒙特卡洛估计（假设图数、每图样本数）也无敏感性分析。
+
+## 文献谱系
+
+前作（在本文中的角色）：Kingma & Welling (2013)、Rezende et al. (2014)——VAE 与 ELBO（式 1）基座；Locatello et al. (2018)——无监督解耦不可识别，本文无标签情形的直接约束；Eastwood & Williams (2018, DCI)——责任矩阵/解耦分数的镜像对象，附录 A.3 专门对比（同为矩阵聚合但相关 vs 因果）；Rifai et al. (2011, 收缩自编码器) 与 Radhakrishnan et al. (2018)——AE 局部收缩/记忆化的经验依据；Arvanitidis et al. (2017)——潜空间曲率与测地线插值，内在 vs 本文外在曲率的对照；Cemgil et al. (2020, AVAE)——响应分布 $r$ 与其转移核同构，但 AVAE 用它做训练目标、本文只做分析且不假设解码器一一映射；Leeb et al. (2020, 2006.07796) 与 Lanzillotta et al. (2021, 干预一致性)——同组前作/平行工作，共享 $h=f\circ g$ 形式化但目标是正则训练而非事后分析；Schölkopf et al. (2021, Toward Causal Representation Learning)——纲领性引用，本文是其「以干预检验表示因果结构」主张的落地。后续：Eastwood et al. (2022, DCI 扩展与可识别性连接，引文 [72]）。
+
+## 明确不覆盖
+
+不改动训练目标（纯事后分析工具，任何已训练 VAE 即插即用）；不处理标签缺失时潜变量与真值因子的对应问题（只识别结构）；不涉扩散模型等其他生成范式；不做内在曲率/测地线（明确以外在曲率为限，插值路径不保证对底层数据流形最优）；不给解耦的正式可识别性理论；公平性、异常检测等下游应用只以动机一句带过。
+
+## 阅读路径
+
+先读 §1 贡献列表与 §2 记号（式 1 的 ELBO）；§3 为全文核心——式 (2)–(7) 的 $S/U$ 分解与响应函数、§3.1 的图 1 加式 (8)–(10)（三个矩阵/分数）务必精读；§4 双螺旋例建立「曲率=流形」直觉；§5 按 Table 1（CDS vs DCI-D）→ Fig 6（维 20→维 4 的因果边识别）→ Figs 4–5（插值）顺序读；附录 A.3（与 DCI 责任矩阵的对比）与 A.4（平均曲率公式）值得看，附录 B 为大规模可视化。姊妹篇对照：1811.00007（站内有笔记，干预稳健性分数 IRS——同样用干预定义解耦度量，但作用于生成因子层面、从观测数据估计，与本文作用于学到的潜变量层面、从模型内部探测互为镜像）；Schölkopf et al. (2021) 因果表示学习综述可作纲领背景。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 潜响应 | latent response |
+| 潜响应函数 | latent response function $h_{\phi\theta}=f_\phi\circ g_\theta$ |
+| 内生/外生分量 | endogenous / exogenous components ($S/U$) |
+| 局部收缩 | locally contractive |
+| 响应矩阵 | (latent) response matrix $M$ |
+| 条件响应矩阵 | conditioned response matrix |
+| 因果解耦分数 | Causal Disentanglement Score (CDS) |
+| 责任矩阵 | responsibility matrix (DCI) |
+| 虚假相关 | spurious correlation |
+| 后验塌缩 | posterior collapse |
+| 聚合后验 | aggregate posterior |
+| 外在/内在曲率 | extrinsic / intrinsic curvature |
+| 平均曲率 | mean curvature |
+| 响应图 | response map |
+| 潜空间的洞 | holes in the latent space |
+| 变化因子 | factors of variation |
+
+## 来源定位
+
+`papers/2106.16091.pdf`（34 页，v4）。关键内容：$S/U$ 分解与响应函数式 (2)–(7)（§3, pp.3–4）；响应矩阵式 (8)、条件响应式 (9) 与 CDS 式 (10)、$|u(z)|$ 式 (11)（§3.1, pp.4–6）；双螺旋 Figs 2–3（§4, pp.6–7）；CDS 对比 Table 1 与因果结构案例 Fig 6（§5, pp.8–9）；结论与局限 §5 末（p.9）；统计处理（附录 A.1, p.14）、式 (6) 推导（附录 A.2, p.14）、与 DCI 对比（附录 A.3, p.15）、平均曲率式 (13)（附录 A.4, p.15）、训练细节（附录 A.6, p.16）；MPI3D 结果 Table 2（附录 B.2, p.23）、MNIST/Fashion-MNIST（附录 B.3, pp.24 起）。
