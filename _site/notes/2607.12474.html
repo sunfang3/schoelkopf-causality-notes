@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN" xml:lang="zh-CN"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="愿景文：主张科学发现本质上是知识组织问题，提出机制化世界模型（MWM）——以可复用机制而非预测映射为中心组织表示、计算与学习，并从科学哲学推出能力清单、四条设计原则、两大归纳压力与形式化解剖。">
+
+<title>机制化世界模型：把可复用机制放进表示中心 – Schölkopf 因果论文阅读站</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-66b4df7ba86f8287dc76b7fb130027a6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "没有结果",
+    "search-matching-documents-text": "匹配的文档",
+    "search-copy-link-title": "复制搜索链接",
+    "search-hide-matches-text": "隐藏其它匹配结果",
+    "search-more-match-text": "更多匹配结果",
+    "search-more-matches-text": "更多匹配结果",
+    "search-clear-button-title": "清除",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "取消",
+    "search-submit-button-title": "提交",
+    "search-label": "搜索"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Schölkopf 因果论文阅读站</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="搜索"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="展开或折叠导航栏" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">首页</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../schoelkopf-causality-arxiv-2008-2026.html"> 
+<span class="menu-text">全景（按年）</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../glossary.html"> 
+<span class="menu-text">术语表</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../notes.html"> 
+<span class="menu-text">逐篇笔记</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">机制化世界模型：把可复用机制放进表示中心</h1>
+<p class="subtitle lead">Ingmar Posner et al., arXiv:2607.12474 (2026)</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">因果推断</div>
+    <div class="quarto-category">机制化世界模型</div>
+    <div class="quarto-category">自主科学发现</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    愿景文：主张科学发现本质上是知识组织问题，提出机制化世界模型（MWM）——以可复用机制而非预测映射为中心组织表示、计算与学习，并从科学哲学推出能力清单、四条设计原则、两大归纳压力与形式化解剖。
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">发布于</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">2026年7月14日</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="导览" class="level2">
+<h2 class="anchored" data-anchor-id="导览">导览</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>作者</td>
+<td>Ingmar Posner、Anson Lei（牛津大学 Applied AI Lab）；Bernhard Schölkopf（MPI for Intelligent Systems / ELLIS Institute Tübingen）</td>
+</tr>
+<tr class="even">
+<td>出处</td>
+<td>arXiv:2607.12474 [cs.AI]，v1 2026-07-14，v2 2026-07-15</td>
+</tr>
+<tr class="odd">
+<td>日期</td>
+<td>2026-07-14</td>
+</tr>
+<tr class="even">
+<td>页数</td>
+<td>21 页（正文 15 页 + 参考文献，无附录）</td>
+</tr>
+</tbody>
+</table>
+<p>一句话定位：本文是 Schölkopf 因果表示学习议程与牛津 Posner 组模块化世界模型两条线的合流总纲——论证「科学发现是知识组织问题」，提出机制化世界模型（Mechanistic World Models, MWM）作为把可复用机制置于表示中心的设计范式与计算蓝图。</p>
+</section>
+<section id="问题与模型" class="level2">
+<h2 class="anchored" data-anchor-id="问题与模型">问题与模型</h2>
+<p>研究问题：AlphaFold、气象等基础模型只预测不解释——映射输入到输出，却不揭示支撑科学理解的可复用机制；预测能力可否、以及需要何种计算能力才能跨越为洞察（insight）？</p>
+<p>论证取材三步。<strong>科学哲学</strong>（§2）：Hempel–Oppenheim 演绎-律则（DN）模型混淆逻辑可推导性与解释方向性（旗杆—影子反例）；统计相关性（气压计—暴雨）不构成因果解释；机制论（Machamer–Darden–Craver）把机制定义为「产生规律变化的有序实体与活动」；统一论强调以少数原理覆盖众多现象。共识是：好解释 = 简约性（parsimony）+ 宽解释范围，故解释是信息组织问题——「用最小的可复用机制集合解释最大的观测集合」（§2.3，引 Marr 模块设计与 Simon 近可分解性（near-decomposability））。<strong>机器学习现状</strong>（§3）：四条路线各自逼近而均不完备（见文献谱系）。<strong>形式化</strong>（§4.2）：概念性机制定义 <span class="math inline">\(m\triangleq(V,f)\)</span>（式 1）；MWM 解剖为四元组 <span class="math inline">\(W\triangleq(\mathcal T,\mathcal Z,\mathcal M,\mathcal S)\)</span>（式 8）——语义变量类型集 <span class="math inline">\(\mathcal T=\{\tau_1,\tau_2,\dots\}\)</span>（式 2，涌现的功能角色而非预指定标签）、带类型函数 <span class="math inline">\(T:\mathcal Z\to\mathcal T\)</span> 的潜变量集 <span class="math inline">\(\mathcal Z\)</span>（式 3）、机制库 <span class="math inline">\(\mathcal M\)</span>（每个机制 <span class="math inline">\(m\triangleq(\Sigma_m,f_m)\)</span> 由类型化变量签名 <span class="math inline">\(\Sigma_m=((\tau_1,\dots,\tau_p),(\sigma_1,\dots,\sigma_q))\)</span> 与映射组成，式 4–5）、绑定结构 <span class="math inline">\(\mathcal S\)</span>（绑定 <span class="math inline">\(b:\Sigma_m\to\mathcal Z\)</span> 须满足类型约束 <span class="math inline">\(T(b(\tau))=\tau\)</span>，式 6–7）。变量与机制联合涌现：「有用的变量恰是容许紧凑可复用机制的变量」。学习目标示意式（式 9）：<span class="math inline">\(W^*=\arg\min\ \Omega_p(\mathcal T,\mathcal M,\mathcal Z)+\Omega_c(\{\mathcal S_e\})+\sum_e \mathcal L_{\mathrm{pred}}\)</span>。</p>
+</section>
+<section id="识别或主要命题" class="level2">
+<h2 class="anchored" data-anchor-id="识别或主要命题">识别或主要命题</h2>
+<p>无定理（立场/愿景文），核心论证链：(i) 预测是发现的必要非充分条件；(ii) 解释性组织不能事后提取——Vafa 等的行星轨道世界模型能精确预测轨迹却始终未内化牛顿力学，Geneformer/scGPT 的注意力电路反映基因共表达而非调控因果通路，瓶颈在模型未编码机制而非解释工具不够（§3.1）；(iii) 故解释结构须在学习过程中被设计原则与归纳压力促成。由此给出：<strong>两组能力</strong>（§4）——知识组织（变量发现、机制发现、结构发现）与主动探究（解释性假设生成、实验设计）；<strong>四条设计原则</strong>（§4.1）——预测与解释联合建模、机制为表示基本单元（结构因果模型只是其一种概率实例：MWM 的机制是可跨系统经不同绑定复用的计算单元，而非固定因果图上的结构指派）、机制复用、层级组织；<strong>两大归纳压力</strong>——简约性与组合性，此处不是正则化器，而是对「解释性知识本身的组织方式」施压：<span class="math inline">\(\Omega_p\)</span> 约束变量与机制，<span class="math inline">\(\Omega_c\)</span> 约束跨环境绑定结构。</p>
+</section>
+<section id="估计经验" class="level2">
+<h2 class="anchored" data-anchor-id="估计经验">估计/经验</h2>
+<p>无算法与定量实验。唯一系统性证据是 <strong>Table 1</strong>（p.12）：对 VCD、COMET、SPARTAN、DIDS、C-JEPA、RIM、C-SWM、DreamCoder、NEO、PoE-World 十法在变量发现、机制学习、结构发现、组合性、简约性、可扩展架构六维上逐项打勾——无一方法全覆盖，MWM 行六项全勾，定位是统一框架而非又一具体方法。§5 按解剖三组件盘点进展：变量发现（Slot Attention/C-SWM/VCD/DIDS）、机制发现（DreamCoder/PoE-World/RIM/NEO/COMET）、结构发现（NRI/C-JEPA/SPARTAN；COMET 的点积注意力绑定被解读为式 7 类型匹配约束的早期隐式实例）。</p>
+</section>
+<section id="开放问题" class="level2">
+<h2 class="anchored" data-anchor-id="开放问题">开放问题</h2>
+<ol type="1">
+<li><strong>联合整合缺失（自认，§5.4）</strong>：尚无方法联合优化变量、机制与绑定结构，且「不是简单拼接」——须在两压力下平衡；非马尔可夫系统与部分可观测情形的可识别性理论无框架能处理。</li>
+<li><strong>主动探究基本未探索（自认）</strong>：机制管理——何时新增/合并/精炼机制、寻求何种证据验证或扩展机制、如何随理解加深重组机制库——均缺研究；如何用先验机制知识初始化机制库并允许被新证据修正，亦未解决。</li>
+<li><strong>评测缺位（自认）</strong>：需要真值变量/机制/结构已知、能原则性验证恢复结果、并探测知识复用与持续学习能力的环境与指标，当前基准不提供。</li>
+<li><strong>规模假设未被排除（自认，§6）</strong>：「足够强的预测模型或仅靠规模即展现这些性质」的可能性未被否定，MWM 只是被主张的更直接路线。</li>
+<li><strong>式 9 不可操作（我识别）</strong>：<span class="math inline">\(\Omega_p\)</span>、<span class="math inline">\(\Omega_c\)</span> 只是示意记号，没有可计算的复杂度度量或「组合性」的量化定义；绑定本身是组合选择问题，文中仅以「稀疏注意力或许可扩展绑定」一句带过。</li>
+<li><strong>类型系统 <span class="math inline">\(\mathcal T\)</span> 的学习悬空（我识别）</strong>：类型、变量、机制联合涌现意味着鸡生蛋循环，文中未给出打破循环的算法次序或可识别性条件；类型（区别于变量）如何被验证完全未讨论。</li>
+<li><strong>与现有基板的关系未定（我识别）</strong>：主张解释组织须在学习过程中促成，却未回答能否从预训练权重热启动还是必须从头训练；§5 对 AI Scientist/co-scientist 等 agentic 系统「继承预测基板、不解决表示问题」的批评，同样悬在自家路线图最难的一步头上。</li>
+</ol>
+</section>
+<section id="文献谱系" class="level2">
+<h2 class="anchored" data-anchor-id="文献谱系">文献谱系</h2>
+<p>前作（在本文中的角色）：Schölkopf 等「Toward Causal Representation Learning」（2021）与「Causality for Machine Learning」（2022）——ICM 原理、稀疏机制转移假设（sparse mechanism shift）与不变性的来源，并被从可识别性技术升格为表示组织原则；Locatello et al.&nbsp;2019——解耦不适定性引证；Lachapelle、von Kügelgen、Lippe（CITRIS）——CRL 可识别性成果同时是「困于合成基准」论断的证据。机制可解释性：Elhage、Huben（SAE）、Dunefsky（转码器）、Ameisen（电路追踪）——「事后提取」范式代表；InterPLM 与 Gujral et al.——SAE 在 ESM-2 上恢复结合位点的成功案例；Kendiukhov 2026 与 Ahlmann-Eltze et al.&nbsp;2025——单细胞基础模型的反面证据；Vafa et al.&nbsp;2025——预测-解释缺口最尖锐的例证。方程发现：SINDy、MDLformer、AI Feynman——简约性压力的载体，同时暴露「需现成正确层级变量、求单一定律而非可组合机制」两大局限。MoE（Shazeer、Switch Transformers）——「模块化有效但按预测能力组织」的证据。世界模型侧：Ha &amp; Schmidhuber、Hafner、Genie 2——基板；自家三步曲 VCD（2023）、COMET（2024）、SPARTAN（2025）与 DIDS——Table 1 的主要比较对象；Draye et al.&nbsp;2512.05865（稀疏注意力后训练）——「稀疏注意力可扩展至 7B」的引证；Janzing &amp; Schölkopf 算法马尔可夫条件——机制作图灵机程序的替代实例化。后续角色：为牛津—图宾根合作线提供统一叙事，Table 1 的空行即后续工作清单。</p>
+</section>
+<section id="明确不覆盖" class="level2">
+<h2 class="anchored" data-anchor-id="明确不覆盖">明确不覆盖</h2>
+<p>不提出学习算法、损失实现或实验；无可识别性定理；不做主动干预/实验设计算法（只列能力）；不涉及具体科学领域案例研究（蛋白质、行星轨道等只作文献引证）；不讨论多智能体/科学工作流自动化（明确与 AI Scientist 类系统划界）；不处理观测噪声与部分可观测动力学的形式化细节；不评估 LLM 基板能否充当 MWM。</p>
+</section>
+<section id="阅读路径" class="level2">
+<h2 class="anchored" data-anchor-id="阅读路径">阅读路径</h2>
+<p>先读 §1 与图 1（预测循环 vs 发现循环，全文图解）；§2.2–2.3 是论证根基——哲学标准如何收敛为「简约性+宽范围」并被改写为信息组织问题；§3.1 的三个案例（ESM-2 成功、Geneformer 失败、行星轨道未内化牛顿力学）是「事后提取不够」论断的全部证据，须精读；§4.2 的式 2–9 是唯一形式内容，重点是类型化签名与绑定如何使机制跨系统复用；Table 1 与 §5 一起读；§5.4 与 §6 承认局限。姊妹篇对照：2511.02091（Da Costa et al.「Natural Building Blocks」）同样主张结构化世界模型须有显式构件，但走「以随机过程（HMM/sLDS）为天然构件、固定因果架构只搜深度参数」的路线，与本文「构件须从数据涌现」互补；2402.06665（站内有笔记）是同一议程在具身智能方向的先声——论证基础世界模型必须内嵌因果考量，本文可读作其「机制化」升级版。</p>
+</section>
+<section id="术语对照" class="level2">
+<h2 class="anchored" data-anchor-id="术语对照">术语对照</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>中文</th>
+<th>English</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>机制化世界模型</td>
+<td>Mechanistic World Models (MWM)</td>
+</tr>
+<tr class="even">
+<td>机制</td>
+<td>mechanism，<span class="math inline">\(m\triangleq(\Sigma_m,f_m)\)</span></td>
+</tr>
+<tr class="odd">
+<td>类型化变量签名</td>
+<td>typed variable signature</td>
+</tr>
+<tr class="even">
+<td>语义变量类型</td>
+<td>semantic variable types</td>
+</tr>
+<tr class="odd">
+<td>绑定结构</td>
+<td>binding structure</td>
+</tr>
+<tr class="even">
+<td>简约性</td>
+<td>parsimony</td>
+</tr>
+<tr class="odd">
+<td>组合性</td>
+<td>compositionality</td>
+</tr>
+<tr class="even">
+<td>知识组织</td>
+<td>knowledge organisation</td>
+</tr>
+<tr class="odd">
+<td>主动探究</td>
+<td>active inquiry</td>
+</tr>
+<tr class="even">
+<td>演绎-律则模型</td>
+<td>deductive-nomological (DN) model</td>
+</tr>
+<tr class="odd">
+<td>近可分解性</td>
+<td>near-decomposability</td>
+</tr>
+<tr class="even">
+<td>稀疏机制转移假设</td>
+<td>sparse mechanism shift hypothesis</td>
+</tr>
+<tr class="odd">
+<td>方程发现</td>
+<td>equation discovery</td>
+</tr>
+<tr class="even">
+<td>解释范围</td>
+<td>explanatory scope</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="来源定位" class="level2">
+<h2 class="anchored" data-anchor-id="来源定位">来源定位</h2>
+<p><code>papers/2607.12474.pdf</code>（21 页）。概念性机制定义式 1（§2.4, p.4）；四条 ML 路线审视 §3（pp.5–7，Vafa 行星轨道案例 §3.1, p.5）；能力两组与设计原则/归纳压力 §4–4.1（pp.8–9）；解剖与式 2–9（§4.2, pp.10–11）；Table 1 十法六维比较（p.12）；三组件进展 §5.1–5.3（pp.12–14）；挑战与机会 §5.4（p.14）；结论与「规模可能性」承认 §6（pp.14–15）。</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "已复制");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "已复制");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

@@ -1,0 +1,4 @@
+Learning soft interventions in complex equilibrium systems
+Michel Besserve, Bernhard Schölkopf
+2021-12-10
+Complex systems often contain feedback loops that can be described as cyclic causal models. Intervening in such systems may lead to counterintuitive effects, which cannot be inferred directly from the graph structure. After establishing a framework for differentiable soft interventions based on Lie groups, we take advantage of modern automatic differentiation techniques and their application to implicit functions in order to optimize interventions in cyclic causal models. We illustrate the use of this framework by investigating scenarios of transition to sustainable economies.

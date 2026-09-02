@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN" xml:lang="zh-CN"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="把广义经验似然框架中的 φ-散度换成最大均值差异（MMD），得到首个允许候选分布脱离样本重加权的矩方法估计器 KMM；经熵正则化为无约束凸对偶规划，并证明其条件矩约束版本相合、渐近正态且达 Chamberlain 半参数有效界。">
+
+<title>核矩方法：用 MMD 取代 φ-散度，突破矩估计的数据重加权限制 – Schölkopf 因果论文阅读站</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-66b4df7ba86f8287dc76b7fb130027a6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "没有结果",
+    "search-matching-documents-text": "匹配的文档",
+    "search-copy-link-title": "复制搜索链接",
+    "search-hide-matches-text": "隐藏其它匹配结果",
+    "search-more-match-text": "更多匹配结果",
+    "search-more-matches-text": "更多匹配结果",
+    "search-clear-button-title": "清除",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "取消",
+    "search-submit-button-title": "提交",
+    "search-label": "搜索"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Schölkopf 因果论文阅读站</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="搜索"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="展开或折叠导航栏" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">首页</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../schoelkopf-causality-arxiv-2008-2026.html"> 
+<span class="menu-text">全景（按年）</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../glossary.html"> 
+<span class="menu-text">术语表</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../notes.html"> 
+<span class="menu-text">逐篇笔记</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">核矩方法：用 MMD 取代 φ-散度，突破矩估计的数据重加权限制</h1>
+<p class="subtitle lead">Heiner Kremer et al., arXiv:2305.10898 (2023)</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">因果推断</div>
+    <div class="quarto-category">矩方法</div>
+    <div class="quarto-category">核方法</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    把广义经验似然框架中的 φ-散度换成最大均值差异（MMD），得到首个允许候选分布脱离样本重加权的矩方法估计器 KMM；经熵正则化为无约束凸对偶规划，并证明其条件矩约束版本相合、渐近正态且达 Chamberlain 半参数有效界。
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">发布于</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">2023年5月18日</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="导览" class="level2">
+<h2 class="anchored" data-anchor-id="导览">导览</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>作者</td>
+<td>Heiner Kremer、Yassine Nemmour、Bernhard Schölkopf（MPI for Intelligent Systems, Tübingen；Schölkopf 兼 ETH Zürich）、Jia-Jie Zhu（Weierstrass Institute, Berlin）</td>
+</tr>
+<tr class="even">
+<td>出处</td>
+<td>arXiv:2305.10898v2 [cs.LG]；ICML 2023（PMLR v202）（v1 2023-05-18，v2 2023-06-13）</td>
+</tr>
+<tr class="odd">
+<td>日期</td>
+<td>2023-05-18</td>
+</tr>
+<tr class="even">
+<td>页数</td>
+<td>47 页（正文 12 页 + 附录 A–F）</td>
+</tr>
+</tbody>
+</table>
+<p>一句话定位：Schölkopf 组核方法主线（核均值嵌入、MMD）与计量经济学矩估计的合流——GMM/GEL 隐式地把「总体分布的近似」限制在对数据样本的重加权上，KMM 用 MMD 剖面函数解除这一限制，且不牺牲半参数有效性。</p>
+</section>
+<section id="问题与模型" class="level2">
+<h2 class="anchored" data-anchor-id="问题与模型">问题与模型</h2>
+<p>研究问题：矩约束（moment restriction, MR）<span class="math inline">\(\mathbb E[\psi(X;\theta_0)]=0\)</span> 与条件矩约束（conditional moment restriction, CMR）<span class="math inline">\(\mathbb E[\psi(X;\theta_0)\mid Z]=0\)</span> 涵盖工具变量（IV）回归、双重机器学习、离线策略评估等。GEL 类估计器（含 GMM）通过在绝对连续类 <span class="math inline">\(P\ll\hat P_n\)</span> 上最小化 φ-散度的剖面散度（profile divergence）（式 1）近似总体分布——这把候选分布限制为经验样本的重加权（data reweighting），小样本下对连续的总体分布是粗糙近似。<strong>Proposition 2.1</strong>：连续更新 GMM 与 χ²-GEL 的一阶条件重合，故 GMM 隐式对应数据重加权（Newey–Smith 等价结果的直接推论）。模型：MMD 剖面 <span class="math inline">\(R(\theta)=\inf_{P\in\mathcal P}\tfrac12\mathrm{MMD}(P,\hat P_n;\mathcal F)^2\)</span> s.t. <span class="math inline">\(\mathbb E_P[\psi(X;\theta)]=0,\ \mathbb E_P[1]=1\)</span>（式 4），<span class="math inline">\(\mathcal F\)</span> 为普适核的 RKHS（保证 MMD 为零当且仅当分布相等）；KMM 估计器 <span class="math inline">\(\hat\theta=\arg\min_\theta R(\theta)\)</span>。CMR 沿 Kremer et al.&nbsp;(2022) 的矩泛函（moment functional）路线：<span class="math inline">\(\Psi(x,z;\theta)(h)=\psi(x;\theta)^\top h(z)\)</span>，把条件式写成连续统无条件式 <span class="math inline">\(\mathbb E[\psi^\top h(Z)]=0\ \forall h\in\mathcal H\)</span>（Bierens 1982），<span class="math inline">\(\mathcal H\)</span> 取普适 ISPD 核的 RKHS 或神经网络。</p>
+</section>
+<section id="识别或主要命题" class="level2">
+<h2 class="anchored" data-anchor-id="识别或主要命题">识别或主要命题</h2>
+<p><strong>Theorem 3.1（强对偶）</strong>：式 4 的对偶为 <span class="math inline">\(R(\theta)=\sup_{\eta,f,h}\{\tfrac1n\sum_i f(x_i)+\eta-\tfrac12\Vert f\Vert_\mathcal F^2\}\)</span> s.t. <span class="math inline">\(f(x)+\eta\le\psi(x;\theta)^\top h\ \forall x\)</span>——凸但含半无限约束（semi-infinitely constrained），难以与随机梯度法配合。<strong>Theorem 3.2（KMM 对偶）</strong>：对式 7 的熵正则剖面 <span class="math inline">\(R_\epsilon^\varphi(\theta)=\inf_{P\ll\omega}\tfrac12\mathrm{MMD}(P,\hat P_n)^2+\epsilon D_\varphi(P\Vert\omega)\)</span>，对偶（式 8）为对 <span class="math inline">\((\eta,f,h)\)</span> 联合凸的<strong>无约束</strong>规划，<span class="math inline">\(\omega\)</span> 只需绝对连续、可为连续分布；KL 正则给出指数惩罚的软约束，Burg 熵（反向 KL）给出 log-障碍，即内点法格式（图 1、附录 D.2 的退火实验）。<strong>Definition 3.3（泛函 KMM）</strong>：CMR 版本以 <span class="math inline">\(h\in\mathcal H\)</span> 替换 <span class="math inline">\(h\in\mathbb R^m\)</span>、<span class="math inline">\(\Psi(x,z;\theta)(h)\)</span> 替换 <span class="math inline">\(\psi^\top h\)</span> 并加 <span class="math inline">\(-\tfrac{\lambda_n}{2}\Vert h\Vert_\mathcal H^2\)</span>（式 10）。<strong>Theorem 3.4（相合性）</strong>：在 <span class="math inline">\(\theta_0\)</span> 为 CMR 唯一解、<span class="math inline">\(\Theta\)</span> 紧、<span class="math inline">\(\psi\)</span> 连续、<span class="math inline">\(V_0(Z)=\mathbb E[\psi\psi^\top\mid Z]\)</span> 非奇异、<span class="math inline">\(\omega=(1-\alpha)\hat P_n+\alpha Q\)</span>（<span class="math inline">\(\alpha=O_p(n^{-1})\)</span>）、<span class="math inline">\(\lambda_n=O_p(n^{-\xi}),0&lt;\xi&lt;1/2\)</span> 等假设下 <span class="math inline">\(\hat\theta\to\theta_0\)</span>，再加分片可微与秩条件得 <span class="math inline">\(\Vert\hat\theta-\theta_0\Vert=O_p(n^{-1/2})\)</span>。<strong>Theorem 3.7（渐近正态）</strong>：<span class="math inline">\(\sqrt n(\hat\theta-\theta_0)\to_d\mathcal N(0,\Xi_0)\)</span>，<span class="math inline">\(\Xi_0=\{\mathbb E[m(Z)V_0^{-1}(Z)m(Z)^\top]\}^{-1}\)</span>（<span class="math inline">\(m(Z)=\mathbb E[\nabla_\theta\psi\mid Z]\)</span>），恰为 Chamberlain (1987) 半参数有效界；<strong>Corollary 3.8</strong>：KMM 在一切仅基于该 CMR 的估计器中渐近方差最小——此前仅核 VMM（Bennett &amp; Kallus 2020）与筛法（Ai &amp; Chen 2003、Chen &amp; Pouzo 2009）达到。</p>
+</section>
+<section id="估计经验" class="level2">
+<h2 class="anchored" data-anchor-id="估计经验">估计/经验</h2>
+<p>计算：鞍点目标（式 11）上做对偶泛函梯度上升（<span class="math inline">\(\beta=(\eta,f,h)\)</span>）+ <span class="math inline">\(\theta\)</span> 梯度下降（Algorithm 1），<span class="math inline">\(f\)</span> 用随机傅里叶特征（random Fourier features）近似，<span class="math inline">\(\omega\)</span> 用核密度估计（KDE）表示并从中采 mini-batch（两批各 200）。实验一（HeteroskedasticIV，Bennett &amp; Kallus 设定，工具变量带异方差噪声，<span class="math inline">\(\theta_0=[2.0,3.0,-0.5,3.0]\)</span>，20 次重复的参数 MSE）：<span class="math inline">\(n{=}500\)</span> 时 KMM 0.40±0.13，大幅优于 DeepGMM 1.03±0.17、FGEL 1.02±0.19、MMR 1.73±0.22、OLS 1.78±0.21；<span class="math inline">\(n{=}10000\)</span> 时 0.01±0.00 与最优基线持平。实验二（神经网络 IV 回归，Lewis &amp; Syrgkanis 设定，<span class="math inline">\(n{=}1000\)</span> 训练、测试 20000、30 次重复、MSE×10）：四个结构函数中三个 KMM 最优（abs 0.32±0.06 对 FGEL 0.37；step 0.35±0.02；linear 0.43±0.11），sin 任务明显落后（0.88±0.10 对 FGEL 0.62）。超参以残差与条件变量的 HSIC 在验证集上选取（附录 C.2 表明比 MMR 准则更好）；代码随文发布。</p>
+</section>
+<section id="开放问题" class="level2">
+<h2 class="anchored" data-anchor-id="开放问题">开放问题</h2>
+<p>自认（§6 及附录 D.3）：(1) 相合性与有效性均要求唯一辨识（<span class="math inline">\(\theta_0\)</span> 为 CMR 唯一解），非唯一辨识设定的统计学习理论留作未来工作；(2) 参考分布 <span class="math inline">\(Q\)</span> 的选择开放——Lebesgue 测度无竞争力、经验分布退回重加权、KDE 实践最有效，设想用生成模型（GAN/VAE/流/扩散）作密度估计器并用原始-对偶格式让 <span class="math inline">\(Q\)</span> 随优化演化；(3) 只做点估计，置信区间构造是方向；(4) 需要更高效定制化的优化方法以扩展到更大规模。我从论证中识别：(5) 核心卖点「脱离重加权」是有限样本主张，理论却只给一阶渐近——与核 VMM 一阶等价意味着渐近上无增益，重加权之外的收益缺少高阶偏差/有限样本刻画（GEL 的经典优势论证 Newey–Smith 式二阶分析在此缺位），证据仅有 Table 1；(6) 假设 f) 要求 <span class="math inline">\(\omega\)</span> 弱收敛到 <span class="math inline">\(P_0\)</span>（<span class="math inline">\(\alpha=O_p(n^{-1})\)</span>），「超越重加权」的自由度被夹在 KDE 质量与该收敛约束之间，而 KDE 在高维失效是公认的——方法的适用范围实际偏向低维结构化问题，文中无高维实验；(7) 超参选择依赖 HSIC 验证准则且 RFF 近似 <span class="math inline">\(f\)</span> 的误差均无理论分析，两处近似对 <span class="math inline">\(\hat\theta\)</span> 的影响未量化；(8) sin 任务的劣势（0.88 对 0.62）恰出现在最需要理论的非唯一辨识设定，与缺口 (1) 互为印证。</p>
+</section>
+<section id="文献谱系" class="level2">
+<h2 class="anchored" data-anchor-id="文献谱系">文献谱系</h2>
+<p>前作（在本文中的角色）：Hansen (1982) GMM、Hansen et al.&nbsp;(1996) 连续更新——被 Proposition 2.1 揭示为隐式重加权的母体；Owen、Qin &amp; Lawless (1994)、Smith (1997)、Newey &amp; Smith (2004)——GEL 家族与剖面散度框架，命题 2.1 的依据；Bierens (1982)——CMR 等价于连续统无条件约束；Carrasco &amp; Florens (2000)、Ai &amp; Chen (2003)、Chen &amp; Pouzo (2009)、Tripathi &amp; Kitamura (2003)、Chaussé (2012)、Carrasco &amp; Kotchoni (2017)——连续统矩约束与正则化 GEL 的基函数展开路线（本文以核/神经网络与 MMD 取代之），其中 Ai &amp; Chen 是达到有效界的既有方法之一；Kremer et al.&nbsp;(2022) FGEL（站内 2207.04771）——矩泛函化路线与 <span class="math inline">\(-\tfrac{\lambda_n}{2}\Vert h\Vert^2\)</span> 正则的直接来源，也是本文要扬弃的 φ-散度姊妹篇；Bennett &amp; Kallus (2020) 核 VMM——一阶等价的强基线兼 HeteroskedasticIV 实验设定来源；Bennett et al.&nbsp;(2019) DeepGMM、Hartford et al.&nbsp;(2017) DeepIV、Lewis &amp; Syrgkanis (2018)、Zhang et al.&nbsp;(2021) MMR——神经/核极小极大基线与第二实验设定；Gretton et al.&nbsp;(2012) MMD、Micchelli et al.&nbsp;(2006) 普适核、Simon-Gabriel &amp; Schölkopf (2018) ISPD 核——度量与函数空间的工具箱；Zhu et al.&nbsp;(2021) MMD-DRO 与 Lam (2019) GEL–DRO 对偶——定理 3.1 改写技术的来源；Blanchet et al.&nbsp;(2019)——用最优传输做 GEL 但只为校准模糊集、不给矩约束估计器，是「非重加权」维度上的唯一前邻；Jordan et al.&nbsp;(1998) JKO、Arbel et al.&nbsp;(2019)、Chizat (2022)——MMD+KL 能量泛函与粒子梯度流的变分脉络（本文改走对偶 RKHS 路线）。后续：KMM 框架的作者自期包括自适应参考测度与非唯一辨识理论；站内视角与 2207.04771 构成 FGEL→KMM 的直接演进对。</p>
+</section>
+<section id="明确不覆盖" class="level2">
+<h2 class="anchored" data-anchor-id="明确不覆盖">明确不覆盖</h2>
+<p>不处理非唯一辨识（弱工具变量、部分识别）的理论，只以 sin 实验旁敲；不做置信区间与推断（仅点估计）；不覆盖时间序列/相关数据（i.i.d. 假设）；不处理无穷维冗余参数的纠偏（无 DML 式两阶段结构）；不做高维数据的参考分布实验（KDE 之外仅提议生成模型）；不与最优传输候选分布做实证对比（Blanchet et al.&nbsp;路线只作讨论）；不研究策略学习等动机中列举应用本身的实验。</p>
+</section>
+<section id="阅读路径" class="level2">
+<h2 class="anchored" data-anchor-id="阅读路径">阅读路径</h2>
+<p>先读 §2 复习 MR/CMR、GEL 剖面散度（式 1）与 Proposition 2.1（GMM=重加权这一全文动机）；§3.1–3.2 是枢纽——式 4 的 MMD 剖面、定理 3.1 的半无限约束、式 7 熵正则与定理 3.2 的无约束对偶，配合图 1 看 KL 软约束 vs Burg 障碍；§3.3 散度菜单可略读；§3.4 Definition 3.3 承接 2207.04771 的矩泛函；§3.5 定理 3.4→3.7→推论 3.8 顺序读，Remark 3.5–3.6 交代 <span class="math inline">\(\omega\)</span> 与 <span class="math inline">\(\mathcal H\)</span> 的可操作性；§4 两张表看小样本优势与 sin 短板；附录 D.3（参考测度选择）与 D.2（退火）最值得看。姊妹篇对照：站内 2207.04771（FGEL：同首作者、同一矩泛函骨架，把 φ-散度换成 MMD 前后对读，最能看清「重加权限制」的确切位置与解除方式）；站内 2106.03340（最小可辨识工具空间：从工具空间/核选择一侧系统化 CMR 的核方法，与本文的估计器一侧互补）。</p>
+</section>
+<section id="术语对照" class="level2">
+<h2 class="anchored" data-anchor-id="术语对照">术语对照</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>中文</th>
+<th>English</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>核矩方法</td>
+<td>kernel method of moments (KMM)</td>
+</tr>
+<tr class="even">
+<td>数据重加权</td>
+<td>data reweighting</td>
+</tr>
+<tr class="odd">
+<td>剖面散度</td>
+<td>profile divergence</td>
+</tr>
+<tr class="even">
+<td>MMD 剖面</td>
+<td>MMD profile</td>
+</tr>
+<tr class="odd">
+<td>熵正则</td>
+<td>entropy regularization</td>
+</tr>
+<tr class="even">
+<td>半无限约束</td>
+<td>(semi-)infinite constraint</td>
+</tr>
+<tr class="odd">
+<td>对数障碍</td>
+<td>log-barrier</td>
+</tr>
+<tr class="even">
+<td>凸共轭</td>
+<td>convex conjugate</td>
+</tr>
+<tr class="odd">
+<td>参考分布</td>
+<td>reference distribution</td>
+</tr>
+<tr class="even">
+<td>矩泛函</td>
+<td>moment functional</td>
+</tr>
+<tr class="odd">
+<td>泛函 KMM</td>
+<td>functional KMM</td>
+</tr>
+<tr class="even">
+<td>半参数有效界</td>
+<td>semiparametric efficiency bound</td>
+</tr>
+<tr class="odd">
+<td>随机傅里叶特征</td>
+<td>random Fourier features</td>
+</tr>
+<tr class="even">
+<td>核密度估计</td>
+<td>kernel density estimation (KDE)</td>
+</tr>
+<tr class="odd">
+<td>Burg 熵</td>
+<td>Burg entropy / backward KL</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="来源定位" class="level2">
+<h2 class="anchored" data-anchor-id="来源定位">来源定位</h2>
+<p><code>papers/2305.10898.pdf</code>：式 (1) 剖面散度与 Proposition 2.1 在 §2（第 3–4 页）；式 (4) MMD 剖面与定理 3.1 在 §3.1（第 4–5 页）；式 (7)–(8) 熵正则与定理 3.2 在 §3.2（第 5–6 页），图 1 在第 6 页；Definition 3.3 在 §3.4（第 7 页）；定理 3.4/3.7 与推论 3.8 在 §3.5（第 8 页）；Algorithm 1 在 §3.6（第 9 页）；Table 1（第 10 页）与 Table 2（第 11 页）为实验数字；附录 D.3 参考测度选择在第 21–22 页，D.2 退火在第 20 页。</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "已复制");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "已复制");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

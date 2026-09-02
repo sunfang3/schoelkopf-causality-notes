@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN" xml:lang="zh-CN"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="证明结构稳定的一阶 ODE 系统的（干预后）平衡态可等价写成确定性结构因果模型（定理 2），为含环结构方程提供「平衡态」而非「离散时间不动点」的干预语义。系 arXiv:1304.7920（NIPS 2013）的期刊扩展版（JMLR 15, 2014）。">
+
+<title>从常微分方程到结构因果模型：确定性情形（期刊版） – Schölkopf 因果论文阅读站</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-66b4df7ba86f8287dc76b7fb130027a6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "没有结果",
+    "search-matching-documents-text": "匹配的文档",
+    "search-copy-link-title": "复制搜索链接",
+    "search-hide-matches-text": "隐藏其它匹配结果",
+    "search-more-match-text": "更多匹配结果",
+    "search-more-matches-text": "更多匹配结果",
+    "search-clear-button-title": "清除",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "取消",
+    "search-submit-button-title": "提交",
+    "search-label": "搜索"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Schölkopf 因果论文阅读站</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="搜索"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="展开或折叠导航栏" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">首页</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../schoelkopf-causality-arxiv-2008-2026.html"> 
+<span class="menu-text">全景（按年）</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../glossary.html"> 
+<span class="menu-text">术语表</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../notes.html"> 
+<span class="menu-text">逐篇笔记</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">从常微分方程到结构因果模型：确定性情形（期刊版）</h1>
+<p class="subtitle lead">Joris Mooij et al., arXiv:1408.2063 (2014)</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">因果推断</div>
+    <div class="quarto-category">动力系统</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    证明结构稳定的一阶 ODE 系统的（干预后）平衡态可等价写成确定性结构因果模型（定理 2），为含环结构方程提供「平衡态」而非「离散时间不动点」的干预语义。系 arXiv:1304.7920（NIPS 2013）的期刊扩展版（JMLR 15, 2014）。
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">发布于</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">2014年8月9日</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="导览" class="level2">
+<h2 class="anchored" data-anchor-id="导览">导览</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>作者</td>
+<td>Joris M. Mooij（Radboud University Nijmegen 计算与信息科学系，兼 University of Amsterdam）、Dominik Janzing、Bernhard Schölkopf（MPI for Intelligent Systems, Tübingen）</td>
+</tr>
+<tr class="even">
+<td>出处</td>
+<td>arXiv:1408.2063v1 [stat.ML]；后刊于 JMLR 15 (2014)。会议版为 arXiv:1304.7920（NIPS 2013，站内已有笔记）</td>
+</tr>
+<tr class="odd">
+<td>日期</td>
+<td>2014-08-09（仅 v1）</td>
+</tr>
+<tr class="even">
+<td>页数</td>
+<td>9 页</td>
+</tr>
+</tbody>
+</table>
+<p>一句话定位：SCM 去掉无环性后结构方程作何解释？通行答案把结构方程当离散时间更新规则的不动点；本文给出替代解释——结构方程刻画 ODE 系统的平衡态，因果（干预）语义在时间结构消失的平衡层面仍然良定义，含环与无环因此不作本质区分。</p>
+</section>
+<section id="问题与模型" class="level2">
+<h2 class="anchored" data-anchor-id="问题与模型">问题与模型</h2>
+<p>模型与会议版相同（此处摘要式复述，细节见站内 1304.7920 笔记）：ODE 系统 <span class="math inline">\(D\)</span>：<span class="math inline">\(\dot X_i(t)=f_i(X_{\mathrm{pa}^{D}(i)})\)</span>，<span class="math inline">\(X_i(0)=(X_0)_i\)</span>（式 (1)），图 <span class="math inline">\(G_D\)</span> 允许自环。完美干预 <span class="math inline">\(do(X_I=\xi_I)\)</span> 由反馈项 <span class="math inline">\(\kappa(\xi_i-X_i)\)</span>、<span class="math inline">\(\kappa\to\infty\)</span> 实现（式 (3)(4)），自 <span class="math inline">\(t=0\)</span> 持续到 <span class="math inline">\(\infty\)</span>。定义 1–2：稳定性（唯一平衡态吸引任意初值）及对干预族 <span class="math inline">\(J\subseteq\mathcal P(\mathcal I)\)</span> 的稳定性。两个贯穿例子：Lotka–Volterra（式 (2)）不稳定——第二个平衡态的雅可比有纯虚特征值 <span class="math inline">\(\pm i\sqrt{\theta_{11}\theta_{22}}\)</span>，无阻尼振荡，干预 <span class="math inline">\(do(X_2=\xi_2)\)</span> 后仅「一般地」稳定（<span class="math inline">\(\theta_{11}-\theta_{12}\xi_2=0\)</span> 时平衡态成族）；阻尼谐振子链（<span class="math inline">\(D\)</span> 个质量-弹簧-摩擦系统，<span class="math inline">\(X_i=(Q_i,P_i)\)</span>，位置干预 <span class="math inline">\(do(X_i=(\xi_i,0))\)</span>）对任意此类干预稳定。</p>
+<p><strong>本版相对会议版的实质改动</strong>（逐段比对两份 PDF 的结论）：</p>
+<ol type="1">
+<li>定义 9 简化：结构可解性从会议版的「对每个 <span class="math inline">\(i\)</span> 存在某个包含父变量集的干预集 <span class="math inline">\(I_i\)</span>（<span class="math inline">\(\mathrm{pa}^{E}(i)\setminus\{i\}\subseteq I_i\subseteq\mathcal I\setminus\{i\}\)</span>）使干预后 LEE 可解」改为更强的「对全体留一干预集 <span class="math inline">\(\{\mathcal I\setminus\{i\}\}_{i\in\mathcal I}\)</span> 可解」，诱导 SCM 的构造固定 <span class="math inline">\(I_i=\mathcal I\setminus\{i\}\)</span>——表述更简单，代价是假设更严。</li>
+<li>引言补一句定位：线性与离散情形已有部分可识别性结果，一般含环情形仍开放。</li>
+<li>讨论节把会议版整段的「运动常数（constants of motion）」讨论压缩为噪声来源列举中的一项；噪声进入途径从两条（参数、隐变量）扩为三条（参数、初始条件（运动常数情形）、隐变量即混杂）。</li>
+<li>增补相关工作引用：Sokol–Hansen (2013) 由随机微分方程推 SCM、Iwasaki–Simon (1994)、Voortman et al.&nbsp;(2010)。</li>
+</ol>
+</section>
+<section id="识别或主要命题" class="level2">
+<h2 class="anchored" data-anchor-id="识别或主要命题">识别或主要命题</h2>
+<ul>
+<li><strong>定理 1</strong>：对 ODE 先诱导带标签平衡方程组（Labeled Equilibrium Equations, LEE，定义 3：<span class="math inline">\(E_i:\ 0=g_i(X_{\mathrm{pa}^{E}(i)})\)</span>，标签 <span class="math inline">\(i\)</span> 记录方程源自哪个变量的动力学，从而保留干预目标信息）再干预，等于先干预 ODE 再诱导 LEE：<span class="math inline">\((E_D)_{do}=E_{D_{do}}\)</span>；且干预后 ODE 的稳定性蕴含干预后 LEE 的可解性、解相同。干预把 <span class="math inline">\(E_i\)</span> 换成 <span class="math inline">\(0=X_i-\xi_i\)</span>（定义 4，式 (9)）。</li>
+<li><strong>引理 1</strong>：诱导 SCM 与 LEE 的干预运算可交换、解相同；LEE 的可解性传导给 SCM。诱导 SCM（定义 9 的构造）：<span class="math inline">\(h_i(\xi_{\mathrm{pa}^{M}(i)}):=(X^*_{do(X_{\mathcal I\setminus\{i\}}=\xi)})_i\)</span>——把其余变量全部干预到给定值后读出平衡态第 <span class="math inline">\(i\)</span> 分量；自环在构造中消失。</li>
+<li><strong>定理 2（主结果）</strong>：若 ODE <span class="math inline">\(D\)</span> 与干预后 <span class="math inline">\(D_{do(X_I=\xi_I)}\)</span> 均结构稳定（定义 10），则 ODE→LEE→SCM 的交换图（图 4）可交换；若 <span class="math inline">\(D\)</span> 进一步对该干预稳定，则干预后诱导 SCM 有唯一解、恰等于干预后 ODE 的稳定平衡态——由平衡态数据诱导的 SCM 能正确预测任意完美干预的平衡层面后果。</li>
+<li>例子（§4.5.1）：谐振子链在平衡处动量恒为零，SCM 只含位置变量，<span class="math inline">\(Q_i=\dfrac{k_i(Q_{i+1}-l_i)+k_{i-1}(Q_{i-1}+l_{i-1})}{k_i+k_{i-1}}\)</span>（式 (13)，见下来源定位的勘误注），因果图为邻居耦合的循环结构（图 5）。</li>
+<li>两条结构评注：结构稳定条件实际上蕴含自环存在（否则 <span class="math inline">\(X_i\)</span> 的平衡值无约束）；动力学→平衡表示丢失信息（收敛速率等），不同动力学可诱导同一 SCM，逆向表示不唯一。</li>
+</ul>
+</section>
+<section id="估计经验" class="level2">
+<h2 class="anchored" data-anchor-id="估计经验">估计/经验</h2>
+<p>无实验。全文是定义–定理–证明加两个物理例子：Lotka–Volterra 作稳定性假设不满足的反例，阻尼谐振子链作正例；式 (13) 与图 5 是唯一展开的 worked example。</p>
+</section>
+<section id="开放问题" class="level2">
+<h2 class="anchored" data-anchor-id="开放问题">开放问题</h2>
+<ol type="1">
+<li><strong>随机与混杂情形（自陈）</strong>：扩展到随机系统是声明的未来工作；噪声经三条途径进入（参数、初始条件/运动常数、隐变量混杂），均未展开。</li>
+<li><strong>运动常数问题实质上被搁置而非解决</strong>：会议版明言「未处理」——不固定谐振子链端点则总动量依赖初值、按定义 1 系统不稳定；本版仅以一句话带过，「哪些动力学变量应进入 SCM」仍无判据（如例子中动量恒零需先验决定剔除）。</li>
+<li><strong>稳定性假设过强</strong>：要求全局唯一吸引平衡态，多稳态与持续振荡系统（Lotka–Volterra 即反例）被整体排除；「一般稳定」的绕法没有系统化的局部理论。</li>
+<li><strong>结构稳定条件难以验证</strong>：定理 2 需要对所有相关干预族验证稳定性，除物理可解的例子外文中无操作性判据；干预的 <span class="math inline">\(\kappa\to\infty\)</span> 实现还需未明写的正则条件。</li>
+<li><strong>无统计层</strong>：如何从有限平衡快照估计诱导 SCM、含环 SCM 的可识别性与因果发现完全不在本文——这些留给后续一般含环含隐 SCM 理论（Bongers et al.&nbsp;2018 起）与均衡因果发现文献。</li>
+</ol>
+</section>
+<section id="文献谱系" class="level2">
+<h2 class="anchored" data-anchor-id="文献谱系">文献谱系</h2>
+<ul>
+<li>Pearl (2000)：SCM 与 do-算子术语；脚注 4「结构方程 vs 代数方程」之辨（任何结构方程子集各自是某干预下有效的现实模型）正是 LEE 标签的形式化依据。</li>
+<li>「结构方程 = 离散时间不动点」路线（Spirtes 1995、Dash 2005、Lacerda et al.&nbsp;2008、Mooij et al.&nbsp;2011、Hyttinen et al.&nbsp;2012）：本文明确对立的解释；Richardson (1996)、Koster (1996)、Pearl–Dechter (1996)、Neal (2000) 是循环因果图的早期谱系。</li>
+<li>本版新增的对照：Sokol–Hansen (2013) 从随机微分方程推 SCM（作者明言本文不主张唯一推导方式时的旁证）；Iwasaki–Simon (1994)、Voortman et al.&nbsp;(2010) 是微分方程与因果的older工作。</li>
+<li>Murray (2002)：Lotka–Volterra 稳定性分析的依据。</li>
+<li>前后身：1304.7920（NIPS 2013 会议版）；后续为 Bongers/Forré/Peters 等的一般含环 SCM 理论与均衡因果发现。</li>
+</ul>
+</section>
+<section id="明确不覆盖" class="level2">
+<h2 class="anchored" data-anchor-id="明确不覆盖">明确不覆盖</h2>
+<p>随机噪声与隐混杂（确定性限定）；运动常数与守恒量（未解决即搁置）；非完美、瞬态或软干预；趋于平衡的瞬态动力学与收敛速率（表示变换中丢失）；由数据学习/估计 SCM 的统计问题；不主张这是 SCM 的唯一推导方式。</p>
+</section>
+<section id="阅读路径" class="level2">
+<h2 class="anchored" data-anchor-id="阅读路径">阅读路径</h2>
+<p>已读站内 1304.7920 笔记者，本版增量集中三处，可只读：§1（引言新句）、定义 9（留一干预的简化表述）、§5（讨论节与噪声三途径）；初读者直接按本篇顺序即可：§2.3 两个例子定调（重点谐振子链）→ §3.3（标签为何携带干预信息，概念核心）→ 定义 3–5 与定理 1 → §4.4 构造与引理 1 → 定义 10、定理 2 与图 4 交换图 → §5。姊妹篇对照：1304.7920（会议版，站内笔记含式 (13) 同一勘误辨析）；站内 1207.5136（TiMINo：时间序列、要求无环，与本文「循环结构在平衡层面合法」互补）；1411.3972（同为结构方程的动力学辩护，但走 VAR + 统计识别路线）。</p>
+</section>
+<section id="术语对照" class="level2">
+<h2 class="anchored" data-anchor-id="术语对照">术语对照</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>中文</th>
+<th>English</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>一阶常微分方程组</td>
+<td>first-order ODE system</td>
+</tr>
+<tr class="even">
+<td>完美干预</td>
+<td>perfect intervention</td>
+</tr>
+<tr class="odd">
+<td>平衡态</td>
+<td>equilibrium state</td>
+</tr>
+<tr class="even">
+<td>（对干预族的）稳定性</td>
+<td>stability (w.r.t. a set of interventions)</td>
+</tr>
+<tr class="odd">
+<td>带标签平衡方程组</td>
+<td>Labeled Equilibrium Equations (LEE)</td>
+</tr>
+<tr class="even">
+<td>留一干预集</td>
+<td>hold-out intervention set <span class="math inline">\(\mathcal I\setminus\{i\}\)</span></td>
+</tr>
+<tr class="odd">
+<td>结构可解性</td>
+<td>structural solvability</td>
+</tr>
+<tr class="even">
+<td>结构稳定性</td>
+<td>structural stability</td>
+</tr>
+<tr class="odd">
+<td>诱导 SCM</td>
+<td>induced SCM</td>
+</tr>
+<tr class="even">
+<td>自环</td>
+<td>self-loop</td>
+</tr>
+<tr class="odd">
+<td>交换图</td>
+<td>commutative diagram</td>
+</tr>
+<tr class="even">
+<td>运动常数</td>
+<td>constants of motion</td>
+</tr>
+<tr class="odd">
+<td>阻尼（耦合）谐振子</td>
+<td>damped (coupled) harmonic oscillator</td>
+</tr>
+<tr class="even">
+<td>Lotka–Volterra 捕食模型</td>
+<td>Lotka–Volterra predator–prey model</td>
+</tr>
+<tr class="odd">
+<td>均衡因果发现</td>
+<td>equilibrium causal discovery</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="来源定位" class="level2">
+<h2 class="anchored" data-anchor-id="来源定位">来源定位</h2>
+<p>来源：<code>papers/1408.2063.pdf</code>。关键编号：式 (1) ODE、(2) Lotka–Volterra、(4) 干预后 ODE、(8) LEE、(9) 干预后 LEE、(11)(12) SCM 及其干预、(13) 谐振子链结构方程；定义 1–10；定理 1、引理 1、定理 2；图 1–3（两例及其干预图）、图 4（交换图）、图 5（诱导 SCM 图）。勘误注：式 (13) 分母印刷为 <span class="math inline">\(k_i+k_{i+1}\)</span>（1304.7920 同），但由本文自己的平衡方程 <span class="math inline">\(0=k_i(Q_{i+1}-Q_i-l_i)-k_{i-1}(Q_i-Q_{i-1}-l_{i-1})\)</span> 解出 <span class="math inline">\(Q_i\)</span>，分母应为 <span class="math inline">\(k_i+k_{i-1}\)</span>——排版笔误（经 200 dpi 页面目检与代数推导双重确认）。</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "已复制");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "已复制");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

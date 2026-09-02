@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN" xml:lang="zh-CN"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="在 SCM 生成过程的每个变量处加 z-标准化得到 iSCM，构造上不具 Var-可排序性、经验上对常用图族基本不具 R²-可排序性；并证明事后标准化反而使线性 SCM 在森林图上部分可识别、深层系统退化为近确定性，而 iSCM 两者皆无。">
+
+<title>iSCM：把标准化写进生成过程，消除基准伪迹 – Schölkopf 因果论文阅读站</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-66b4df7ba86f8287dc76b7fb130027a6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "没有结果",
+    "search-matching-documents-text": "匹配的文档",
+    "search-copy-link-title": "复制搜索链接",
+    "search-hide-matches-text": "隐藏其它匹配结果",
+    "search-more-match-text": "更多匹配结果",
+    "search-more-matches-text": "更多匹配结果",
+    "search-clear-button-title": "清除",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "取消",
+    "search-submit-button-title": "提交",
+    "search-label": "搜索"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Schölkopf 因果论文阅读站</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="搜索"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="展开或折叠导航栏" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">首页</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../schoelkopf-causality-arxiv-2008-2026.html"> 
+<span class="menu-text">全景（按年）</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../glossary.html"> 
+<span class="menu-text">术语表</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../notes.html"> 
+<span class="menu-text">逐篇笔记</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">iSCM：把标准化写进生成过程，消除基准伪迹</h1>
+<p class="subtitle lead">Weronika Ormaniec et al., arXiv:2406.11601 (2024)</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">因果推断</div>
+    <div class="quarto-category">因果发现基准</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    在 SCM 生成过程的每个变量处加 z-标准化得到 iSCM，构造上不具 Var-可排序性、经验上对常用图族基本不具 R²-可排序性；并证明事后标准化反而使线性 SCM 在森林图上部分可识别、深层系统退化为近确定性，而 iSCM 两者皆无。
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">发布于</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">2024年6月17日</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="导览" class="level2">
+<h2 class="anchored" data-anchor-id="导览">导览</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>作者</td>
+<td>Weronika Ormaniec、Scott Sussex、Lars Lorch（均 ETH Zürich，同等贡献）、Bernhard Schölkopf（MPI for Intelligent Systems，Tübingen）、Andreas Krause（ETH Zürich）</td>
+</tr>
+<tr class="even">
+<td>出处</td>
+<td>arXiv:2406.11601 [cs.LG]；ICLR 2025；站内 PDF 为 v3（2025-03-17）</td>
+</tr>
+<tr class="odd">
+<td>日期</td>
+<td>2024-06-17（v1）</td>
+</tr>
+<tr class="even">
+<td>页数</td>
+<td>43 页（正文 10 页 + 附录 A–F 33 页）</td>
+</tr>
+</tbody>
+</table>
+<p>一句话定位：把「基准批判」转化为可操作的生成模型修正——内部标准化结构因果模型（internally-standardized SCM, iSCM），并证明事后标准化并非无害：它带来部分可识别性与深层确定性退化，iSCM 两者皆无。</p>
+</section>
+<section id="问题与模型" class="level2">
+<h2 class="anchored" data-anchor-id="问题与模型">问题与模型</h2>
+<p>研究问题：加性噪声 SCM 的方差与两两相关沿因果序递增，产生 Var-可排序性（Var-sortability, Reisach et al.&nbsp;2021）与 R²-可排序性（R²-sortability, 2024）两类伪迹（artifact）；现有度量只量化不消除，事后标准化（post-hoc standardization）<span class="math inline">\(x^s_i=(x_i-\mathbb E[x_i])/\sqrt{\mathrm{Var}[x_i]}\)</span> 只除方差伪迹。如何不对机制 <span class="math inline">\(f_i\)</span>、噪声 <span class="math inline">\(\varepsilon_i\)</span> 施加限制地生成无两类伪迹的数据，并理解标准化对可识别性的影响？</p>
+<p>模型：iSCM（式 (iSCM)）在生成过程内部对每个变量做标准化 <span class="math inline">\(x_i:=f_i(\tilde x_{\mathrm{pa}(i)},\varepsilon_i)\)</span>，<span class="math inline">\(\tilde x_i:=(x_i-\mathbb E[x_i])/\sqrt{\mathrm{Var}[x_i]}\)</span>，潜变量 <span class="math inline">\(x_i\)</span> 不可观测、<span class="math inline">\(\tilde x_i\)</span> 可观测（算法 1 按拓扑序采样）。机制因此尺度自由（scale-free）：噪声与机制的相对尺度不随变量在因果序中的位置改变，且天然满足单位协变性（unit covariance, Villar et al.&nbsp;2023）。把标准化吸入机制可得「隐含 SCM」（implied SCM，式 2）<span class="math inline">\(\tilde x_i=\tilde g_i(\tilde x_{\mathrm{pa}(i)})+\tilde\theta_i\varepsilon_i\)</span>，于是 iSCM/标准化 SCM 均可按普通 SCM 分析。理论限于等方差零均值加性噪声的线性系统、总体层面；分析工具为引理 1（即 Wright 1934 的 trek 规则）：单位方差线性 SCM 的协方差等于两节点间所有无阻塞路径（无碰撞节点的路径）上权重乘积之和。干预推迟到附录 B：替换潜变量机制而标准化统计量保持观测分布的值，故干预后观测变量不再零均值单位方差。</p>
+</section>
+<section id="识别或主要命题" class="level2">
+<h2 class="anchored" data-anchor-id="识别或主要命题">识别或主要命题</h2>
+<p><strong>定理 2（CEV 上界）</strong>：设每节点至多 <span class="math inline">\(m\)</span> 个父、<span class="math inline">\(\bar w=\max|w_{i,j}|\)</span>、噪声方差 <span class="math inline">\(\sigma^2\)</span>，则线性 iSCM 的原因解释方差份额（fraction of cause-explained variance, CEV，式 4）满足 <span class="math inline">\(\mathrm{CEV}_f[\tilde x_i]\le 1-\sigma^2/(m^2\bar w^2+\sigma^2)\)</span>——深图不会塌缩到确定性机制，而标准化 SCM 会（Reisach et al.&nbsp;2024）。<strong>定理 3（标准化 SCM 的部分可识别性，此类首个结果）</strong>：森林 DAG（无环骨架）、<span class="math inline">\(|w_{i,j}|&gt;1\)</span> 时，给定 <span class="math inline">\(p(x^s)\)</span> 与马尔可夫等价类（Markov equivalence class, MEC）的 CPDAG <span class="math inline">\(\tilde G\)</span>，每个无向连通分量中至多一条边外全部边向可识别——权重支集有下界这一基准惯例本身使标准化基准可被游戏。<strong>定理 4（iSCM 不可识别）</strong>：线性高斯 iSCM 在森林 DAG 上不可识别超出 MEC——MEC 中任一 DAG 都存在同观测分布、同噪声方差、同对应边权重的 iSCM；但此结论不推广到一般图（附录 C.4.2、图 12 给出三节点骨架的反例）。三节点链例子（图 3）给出定理 3 的直觉：标准化 SCM 中下游协方差依 <span class="math inline">\(|w|&gt;1\)</span> 单调增大，而 iSCM 三种边向共享同一协方差矩阵。</p>
+</section>
+<section id="估计经验" class="level2">
+<h2 class="anchored" data-anchor-id="估计经验">估计/经验</h2>
+<p>可排序性实验（图 4）：ER(d,2)/SF(d,2)，<span class="math inline">\(d\in\{100,200\}\)</span>，权重 Unif±[0.3,0.8]/±[0.5,2.0]/±[1.3,3.0]，每格 100 个系统、<span class="math inline">\(n=1000\)</span>：iSCM 数据 R²-可排序性≈0.5（无伪迹），标准化 SCM 显著偏离。结构学习（图 5）：ER(20,2)/ER(100,2)，线性与非线性（平方指数核高斯过程）机制，<span class="math inline">\(\varepsilon_i\sim N(0,1)\)</span>、<span class="math inline">\(w_{i,j}\sim\)</span> Unif±[0.5,2.0]，每设定 20 个系统、<span class="math inline">\(n=1000\)</span>，以 F1 评测：Var-/R²-SortNRegress 与在标准化 SCM 上预训练的 AVICI 在 iSCM 上失效；NOTEARS/GOLEM-EV 在 iSCM 上反优于标准化 SCM；PC/GES 在大系统上于 iSCM 更优；不假设等噪声尺度的 CAM/GOLEM-NV 两类数据皆好。归因实验（图 6）：标准化 SCM 的隐含逆噪声尺度 <span class="math inline">\(1/\tilde\theta_i^2\)</span> 比 iSCM 高数个量级——深层确定性的足迹；保持 Var-可排序性（约 0.99）而换入隐含噪声统计的隔离实验证实：噪声统计而非 Var-可排序性才是主因。</p>
+</section>
+<section id="开放问题" class="level2">
+<h2 class="anchored" data-anchor-id="开放问题">开放问题</h2>
+<p>本文自认：(1) 定理 4 的不可识别性仅对森林成立，一般图有反例；(2) 不排除仍产生 R²-可排序数据的 iSCM 配置，「常用图族下大概率无伪迹」仅为经验结论；(3) 干预仅附录 B 给定义，干预后观测变量不再零均值单位方差，效用待查；(4) iSCM 作为基准之外的一般建模工具（时间序列、物理系统、能量守恒类比、共享先验下的重参数化）是推测性展望；(5) 可识别性究竟是特性还是缺陷，取决于评估所用假设是否先验可知、可验证。我另识别：(6) 理论与实验有断层——定理在森林与总体层面，实验用 ER/SF 图（稀疏但非森林），iSCM 数据 R²-可排序性≈0.5 这一核心现象并无对应定理；(7) 定理 4 依赖高斯性（协方差相等即分布相等），非高斯 iSCM 未触及而附录 F 恰有非高斯实验；(8) 非线性机制的理论完全空白（三个定理皆线性），但实验含非线性；(9) 「无伪迹」只对两种可排序性度量验证，其他可游戏信号（高阶矩、噪声形状等）未审查；(10) 用经验均值方差替代总体统计量做标准化的有限样本偏差未分析。</p>
+</section>
+<section id="文献谱系" class="level2">
+<h2 class="anchored" data-anchor-id="文献谱系">文献谱系</h2>
+<p>前作（在本文中的角色）：Reisach et al.&nbsp;(2021)——Var-可排序性、Var-SortNRegress 与事后标准化提议，本文承接并指出其不足；Reisach et al.&nbsp;(2024)——R²-可排序性与确定性退化结论的来源；Lorch et al.&nbsp;(2022) AVICI（站内 2205.12934）——被检验出在其标准化 SCM 训练分布上利用伪迹的摊销推断模型；Peters &amp; Bühlmann (2014)——等方差高斯可识别性，标准化后失效的基准；Shimizu et al.&nbsp;(2006) LiNGAM——非高斯可识别性，标准化后仍成立的对照；Wright (1934)——引理 1 trek 规则的源头；Schölkopf (2022) 独立因果机制（ICM）——机制不应泄露其在因果序中位置的纲领依据；Villar et al.&nbsp;(2023, 站内 2301.13724)——单位协变性，iSCM 的物理动机；Ioffe &amp; Szegedy (2015)——批规范化类比；Mooij et al.&nbsp;(2020)、Squires et al.&nbsp;(2022)——方差累积启发式，既限制依赖强度又不能同时去除两类伪迹；NOTEARS、GOLEM、PC、GES、CAM——被评测算法；Loh &amp; Bühlmann (2014)、Seng et al.&nbsp;(2024)——MSE 型损失在噪声尺度失衡时最小化于错误 DAG 的解释工具。</p>
+</section>
+<section id="明确不覆盖" class="level2">
+<h2 class="anchored" data-anchor-id="明确不覆盖">明确不覆盖</h2>
+<p>不研究干预推断（仅附录 B 给定义）；只考虑无潜混淆的观测数据；不提出新的结构学习算法；定理层面不覆盖非线性与非高斯；不检验真实数据更接近 iSCM 还是 SCM（伪迹在现实中的普遍性）。</p>
+</section>
+<section id="阅读路径" class="level2">
+<h2 class="anchored" data-anchor-id="阅读路径">阅读路径</h2>
+<p>先读 §1 与图 1（链图上标准化 SCM 相邻相关从 0.75 升至 0.98 而 iSCM 恒为 0.75，问题与方案一目了然）；§2 补两类可排序性背景；§3 读式 (iSCM)、算法 1 与隐含 SCM；§4 是核心——定理 2 给确定性上界，图 3 的三节点例子是定理 3/4 的全部直觉，务必先看再读两定理；§5 先看图 4（可排序性）再图 5（结构学习），图 6 的噪声归因实验是解释 NOTEARS 行为反转的关键；§6 三条要点。附录按需：B 干预（p.17）、C 证明、C.4.2 反例（p.28）、D.1 启发式为何失败。姊妹篇对照：站内 2205.12934（AVICI——本文检验其伪迹敏感性的对象）、2301.13724（单位协变性——尺度自由的物理动机）；Reisach 两篇不在站内，读本文 §2 即可得其要点。</p>
+</section>
+<section id="术语对照" class="level2">
+<h2 class="anchored" data-anchor-id="术语对照">术语对照</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>中文</th>
+<th>English</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>内部标准化结构因果模型</td>
+<td>internally-standardized SCM (iSCM)</td>
+</tr>
+<tr class="even">
+<td>事后标准化</td>
+<td>post-hoc standardization</td>
+</tr>
+<tr class="odd">
+<td>隐含 SCM / 隐含噪声尺度</td>
+<td>implied SCM / implied noise scale</td>
+</tr>
+<tr class="even">
+<td>Var-可排序性 / R²-可排序性</td>
+<td>Var-sortability / R²-sortability</td>
+</tr>
+<tr class="odd">
+<td>伪迹</td>
+<td>artifact</td>
+</tr>
+<tr class="even">
+<td>尺度自由</td>
+<td>scale-free</td>
+</tr>
+<tr class="odd">
+<td>单位协变性</td>
+<td>unit covariance</td>
+</tr>
+<tr class="even">
+<td>森林（无环骨架 DAG）</td>
+<td>forest</td>
+</tr>
+<tr class="odd">
+<td>马尔可夫等价类</td>
+<td>Markov equivalence class (MEC)</td>
+</tr>
+<tr class="even">
+<td>部分可识别性</td>
+<td>partial identifiability</td>
+</tr>
+<tr class="odd">
+<td>原因解释方差份额</td>
+<td>fraction of cause-explained variance (CEV)</td>
+</tr>
+<tr class="even">
+<td>trek 规则</td>
+<td>trek rule</td>
+</tr>
+<tr class="odd">
+<td>无阻塞路径</td>
+<td>unblocked path</td>
+</tr>
+<tr class="even">
+<td>碰撞节点</td>
+<td>collider</td>
+</tr>
+<tr class="odd">
+<td>摊销推断</td>
+<td>amortized inference</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="来源定位" class="level2">
+<h2 class="anchored" data-anchor-id="来源定位">来源定位</h2>
+<p><code>papers/2406.11601.pdf</code>（43 页）。关键内容：图 1 两类标准化对比（p.2）；式 (iSCM) 与 §3 定义（p.3）、算法 1（p.4）；隐含 SCM 式 2 与引理 1 trek 规则（p.4–5）；定理 2（p.6）；定理 3/定理 4 与图 3（p.6–7）；图 4 可排序性实验（p.8）；图 5 结构学习与图 6 隐含噪声归因（p.9）；§6 三条要点（p.10）；附录 A 隐含模型（p.15–16）、B 干预（p.17）、C.4.2 与图 12 非森林反例（p.28）、E 实验细节（p.31 起）。</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "已复制");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "已复制");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

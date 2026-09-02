@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN" xml:lang="zh-CN"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="为核最大矩约束（KMMR）这一核化 IV 估计框架补上被中值启发式随意处理的核（工具空间）选择问题：定义辨识性与复杂度兼优的最小可辨识工具空间（LIIS），用辨识性检验（ITC）加核有效信息准则（KEIC）两步选出，并证明选择相合性。">
+
+<title>最小可辨识工具空间：为核最大矩约束系统选核 – Schölkopf 因果论文阅读站</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-66b4df7ba86f8287dc76b7fb130027a6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "没有结果",
+    "search-matching-documents-text": "匹配的文档",
+    "search-copy-link-title": "复制搜索链接",
+    "search-hide-matches-text": "隐藏其它匹配结果",
+    "search-more-match-text": "更多匹配结果",
+    "search-more-matches-text": "更多匹配结果",
+    "search-clear-button-title": "清除",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "取消",
+    "search-submit-button-title": "提交",
+    "search-label": "搜索"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Schölkopf 因果论文阅读站</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="搜索"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="展开或折叠导航栏" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">首页</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../schoelkopf-causality-arxiv-2008-2026.html"> 
+<span class="menu-text">全景（按年）</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../glossary.html"> 
+<span class="menu-text">术语表</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../notes.html"> 
+<span class="menu-text">逐篇笔记</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">最小可辨识工具空间：为核最大矩约束系统选核</h1>
+<p class="subtitle lead">Rui Zhang et al., arXiv:2106.03340 (2021)</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">因果推断</div>
+    <div class="quarto-category">工具变量</div>
+    <div class="quarto-category">核方法</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    为核最大矩约束（KMMR）这一核化 IV 估计框架补上被中值启发式随意处理的核（工具空间）选择问题：定义辨识性与复杂度兼优的最小可辨识工具空间（LIIS），用辨识性检验（ITC）加核有效信息准则（KEIC）两步选出，并证明选择相合性。
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">发布于</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">2021年6月7日</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="导览" class="level2">
+<h2 class="anchored" data-anchor-id="导览">导览</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>作者</td>
+<td>Rui Zhang（Australian National University）、Krikamol Muandet（MPI for Intelligent Systems, Tübingen）、Bernhard Schölkopf（MPI IS）、Masaaki Imaizumi（University of Tokyo）</td>
+</tr>
+<tr class="even">
+<td>出处</td>
+<td>arXiv:2106.03340 [cs.LG]，v1 2021-06-07（Preprint, Under review）</td>
+</tr>
+<tr class="odd">
+<td>日期</td>
+<td>2021-06-07</td>
+</tr>
+<tr class="even">
+<td>页数</td>
+<td>18 页（正文 9 页 + 文献、审稿清单与附录 A–C）</td>
+</tr>
+</tbody>
+</table>
+<p>一句话定位：把计量经济学的矩/工具选择难题转译为 KMMR 框架下的 RKHS 选择问题，以「可辨识 + 复杂度最小」为最优性原则给出带相合性保证的两步选择程序。</p>
+</section>
+<section id="问题与模型" class="level2">
+<h2 class="anchored" data-anchor-id="问题与模型">问题与模型</h2>
+<p>条件矩约束（conditional moment restriction, CMR）指 <span class="math inline">\(\mathrm{CMR}(\theta_0)=\mathbb{E}[\varphi_{\theta_0}(X)\mid Z]=0\)</span>（<span class="math inline">\(P_Z\)</span>-几乎处处，式 1），<span class="math inline">\(\varphi_\theta\)</span> 为广义残差函数；IV 回归取 <span class="math inline">\(X=(\tilde X,Y)\)</span>、<span class="math inline">\(Z\)</span> 为工具、<span class="math inline">\(\varphi_\theta(X)=Y-f(\tilde X;\theta)\in\mathbb R\)</span>。CMR 蕴含连续无穷多无条件矩，故估计须选定工具空间 <span class="math inline">\(\mathcal H\)</span>，即最大矩约束（maximum moment restriction, MMR）<span class="math inline">\(R_{\mathcal H}(\theta):=\sup_{h\in\mathcal H,\|h\|=1}\mathbb{E}^2[\varphi_\theta(X)^\top h(Z)]\)</span>（式 2）。取 <span class="math inline">\(\mathcal H\)</span> 为与核 <span class="math inline">\(k\)</span> 相伴的再生核希尔伯特空间（RKHS）并加 Ivanov 正则化 <span class="math inline">\(\|h\|=1\)</span> 后得核最大矩约束（kernel MMR, KMMR）的闭式（式 3）：<span class="math inline">\(R_{\mathcal H}(\theta)=\mathbb{E}[\varphi_\theta(X)k(Z,Z')\varphi_\theta(X')]\)</span>，<span class="math inline">\((X',Z')\)</span> 为独立副本，估计量 <span class="math inline">\(\hat\theta=\arg\min_\theta\hat R_{\mathcal H}(\theta)\)</span>。核心张力：<span class="math inline">\(\mathcal H\)</span> 过小则欠辨识（多个 <span class="math inline">\(\theta\)</span> 使 <span class="math inline">\(R_{\mathcal H}=0\)</span>，MSE 上界随空间临界半径单调增加），过大则有限样本误差上升；且损失 <span class="math inline">\(R_{\mathcal H}\)</span> 依赖 <span class="math inline">\(\mathcal H\)</span> 自身（Mercer 分解 <span class="math inline">\(R_{\mathcal H}=\sum_i\lambda_i\mathbb{E}[\varphi_\theta\phi_i]^2\)</span> 显示空间越小损失越小），交叉验证必然选中过小空间。在候选 <span class="math inline">\(\mathcal H_1,\dots,\mathcal H_M\)</span> 上设：假设 1（全局辨识，CMR 有唯一解 <span class="math inline">\(\theta_0\)</span>）、假设 2（存在非空可辨识候选集 <span class="math inline">\(\mathcal M\)</span>），随后定义 1（最小可辨识工具空间，least identifiable instrument space, LIIS）<span class="math inline">\(\mathcal H^*:=\arg\min_{\mathcal H_j:j\in\mathcal M}\Omega(\mathcal H_j)\)</span>，<span class="math inline">\(\Omega\)</span> 为复杂度度量。</p>
+</section>
+<section id="识别或主要命题" class="level2">
+<h2 class="anchored" data-anchor-id="识别或主要命题">识别或主要命题</h2>
+<p>定理 1（承 Zhang et al.&nbsp;2020 / Muandet et al.&nbsp;2020）：<span class="math inline">\(k\)</span> 连续、有界且积分严格正定（ISPD）时 <span class="math inline">\(R_{\mathcal H}(\theta)=0\iff\mathrm{CMR}(\theta)=0\)</span>——RKHS 工具空间充分但不最优。选择程序 LISC 分两步。第一步辨识性检验准则（identification test criterion, ITC）：考察 Hessian 型矩阵 <span class="math inline">\(F_{\mathcal H}(\theta^*)=\mathbb{E}[u_{\theta^*}(S)]\)</span>，<span class="math inline">\(u_\theta(S)=\nabla_\theta\varphi_{\theta^*}(X)\,k(Z,Z')\,\nabla_\theta\varphi_{\theta^*}(X')\)</span>；其满秩是线性模型全局辨识、非线性模型局部辨识的充分条件（Hall 假设 2.3/3.6）。检验 <span class="math inline">\(H_0:\mathrm{rank}=c-1\)</span> 对 <span class="math inline">\(H_1:\mathrm{rank}=c\)</span>，统计量 <span class="math inline">\(\hat T=\hat\lambda_c^2\)</span>（最小特征值平方），数据对分算 <span class="math inline">\(\hat\Lambda=(\hat C\otimes\hat C)^\top\hat\Omega(\hat C\otimes\hat C)\)</span>，当 <span class="math inline">\(\mathrm{ITC}(\mathcal H)=n\hat T/\hat\Lambda&gt;Q_{1-\alpha}\)</span> 时选入。附录定理 6 给出 <span class="math inline">\(H_0\)</span> 与秩条件（假设 3）下 <span class="math inline">\(n\hat T\to\Lambda Z^2\)</span>，定理 7 给出第一类错误渐近为 <span class="math inline">\(\alpha\)</span>，定理 2 给出对固定备择相合，定理 3 断言 ITC 选中的空间以趋于 1 的概率可辨识。第二步核有效信息准则（kernel effective information criterion, KEIC）：<span class="math inline">\(\mathrm{KEIC}(\mathcal H)=n\hat R_{\mathcal H}(\hat\theta)+\mathrm{Tr}(K_z)\mathrm{Tr}(K_z^2)^{-1/2}\log n\)</span>，惩罚项是核有效维数 <span class="math inline">\(\mathcal E_k=(\sum_i\lambda_i^k)(\sum_i(\lambda_i^k)^2)^{-1/2}\)</span> 的相合估计（定理 4）；首项可滤除无零风险的无效空间（注 1）；定理 5：在可辨识候选集内 KEIC 以概率 <span class="math inline">\(\to1\)</span> 选中复杂度最小者（依赖「唯一最小复杂度可辨识空间存在」），注 2 合并得两步法对 LIIS 相合。无可辨识空间时（如神经网络）退化为最小化比值 <span class="math inline">\(\mathrm{KEIC}/\mathrm{ITC}\)</span>。</p>
+</section>
+<section id="估计经验" class="level2">
+<h2 class="anchored" data-anchor-id="估计经验">估计/经验</h2>
+<p>三组实验（每设定重复 10 次，种子 527，KEIC 风险用二折交叉验证）。其一（§6.1）：合成 IV 数据 <span class="math inline">\(Y=f^*(X)+e+\delta,\ X=Z+e+\gamma\)</span>，<span class="math inline">\(Z\sim U[-3,3]\)</span>，<span class="math inline">\(e\sim N(0,1)\)</span>，<span class="math inline">\(\delta,\gamma\sim N(0,0.1^2)\)</span>；多项式基 <span class="math inline">\(f_m\)</span>（<span class="math inline">\(m\in\{2,4\}\)</span>）配线性/多项式/高斯核候选，真 LIIS 为 <span class="math inline">\(f_2\)</span> 配 P2-1、<span class="math inline">\(f_4\)</span> 配 P4-1。ITC 把不可辨识空间（<span class="math inline">\(f_2\)</span> 的 L；<span class="math inline">\(f_4\)</span> 的 L、P2-1、P2-2）全部正确拒斥并随 <span class="math inline">\(n\in\{100,500,1000\}\)</span> 增大显著度上升，但 <span class="math inline">\(f_4\)</span> 参数多、小样本时 LIIS 检验不显著（作者自认局限）。其二（§6.2，表 1，<span class="math inline">\(n=500\)</span>）：线性 <span class="math inline">\(f_4\)</span>，四种真函数（abs/linear/quad/sin）×三场景（LS 强工具；LW 六个线性弱工具，类孟德尔随机化；NS 非线性 <span class="math inline">\(\sin\)</span> 型工具）。本文方法 MSE 全程 0.006–0.039；LW 下中值启发式退化至 0.214±0.019（abs，本文 0.024±0.010），NS 下 Silverman 法则最差 7.384±18.271（本文 0.039±0.019）。其三（§6.3，表 2，弱工具 <span class="math inline">\(d=2\)</span>，<span class="math inline">\(n=500\)</span>）：NN10/NN55（sigmoid）用比值法选核、ITC 仅取末层 <span class="math inline">\((W_0,b_0)\)</span> 梯度近似；本文 MSE 0.006–0.058，基线最差 0.63（NN55-sin，Silverman）。</p>
+</section>
+<section id="开放问题" class="level2">
+<h2 class="anchored" data-anchor-id="开放问题">开放问题</h2>
+<ol type="1">
+<li><strong>适用面窄（作者）</strong>：只考虑 IV 回归型标量残差模型 <span class="math inline">\(\varphi_\theta\in\mathbb R\)</span>；分位数回归、条件矩检验、近端因果学习、离线 RL 等其他 CMR 场景留作未来工作。</li>
+<li><strong>多参数小样本下 ITC 失效（作者）</strong>：<span class="math inline">\(f_4\)</span> 在 <span class="math inline">\(n=100\)</span> 时 LIIS 无法被显著判定，只能退化为 KEIC/ITC 比值法，而比值法没有任何一致性理论。</li>
+<li><strong>NN 情形的 ITC 是启发式（作者）</strong>：仅用末层参数梯度近似全参数梯度，无误差刻画。</li>
+<li><strong>最优性论证缺位（我识别）</strong>：KEIC 是 BIC 的类比构造，定理 5 依赖「唯一最小复杂度可辨识空间存在」与固定候选集；若 LIIS 不在候选中、或存在多个同复杂度候选，方法只能给次优解，也无相对于 Donald–Newey 高阶渐近方法的效率比较。</li>
+<li><strong>秩检验只覆盖相邻备择（我识别）</strong>：<span class="math inline">\(H_0\)</span> 为 <span class="math inline">\(\mathrm{rank}=c-1\)</span>，<span class="math inline">\(\hat\Lambda\)</span> 的构造依赖单一零特征向量 <span class="math inline">\(C\)</span>；真实秩亏更深（<span class="math inline">\(\le c-2\)</span>）或 <span class="math inline">\(c\)</span> 较大时的分布与水平控制未讨论，对 <span class="math inline">\(M\)</span> 个候选同时检验亦无多重校正。</li>
+<li><strong>弱工具与真实数据（我识别）</strong>：LW 场景只有经验稳健性，无弱辨识下的渐近理论；全部实验为合成数据，无真实（如孟德尔随机化）验证；<span class="math inline">\(\hat R_{\mathcal H}\)</span> 为 <span class="math inline">\(O(n^2)\)</span> 成对统计量、ITC 需特征分解与数据对分，可扩展性未评估。</li>
+</ol>
+</section>
+<section id="文献谱系" class="level2">
+<h2 class="anchored" data-anchor-id="文献谱系">文献谱系</h2>
+<p>Newey (1993) 与 Ai &amp; Chen (2003) 的 CMR 传统、Hansen (1982) 的 GMM 构成问题来源；Carrasco–Florens (2000) 等的「矩条件连续统」是式 3 的计量对照（KMMR 相当于去掉再加权矩阵的 OWGMM）。工具选择文献三类中被明确对标：Donald–Newey (2001)、Donald et al.&nbsp;(2009)、Newey–Smith (2004) 的高阶渐近（Nagar 型）路线复杂、计算重且要求「候选全有效」，是本文的对照面；Andrews (1999) 与 Hall et al.&nbsp;(2007) 的信息准则路线是 KEIC 的直系；Robin–Smith (2000) 的秩检验直接充当 ITC 的检验内核。核方法侧：有效维数取自 Zhang (2003)、Caponnetto–De Vito (2007)；KMMR 框架本身出自 Muandet et al.&nbsp;(2020, UAI) 与 Zhang et al.&nbsp;(2020, arXiv:2010.07684)，本文定理 1 即改写自二者——本文补的是其核选择短板。DeepGMM（Bennett et al.&nbsp;2019）、对抗 GMM（Lewis–Syrgkanis 2018）、Dikkala et al.&nbsp;(2020) 用灵活工具但均未处理 IV 估计器的矩选择；KernelIV/DeepIV/DualIV 是两阶段近邻；Mastouri et al.&nbsp;(2021) 近端因果学习与 Liao et al.&nbsp;(2021) 离线 RL 是 KMMR 的应用动机。Gretton et al.&nbsp;(2012) 的 MMD 最优核（最大化检验功效）被显式排除：本文目标是估计而非检验。</p>
+</section>
+<section id="明确不覆盖" class="level2">
+<h2 class="anchored" data-anchor-id="明确不覆盖">明确不覆盖</h2>
+<p>不处理向量残差与其他 CMR 场景（分位数回归、CM 检验、近端因果学习、离线 RL）；不选择结构函数的模型族（多项式阶、网络结构视为给定）；不给出估计量本身的弱工具稳健推断与置信区间构造；不做真实数据实验；不与高阶渐近方法做经验对比。</p>
+</section>
+<section id="阅读路径" class="level2">
+<h2 class="anchored" data-anchor-id="阅读路径">阅读路径</h2>
+<p>先读 §1 与 Fig 1（p.3，under-/identification/over-/weak 四类空间的图示，全文纲目所在）；再读 §3 的假设 1–2 与定义 1（LIIS，p.4）；§4.1 的 ITC 与定理 2–3（p.5）、§4.2 的 KEIC 与定理 4–5（p.5–6）是方法核心，统计细节（引理 1、假设 3、定理 6–7）在附录 A（p.15）；实验按表 1（p.8）→ 表 2（p.9）→ 附录 C.1（LIIS 的手工推导，p.17）的顺序读。本站尚无 KMMR/IV 估计线的其他笔记，可与其上位纲领笔记 1911.10500（Schölkopf《Causality for Machine Learning》，站内有笔记）对照，理解核均值嵌入—MMD 一脉如何接入因果估计工具链。</p>
+</section>
+<section id="术语对照" class="level2">
+<h2 class="anchored" data-anchor-id="术语对照">术语对照</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>中文</th>
+<th>English</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>条件矩约束 / 无条件矩约束</td>
+<td>conditional / unconditional moment restriction (CMR / UMR)</td>
+</tr>
+<tr class="even">
+<td>最大矩约束</td>
+<td>maximum moment restriction (MMR)</td>
+</tr>
+<tr class="odd">
+<td>核最大矩约束</td>
+<td>kernel maximum moment restriction (KMMR)</td>
+</tr>
+<tr class="even">
+<td>工具空间</td>
+<td>instrument space</td>
+</tr>
+<tr class="odd">
+<td>最小可辨识工具空间</td>
+<td>least identifiable instrument space (LIIS)</td>
+</tr>
+<tr class="even">
+<td>最小辨识选择准则</td>
+<td>least identification selection criterion (LISC)</td>
+</tr>
+<tr class="odd">
+<td>辨识性检验准则</td>
+<td>identification test criterion (ITC)</td>
+</tr>
+<tr class="even">
+<td>核有效信息准则</td>
+<td>kernel effective information criterion (KEIC)</td>
+</tr>
+<tr class="odd">
+<td>有效维数</td>
+<td>effective dimension</td>
+</tr>
+<tr class="even">
+<td>积分严格正定核</td>
+<td>integrally strictly positive definite (ISPD) kernel</td>
+</tr>
+<tr class="odd">
+<td>欠辨识 / 弱辨识</td>
+<td>under-identification / weak identification</td>
+</tr>
+<tr class="even">
+<td>临界半径</td>
+<td>critical radius</td>
+</tr>
+<tr class="odd">
+<td>中值启发式 / Silverman 经验法则</td>
+<td>median heuristic / Silverman’s rule of thumb</td>
+</tr>
+<tr class="even">
+<td>秩检验</td>
+<td>test of rank</td>
+</tr>
+<tr class="odd">
+<td>孟德尔随机化</td>
+<td>Mendelian randomization</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="来源定位" class="level2">
+<h2 class="anchored" data-anchor-id="来源定位">来源定位</h2>
+<p><code>papers/2106.03340.pdf</code>（18 页，v1）。关键内容：式 1–2（p.2）、式 3 与定理 1（p.3）、Fig 1（p.3）、假设 1–2 与定义 1（p.4）、ITC 与定理 2–3（p.5）、式 4 与定理 4（p.5）、定理 5 与注 1–2（p.6）、表 1（p.8）、表 2（p.9）、引理 1/假设 3/定理 6–7（附录 A，p.15）、LIIS 推导（附录 C.1，p.17）、表 3（p.18）。</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "已复制");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "已复制");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

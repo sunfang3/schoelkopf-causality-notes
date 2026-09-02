@@ -1,0 +1,4 @@
+Group invariance principles for causal generative models
+Michel Besserve, Naji Shajarisales, Bernhard Schölkopf, Dominik Janzing
+2017-05-05
+The postulate of independence of cause and mechanism (ICM) has recently led to several new causal discovery algorithms. The interpretation of independence and the way it is utilized, however, varies across these methods. Our aim in this paper is to propose a group theoretic framework for ICM to unify and generalize these approaches. In our setting, the cause-mechanism relationship is assessed by comparing it against a null hypothesis through the application of random generic group transformations. We show that the group theoretic view provides a very general tool to study the structure of data generating mechanisms with direct applications to machine learning.

@@ -1,7 +1,0 @@
----
-title: "逐篇笔记"
-listing:
-  contents: notes/
-  sort: "date asc"
-  fields: [title, subtitle, date, categories]
----

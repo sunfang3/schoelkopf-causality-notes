@@ -1,0 +1,2103 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:arxiv="http://arxiv.org/schemas/atom" xmlns="http://www.w3.org/2005/Atom">
+  <id>https://arxiv.org/api/cQIRIdWozBTaewN9HheDiZnv8HQ</id>
+  <title>arXiv Query: search_query=au:Scholkopf AND abs:causality&amp;id_list=&amp;start=100&amp;max_results=100</title>
+  <updated>2026-09-01T12:59:59Z</updated>
+  <link href="https://arxiv.org/api/query?search_query=au:Scholkopf+AND+abs:causality&amp;start=100&amp;max_results=100&amp;id_list=" type="application/atom+xml"/>
+  <opensearch:itemsPerPage>100</opensearch:itemsPerPage>
+  <opensearch:totalResults>172</opensearch:totalResults>
+  <opensearch:startIndex>100</opensearch:startIndex>
+  <entry>
+    <id>http://arxiv.org/abs/2204.03439v1</id>
+    <title>Half-sibling regression meets exoplanet imaging: PSF modeling and subtraction using a flexible, domain knowledge-driven, causal framework</title>
+    <updated>2022-04-07T13:34:30Z</updated>
+    <link href="https://arxiv.org/abs/2204.03439v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2204.03439v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>High-contrast imaging of exoplanets hinges on powerful post-processing methods to denoise the data and separate the signal of a companion from its host star, which is typically orders of magnitude brighter. Existing post-processing algorithms do not use all prior domain knowledge that is available about the problem. We propose a new method that builds on our understanding of the systematic noise and the causal structure of the data-generating process. Our algorithm is based on a modified version of half-sibling regression (HSR), a flexible denoising framework that combines ideas from the fields of machine learning and causality. We adapt the method to address the specific requirements of high-contrast exoplanet imaging data obtained in pupil tracking mode. The key idea is to estimate the systematic noise in a pixel by regressing the time series of this pixel onto a set of causally independent, signal-free predictor pixels. We use regularized linear models in this work; however, other (non-linear) models are also possible. In a second step, we demonstrate how the HSR framework allows us to incorporate observing conditions such as wind speed or air temperature as additional predictors. When we apply our method to four data sets from the VLT/NACO instrument, our algorithm provides a better false-positive fraction than PCA-based PSF subtraction, a popular baseline method in the field. Additionally, we find that the HSR-based method provides direct and accurate estimates for the contrast of the exoplanets without the need to insert artificial companions for calibration in the data sets. Finally, we present first evidence that using the observing conditions as additional predictors can improve the results. Our HSR-based method provides an alternative, flexible and promising approach to the challenge of modeling and subtracting the stellar PSF and systematic noise in exoplanet imaging data.</summary>
+    <category term="astro-ph.IM" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="astro-ph.EP" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2022-04-07T13:34:30Z</published>
+    <arxiv:comment>Accepted for publication in Astronomy &amp; Astrophysics</arxiv:comment>
+    <arxiv:primary_category term="astro-ph.IM"/>
+    <arxiv:journal_ref>A&amp;A 666, A9 (2022)</arxiv:journal_ref>
+    <author>
+      <name>Timothy D. Gebhard</name>
+    </author>
+    <author>
+      <name>Markus J. Bonse</name>
+    </author>
+    <author>
+      <name>Sascha P. Quanz</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <arxiv:doi>10.1051/0004-6361/202142529</arxiv:doi>
+    <link rel="related" href="https://doi.org/10.1051/0004-6361/202142529" title="doi"/>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2205.02293v3</id>
+    <title>Original or Translated? A Causal Analysis of the Impact of Translationese on Machine Translation Performance</title>
+    <updated>2022-06-08T22:53:05Z</updated>
+    <link href="https://arxiv.org/abs/2205.02293v3" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2205.02293v3" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Human-translated text displays distinct features from naturally written text in the same language. This phenomena, known as translationese, has been argued to confound the machine translation (MT) evaluation. Yet, we find that existing work on translationese neglects some important factors and the conclusions are mostly correlational but not causal. In this work, we collect CausalMT, a dataset where the MT training data are also labeled with the human translation directions. We inspect two critical factors, the train-test direction match (whether the human translation directions in the training and test sets are aligned), and data-model direction match (whether the model learns in the same direction as the human translation direction in the dataset). We show that these two factors have a large causal effect on the MT performance, in addition to the test-model direction mismatch highlighted by existing work on the impact of translationese. In light of our findings, we provide a set of suggestions for MT training and evaluation. Our code and data are at https://github.com/EdisonNi-hku/CausalMT</summary>
+    <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2022-05-04T19:17:55Z</published>
+    <arxiv:comment>NAACL 2022 (Oral)</arxiv:comment>
+    <arxiv:primary_category term="cs.CL"/>
+    <author>
+      <name>Jingwei Ni</name>
+    </author>
+    <author>
+      <name>Zhijing Jin</name>
+    </author>
+    <author>
+      <name>Markus Freitag</name>
+    </author>
+    <author>
+      <name>Mrinmaya Sachan</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2205.12934v4</id>
+    <title>Amortized Inference for Causal Structure Learning</title>
+    <updated>2022-12-15T13:39:22Z</updated>
+    <link href="https://arxiv.org/abs/2205.12934v4" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2205.12934v4" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Inferring causal structure poses a combinatorial search problem that typically involves evaluating structures with a score or independence test. The resulting search is costly, and designing suitable scores or tests that capture prior knowledge is difficult. In this work, we propose to amortize causal structure learning. Rather than searching over structures, we train a variational inference model to directly predict the causal structure from observational or interventional data. This allows our inference model to acquire domain-specific inductive biases for causal discovery solely from data generated by a simulator, bypassing both the hand-engineering of suitable score functions and the search over graphs. The architecture of our inference model emulates permutation invariances that are crucial for statistical efficiency in structure learning, which facilitates generalization to significantly larger problem instances than seen during training. On synthetic data and semisynthetic gene expression data, our models exhibit robust generalization capabilities when subject to substantial distribution shifts and significantly outperform existing algorithms, especially in the challenging genomics domain. Our code and models are publicly available at: https://github.com/larslorch/avici.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2022-05-25T17:37:08Z</published>
+    <arxiv:comment>NeurIPS 2022, fixed formatting of Figure 5</arxiv:comment>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Lars Lorch</name>
+    </author>
+    <author>
+      <name>Scott Sussex</name>
+    </author>
+    <author>
+      <name>Jonas Rothfuss</name>
+    </author>
+    <author>
+      <name>Andreas Krause</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2206.01665v2</id>
+    <title>BaCaDI: Bayesian Causal Discovery with Unknown Interventions</title>
+    <updated>2023-02-23T16:50:49Z</updated>
+    <link href="https://arxiv.org/abs/2206.01665v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2206.01665v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Inferring causal structures from experimentation is a central task in many domains. For example, in biology, recent advances allow us to obtain single-cell expression data under multiple interventions such as drugs or gene knockouts. However, the targets of the interventions are often uncertain or unknown and the number of observations limited. As a result, standard causal discovery methods can no longer be reliably used. To fill this gap, we propose a Bayesian framework (BaCaDI) for discovering and reasoning about the causal structure that underlies data generated under various unknown experimental or interventional conditions. BaCaDI is fully differentiable, which allows us to infer the complex joint posterior over the intervention targets and the causal structure via efficient gradient-based variational inference. In experiments on synthetic causal discovery tasks and simulated gene-expression data, BaCaDI outperforms related methods in identifying causal structures and intervention targets.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="stat.ME" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2022-06-03T16:25:48Z</published>
+    <arxiv:comment>Accepted to AISTATS 2023. 26 pages</arxiv:comment>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Alexander Hägele</name>
+    </author>
+    <author>
+      <name>Jonas Rothfuss</name>
+    </author>
+    <author>
+      <name>Lars Lorch</name>
+    </author>
+    <author>
+      <name>Vignesh Ram Somnath</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Andreas Krause</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2206.02013v2</id>
+    <title>Causal Discovery in Heterogeneous Environments Under the Sparse Mechanism Shift Hypothesis</title>
+    <updated>2022-10-15T12:30:37Z</updated>
+    <link href="https://arxiv.org/abs/2206.02013v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2206.02013v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Machine learning approaches commonly rely on the assumption of independent and identically distributed (i.i.d.) data. In reality, however, this assumption is almost always violated due to distribution shifts between environments. Although valuable learning signals can be provided by heterogeneous data from changing distributions, it is also known that learning under arbitrary (adversarial) changes is impossible. Causality provides a useful framework for modeling distribution shifts, since causal models encode both observational and interventional distributions. In this work, we explore the sparse mechanism shift hypothesis, which posits that distribution shifts occur due to a small number of changing causal conditionals. Motivated by this idea, we apply it to learning causal structure from heterogeneous environments, where i.i.d. data only allows for learning an equivalence class of graphs without restrictive assumptions. We propose the Mechanism Shift Score (MSS), a score-based approach amenable to various empirical estimators, which provably identifies the entire causal structure with high probability if the sparse mechanism shift hypothesis holds. Empirically, we verify behavior predicted by the theory and compare multiple estimators and score functions to identify the best approaches in practice. Compared to other methods, we show how MSS bridges a gap by both being nonparametric as well as explicitly leveraging sparse changes.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="stat.ME" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2022-06-04T15:39:30Z</published>
+    <arxiv:comment>NeurIPS 2022 camera-ready version. JvK and BS are shared last authors. 10 pages + Bibliography + Appendix (26 pages total)</arxiv:comment>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Ronan Perry</name>
+    </author>
+    <author>
+      <name>Julius von Kügelgen</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2206.11131v1</id>
+    <title>Variational Causal Dynamics: Discovering Modular World Models from Interventions</title>
+    <updated>2022-06-22T14:28:40Z</updated>
+    <link href="https://arxiv.org/abs/2206.11131v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2206.11131v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Latent world models allow agents to reason about complex environments with high-dimensional observations. However, adapting to new environments and effectively leveraging previous knowledge remain significant challenges. We present variational causal dynamics (VCD), a structured world model that exploits the invariance of causal mechanisms across environments to achieve fast and modular adaptation. By causally factorising a transition model, VCD is able to identify reusable components across different environments. This is achieved by combining causal discovery and variational inference to learn a latent representation and transition model jointly in an unsupervised manner. Specifically, we optimise the evidence lower bound jointly over a representation model and a transition model structured as a causal graphical model. In evaluations on simulated environments with state and image observations, we show that VCD is able to successfully identify causal variables, and to discover consistent causal structures across different environments. Moreover, given a small number of observations in a previously unseen, intervened environment, VCD is able to identify the sparse changes in the dynamics and to adapt efficiently. In doing so, VCD significantly extends the capabilities of the current state-of-the-art in latent world models while also comparing favourably in terms of prediction accuracy.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="stat.ME" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2022-06-22T14:28:40Z</published>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Anson Lei</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Ingmar Posner</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2207.04771v2</id>
+    <title>Functional Generalized Empirical Likelihood Estimation for Conditional Moment Restrictions</title>
+    <updated>2024-02-16T13:48:47Z</updated>
+    <link href="https://arxiv.org/abs/2207.04771v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2207.04771v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Important problems in causal inference, economics, and, more generally, robust machine learning can be expressed as conditional moment restrictions, but estimation becomes challenging as it requires solving a continuum of unconditional moment restrictions. Previous works addressed this problem by extending the generalized method of moments (GMM) to continuum moment restrictions. In contrast, generalized empirical likelihood (GEL) provides a more general framework and has been shown to enjoy favorable small-sample properties compared to GMM-based estimators. To benefit from recent developments in machine learning, we provide a functional reformulation of GEL in which arbitrary models can be leveraged. Motivated by a dual formulation of the resulting infinite dimensional optimization problem, we devise a practical method and explore its asymptotic properties. Finally, we provide kernel- and neural network-based implementations of the estimator, which achieve state-of-the-art empirical performance on two conditional moment restriction problems.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="math.ST" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2022-07-11T11:02:52Z</published>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Heiner Kremer</name>
+    </author>
+    <author>
+      <name>Jia-Jie Zhu</name>
+    </author>
+    <author>
+      <name>Krikamol Muandet</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2207.06137v1</id>
+    <title>Probing the Robustness of Independent Mechanism Analysis for Representation Learning</title>
+    <updated>2022-07-13T11:51:16Z</updated>
+    <link href="https://arxiv.org/abs/2207.06137v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2207.06137v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>One aim of representation learning is to recover the original latent code that generated the data, a task which requires additional information or inductive biases. A recently proposed approach termed Independent Mechanism Analysis (IMA) postulates that each latent source should influence the observed mixtures independently, complementing standard nonlinear independent component analysis, and taking inspiration from the principle of independent causal mechanisms. While it was shown in theory and experiments that IMA helps recovering the true latents, the method's performance was so far only characterized when the modeling assumptions are exactly satisfied. Here, we test the method's robustness to violations of the underlying assumptions. We find that the benefits of IMA-based regularization for recovering the true sources extend to mixing functions with various degrees of violation of the IMA principle, while standard regularizers do not provide the same merits. Moreover, we show that unregularized maximum likelihood recovers mixing functions which systematically deviate from the IMA principle, and provide an argument elucidating the benefits of IMA-based regularization.</summary>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2022-07-13T11:51:16Z</published>
+    <arxiv:comment>10 pages, 14 figures, UAI CRL 2022 final camera-ready version</arxiv:comment>
+    <arxiv:primary_category term="stat.ML"/>
+    <author>
+      <name>Joanna Sliwa</name>
+    </author>
+    <author>
+      <name>Shubhangi Ghosh</name>
+    </author>
+    <author>
+      <name>Vincent Stimper</name>
+    </author>
+    <author>
+      <name>Luigi Gresele</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2207.09944v4</id>
+    <title>Probable Domain Generalization via Quantile Risk Minimization</title>
+    <updated>2023-08-22T09:31:35Z</updated>
+    <link href="https://arxiv.org/abs/2207.09944v4" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2207.09944v4" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Domain generalization (DG) seeks predictors which perform well on unseen test distributions by leveraging data drawn from multiple related training distributions or domains. To achieve this, DG is commonly formulated as an average- or worst-case problem over the set of possible domains. However, predictors that perform well on average lack robustness while predictors that perform well in the worst case tend to be overly-conservative. To address this, we propose a new probabilistic framework for DG where the goal is to learn predictors that perform well with high probability. Our key idea is that distribution shifts seen during training should inform us of probable shifts at test time, which we realize by explicitly relating training and test domains as draws from the same underlying meta-distribution. To achieve probable DG, we propose a new optimization problem called Quantile Risk Minimization (QRM). By minimizing the $α$-quantile of predictor's risk distribution over domains, QRM seeks predictors that perform well with probability $α$. To solve QRM in practice, we propose the Empirical QRM (EQRM) algorithm and provide: (i) a generalization bound for EQRM; and (ii) the conditions under which EQRM recovers the causal predictor as $α\to 1$. In our experiments, we introduce a more holistic quantile-focused evaluation protocol for DG and demonstrate that EQRM outperforms state-of-the-art baselines on datasets from WILDS and DomainBed.</summary>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2022-07-20T14:41:09Z</published>
+    <arxiv:comment>NeurIPS 2022 camera-ready (+ minor corrections)</arxiv:comment>
+    <arxiv:primary_category term="stat.ML"/>
+    <author>
+      <name>Cian Eastwood</name>
+    </author>
+    <author>
+      <name>Alexander Robey</name>
+    </author>
+    <author>
+      <name>Shashank Singh</name>
+    </author>
+    <author>
+      <name>Julius von Kügelgen</name>
+    </author>
+    <author>
+      <name>Hamed Hassani</name>
+    </author>
+    <author>
+      <name>George J. Pappas</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2207.10156v1</id>
+    <title>Structural Causal 3D Reconstruction</title>
+    <updated>2022-07-20T19:22:06Z</updated>
+    <link href="https://arxiv.org/abs/2207.10156v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2207.10156v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>This paper considers the problem of unsupervised 3D object reconstruction from in-the-wild single-view images. Due to ambiguity and intrinsic ill-posedness, this problem is inherently difficult to solve and therefore requires strong regularization to achieve disentanglement of different latent factors. Unlike existing works that introduce explicit regularizations into objective functions, we look into a different space for implicit regularization -- the structure of latent space. Specifically, we restrict the structure of latent space to capture a topological causal ordering of latent factors (i.e., representing causal dependency as a directed acyclic graph). We first show that different causal orderings matter for 3D reconstruction, and then explore several approaches to find a task-dependent causal factor ordering. Our experiments demonstrate that the latent space structure indeed serves as an implicit regularization and introduces an inductive bias beneficial for reconstruction.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2022-07-20T19:22:06Z</published>
+    <arxiv:comment>ECCV 2022 (32 pages, 22 figures)</arxiv:comment>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Weiyang Liu</name>
+    </author>
+    <author>
+      <name>Zhen Liu</name>
+    </author>
+    <author>
+      <name>Liam Paull</name>
+    </author>
+    <author>
+      <name>Adrian Weller</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2210.09054v2</id>
+    <title>On the Identifiability and Estimation of Causal Location-Scale Noise Models</title>
+    <updated>2023-06-01T08:50:54Z</updated>
+    <link href="https://arxiv.org/abs/2210.09054v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2210.09054v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>We study the class of location-scale or heteroscedastic noise models (LSNMs), in which the effect $Y$ can be written as a function of the cause $X$ and a noise source $N$ independent of $X$, which may be scaled by a positive function $g$ over the cause, i.e., $Y = f(X) + g(X)N$. Despite the generality of the model class, we show the causal direction is identifiable up to some pathological cases. To empirically validate these theoretical findings, we propose two estimators for LSNMs: an estimator based on (non-linear) feature maps, and one based on neural networks. Both model the conditional distribution of $Y$ given $X$ as a Gaussian parameterized by its natural parameters. When the feature maps are correctly specified, we prove that our estimator is jointly concave, and a consistent estimator for the cause-effect identification task. Although the the neural network does not inherit those guarantees, it can fit functions of arbitrary complexity, and reaches state-of-the-art performance across benchmarks.</summary>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2022-10-13T17:18:59Z</published>
+    <arxiv:comment>ICML 2023</arxiv:comment>
+    <arxiv:primary_category term="stat.ML"/>
+    <author>
+      <name>Alexander Immer</name>
+    </author>
+    <author>
+      <name>Christoph Schultheiss</name>
+    </author>
+    <author>
+      <name>Julia E. Vogt</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Peter Bühlmann</name>
+    </author>
+    <author>
+      <name>Alexander Marx</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2210.12023v3</id>
+    <title>A Causal Framework to Quantify the Robustness of Mathematical Reasoning with Language Models</title>
+    <updated>2023-06-07T22:03:16Z</updated>
+    <link href="https://arxiv.org/abs/2210.12023v3" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2210.12023v3" rel="related" type="application/pdf" title="pdf"/>
+    <summary>We have recently witnessed a number of impressive results on hard mathematical reasoning problems with language models. At the same time, the robustness of these models has also been called into question; recent works have shown that models can rely on shallow patterns in the problem description when generating a solution. Building on the idea of behavioral testing, we propose a novel framework, which pins down the causal effect of various factors in the input, e.g., the surface form of the problem text, the operands, and math operators on the output solution. By grounding the behavioral analysis in a causal graph describing an intuitive reasoning process, we study the behavior of language models in terms of robustness and sensitivity to direct interventions in the input space. We apply our framework on a test bed of math word problems. Our analysis shows that robustness does not appear to continuously improve as a function of size, but the GPT-3 Davinci models (175B) achieve a dramatic improvement in both robustness and sensitivity compared to all other GPT variants.</summary>
+    <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2022-10-21T15:12:37Z</published>
+    <arxiv:comment>ACL 2023. A shorter version of the paper was accepted at the MATH-AI Workshop at NeurIPS 2022. 15 pages, 8 figures</arxiv:comment>
+    <arxiv:primary_category term="cs.CL"/>
+    <author>
+      <name>Alessandro Stolfo</name>
+    </author>
+    <author>
+      <name>Zhijing Jin</name>
+    </author>
+    <author>
+      <name>Kumar Shridhar</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Mrinmaya Sachan</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2210.16525v2</id>
+    <title>Spectral Representation Learning for Conditional Moment Models</title>
+    <updated>2022-12-28T12:29:59Z</updated>
+    <link href="https://arxiv.org/abs/2210.16525v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2210.16525v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Many problems in causal inference and economics can be formulated in the framework of conditional moment models, which characterize the target function through a collection of conditional moment restrictions. For nonparametric conditional moment models, efficient estimation often relies on preimposed conditions on various measures of ill-posedness of the hypothesis space, which are hard to validate when flexible models are used. In this work, we address this issue by proposing a procedure that automatically learns representations with controlled measures of ill-posedness. Our method approximates a linear representation defined by the spectral decomposition of a conditional expectation operator, which can be used for kernelized estimators and is known to facilitate minimax optimal estimation in certain settings. We show this representation can be efficiently estimated from data, and establish L2 consistency for the resulting estimator. We evaluate the proposed method on proximal causal inference tasks, exhibiting promising performance on high-dimensional, semi-synthetic data.</summary>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="econ.EM" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2022-10-29T07:48:29Z</published>
+    <arxiv:primary_category term="stat.ML"/>
+    <author>
+      <name>Ziyu Wang</name>
+    </author>
+    <author>
+      <name>Yucen Luo</name>
+    </author>
+    <author>
+      <name>Yueru Li</name>
+    </author>
+    <author>
+      <name>Jun Zhu</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2211.03846v4</id>
+    <title>Federated Causal Discovery From Interventions</title>
+    <updated>2024-02-11T05:18:01Z</updated>
+    <link href="https://arxiv.org/abs/2211.03846v4" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2211.03846v4" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Causal discovery serves a pivotal role in mitigating model uncertainty through recovering the underlying causal mechanisms among variables. In many practical domains, such as healthcare, access to the data gathered by individual entities is limited, primarily for privacy and regulatory constraints. However, the majority of existing causal discovery methods require the data to be available in a centralized location. In response, researchers have introduced federated causal discovery. While previous federated methods consider distributed observational data, the integration of interventional data remains largely unexplored. We propose FedCDI, a federated framework for inferring causal structures from distributed data containing interventional samples. In line with the federated learning framework, FedCDI improves privacy by exchanging belief updates rather than raw samples. Additionally, it introduces a novel intervention-aware method for aggregating individual updates. We analyze scenarios with shared or disjoint intervened covariates, and mitigate the adverse effects of interventional data heterogeneity. The performance and scalability of FedCDI is rigorously tested across a variety of synthetic and real-world graphs.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.MA" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="stat.ME" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2022-11-07T20:25:48Z</published>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Amin Abyaneh</name>
+    </author>
+    <author>
+      <name>Nino Scherrer</name>
+    </author>
+    <author>
+      <name>Patrick Schwab</name>
+    </author>
+    <author>
+      <name>Stefan Bauer</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Arash Mehrjou</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2212.06925v4</id>
+    <title>On the Relationship Between Explanation and Prediction: A Causal View</title>
+    <updated>2023-05-12T21:24:33Z</updated>
+    <link href="https://arxiv.org/abs/2212.06925v4" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2212.06925v4" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Being able to provide explanations for a model's decision has become a central requirement for the development, deployment, and adoption of machine learning models. However, we are yet to understand what explanation methods can and cannot do. How do upstream factors such as data, model prediction, hyperparameters, and random initialization influence downstream explanations? While previous work raised concerns that explanations (E) may have little relationship with the prediction (Y), there is a lack of conclusive study to quantify this relationship. Our work borrows tools from causal inference to systematically assay this relationship. More specifically, we study the relationship between E and Y by measuring the treatment effect when intervening on their causal ancestors, i.e., on hyperparameters and inputs used to generate saliency-based Es or Ys. Our results suggest that the relationships between E and Y is far from ideal. In fact, the gap between 'ideal' case only increase in higher-performing models -- models that are likely to be deployed. Our work is a promising first step towards providing a quantitative measure of the relationship between E and Y, which could also inform the future development of methods for E with a quantitative metric.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="stat.ME" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2022-12-13T22:42:00Z</published>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Amir-Hossein Karimi</name>
+    </author>
+    <author>
+      <name>Krikamol Muandet</name>
+    </author>
+    <author>
+      <name>Simon Kornblith</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Been Kim</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2212.08498v1</id>
+    <title>Evaluating vaccine allocation strategies using simulation-assisted causal modelling</title>
+    <updated>2022-12-14T14:24:17Z</updated>
+    <link href="https://arxiv.org/abs/2212.08498v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2212.08498v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Early on during a pandemic, vaccine availability is limited, requiring prioritisation of different population groups. Evaluating vaccine allocation is therefore a crucial element of pandemics response. In the present work, we develop a model to retrospectively evaluate age-dependent counterfactual vaccine allocation strategies against the COVID-19 pandemic. To estimate the effect of allocation on the expected severe-case incidence, we employ a simulation-assisted causal modelling approach which combines a compartmental infection-dynamics simulation, a coarse-grained, data-driven causal model and literature estimates for immunity waning. We compare Israel's implemented vaccine allocation strategy in 2021 to counterfactual strategies such as no prioritisation, prioritisation of younger age groups or a strict risk-ranked approach; we find that Israel's implemented strategy was indeed highly effective. We also study the marginal impact of increasing vaccine uptake for a given age group and find that increasing vaccinations in the elderly is most effective at preventing severe cases, whereas additional vaccinations for middle-aged groups reduce infections most effectively. Due to its modular structure, our model can easily be adapted to study future pandemics. We demonstrate this flexibility by investigating vaccine allocation strategies for a pandemic with characteristics of the Spanish Flu. Our approach thus helps evaluate vaccination strategies under the complex interplay of core epidemic factors, including age-dependent risk profiles, immunity waning, vaccine availability and spreading rates.</summary>
+    <category term="stat.AP" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="math.DS" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2022-12-14T14:24:17Z</published>
+    <arxiv:primary_category term="stat.AP"/>
+    <author>
+      <name>Armin Kekić</name>
+    </author>
+    <author>
+      <name>Jonas Dehning</name>
+    </author>
+    <author>
+      <name>Luigi Gresele</name>
+    </author>
+    <author>
+      <name>Julius von Kügelgen</name>
+    </author>
+    <author>
+      <name>Viola Priesemann</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2301.05169v2</id>
+    <title>Causal Triplet: An Open Challenge for Intervention-centric Causal Representation Learning</title>
+    <updated>2023-04-03T17:19:51Z</updated>
+    <link href="https://arxiv.org/abs/2301.05169v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2301.05169v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Recent years have seen a surge of interest in learning high-level causal representations from low-level image pairs under interventions. Yet, existing efforts are largely limited to simple synthetic settings that are far away from real-world problems. In this paper, we present Causal Triplet, a causal representation learning benchmark featuring not only visually more complex scenes, but also two crucial desiderata commonly overlooked in previous works: (i) an actionable counterfactual setting, where only certain object-level variables allow for counterfactual observations whereas others do not; (ii) an interventional downstream task with an emphasis on out-of-distribution robustness from the independent causal mechanisms principle. Through extensive experiments, we find that models built with the knowledge of disentangled or object-centric representations significantly outperform their distributed counterparts. However, recent causal representation learning methods still struggle to identify such latent structures, indicating substantial challenges and opportunities for future work. Our code and datasets will be available at https://sites.google.com/view/causaltriplet.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-01-12T17:43:38Z</published>
+    <arxiv:comment>Conference on Causal Learning and Reasoning (CLeaR) 2023</arxiv:comment>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Yuejiang Liu</name>
+    </author>
+    <author>
+      <name>Alexandre Alahi</name>
+    </author>
+    <author>
+      <name>Chris Russell</name>
+    </author>
+    <author>
+      <name>Max Horn</name>
+    </author>
+    <author>
+      <name>Dominik Zietlow</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Francesco Locatello</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2301.13724v2</id>
+    <title>Towards fully covariant machine learning</title>
+    <updated>2023-06-28T13:02:31Z</updated>
+    <link href="https://arxiv.org/abs/2301.13724v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2301.13724v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Any representation of data involves arbitrary investigator choices. Because those choices are external to the data-generating process, each choice leads to an exact symmetry, corresponding to the group of transformations that takes one possible representation to another. These are the passive symmetries; they include coordinate freedom, gauge symmetry, and units covariance, all of which have led to important results in physics. In machine learning, the most visible passive symmetry is the relabeling or permutation symmetry of graphs. Our goal is to understand the implications for machine learning of the many passive symmetries in play. We discuss dos and don'ts for machine learning practice if passive symmetries are to be respected. We discuss links to causal modeling, and argue that the implementation of passive symmetries is particularly valuable when the goal of the learning problem is to generalize out of sample. This paper is conceptual: It translates among the languages of physics, mathematics, and machine-learning. We believe that consideration and implementation of passive symmetries might help machine learning in the same ways that it transformed physics in the twentieth century.</summary>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="astro-ph.IM" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="math-ph" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="physics.data-an" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-01-31T16:01:12Z</published>
+    <arxiv:comment>substantial revision from v1; submitted to TMLR</arxiv:comment>
+    <arxiv:primary_category term="stat.ML"/>
+    <author>
+      <name>Soledad Villar</name>
+      <arxiv:affiliation>JHU</arxiv:affiliation>
+    </author>
+    <author>
+      <name>David W. Hogg</name>
+      <arxiv:affiliation>NYU, MPIA, Flatiron</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Weichi Yao</name>
+      <arxiv:affiliation>NYU</arxiv:affiliation>
+    </author>
+    <author>
+      <name>George A. Kevrekidis</name>
+      <arxiv:affiliation>JHU, LANL</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+      <arxiv:affiliation>MPI-IS</arxiv:affiliation>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2302.03465v2</id>
+    <title>Robustness Implies Fairness in Causal Algorithmic Recourse</title>
+    <updated>2023-02-11T12:03:04Z</updated>
+    <link href="https://arxiv.org/abs/2302.03465v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2302.03465v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Algorithmic recourse aims to disclose the inner workings of the black-box decision process in situations where decisions have significant consequences, by providing recommendations to empower beneficiaries to achieve a more favorable outcome. To ensure an effective remedy, suggested interventions must not only be low-cost but also robust and fair. This goal is accomplished by providing similar explanations to individuals who are alike. This study explores the concept of individual fairness and adversarial robustness in causal algorithmic recourse and addresses the challenge of achieving both. To resolve the challenges, we propose a new framework for defining adversarially robust recourse. The new setting views the protected feature as a pseudometric and demonstrates that individual fairness is a special case of adversarial robustness. Finally, we introduce the fair robust recourse problem to achieve both desirable properties and show how it can be satisfied both theoretically and empirically.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-02-07T13:40:56Z</published>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Ahmad-Reza Ehyaei</name>
+    </author>
+    <author>
+      <name>Amir-Hossein Karimi</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Setareh Maghsudi</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2302.05380v1</id>
+    <title>On the Interventional Kullback-Leibler Divergence</title>
+    <updated>2023-02-10T17:03:29Z</updated>
+    <link href="https://arxiv.org/abs/2302.05380v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2302.05380v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Modern machine learning approaches excel in static settings where a large amount of i.i.d. training data are available for a given task. In a dynamic environment, though, an intelligent agent needs to be able to transfer knowledge and re-use learned components across domains. It has been argued that this may be possible through causal models, aiming to mirror the modularity of the real world in terms of independent causal mechanisms. However, the true causal structure underlying a given set of data is generally not identifiable, so it is desirable to have means to quantify differences between models (e.g., between the ground truth and an estimate), on both the observational and interventional level.
+  In the present work, we introduce the Interventional Kullback-Leibler (IKL) divergence to quantify both structural and distributional differences between models based on a finite set of multi-environment distributions generated by interventions from the ground truth. Since we generally cannot quantify all differences between causal models for every finite set of interventional distributions, we propose a sufficient condition on the intervention targets to identify subsets of observed variables on which the models provably agree or disagree.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-02-10T17:03:29Z</published>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Jonas Wildberger</name>
+    </author>
+    <author>
+      <name>Siyuan Guo</name>
+    </author>
+    <author>
+      <name>Arnab Bhattacharyya</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2303.09552v1</id>
+    <title>Dataflow graphs as complete causal graphs</title>
+    <updated>2023-03-16T17:59:13Z</updated>
+    <link href="https://arxiv.org/abs/2303.09552v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2303.09552v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Component-based development is one of the core principles behind modern software engineering practices. Understanding of causal relationships between components of a software system can yield significant benefits to developers. Yet modern software design approaches make it difficult to track and discover such relationships at system scale, which leads to growing intellectual debt. In this paper we consider an alternative approach to software design, flow-based programming (FBP), and draw the attention of the community to the connection between dataflow graphs produced by FBP and structural causal models. With expository examples we show how this connection can be leveraged to improve day-to-day tasks in software projects, including fault localisation, business analysis and experimentation.</summary>
+    <category term="cs.SE" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-03-16T17:59:13Z</published>
+    <arxiv:comment>Accepted to 2nd International Conference on AI Engineering - Software Engineering for AI (CAIN 23)</arxiv:comment>
+    <arxiv:primary_category term="cs.SE"/>
+    <author>
+      <name>Andrei Paleyes</name>
+    </author>
+    <author>
+      <name>Siyuan Guo</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Neil D. Lawrence</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2304.07896v3</id>
+    <title>Out-of-Variable Generalization for Discriminative Models</title>
+    <updated>2024-02-08T10:22:42Z</updated>
+    <link href="https://arxiv.org/abs/2304.07896v3" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2304.07896v3" rel="related" type="application/pdf" title="pdf"/>
+    <summary>The ability of an agent to do well in new environments is a critical aspect of intelligence. In machine learning, this ability is known as $\textit{strong}$ or $\textit{out-of-distribution}$ generalization. However, merely considering differences in data distributions is inadequate for fully capturing differences between learning environments. In the present paper, we investigate $\textit{out-of-variable}$ generalization, which pertains to an agent's generalization capabilities concerning environments with variables that were never jointly observed before. This skill closely reflects the process of animate learning: we, too, explore Nature by probing, observing, and measuring $\textit{subsets}$ of variables at any given time. Mathematically, $\textit{out-of-variable}$ generalization requires the efficient re-use of past marginal information, i.e., information over subsets of previously observed variables. We study this problem, focusing on prediction tasks across environments that contain overlapping, yet distinct, sets of causes. We show that after fitting a classifier, the residual distribution in one environment reveals the partial derivative of the true generating function with respect to the unobserved causal parent in that environment. We leverage this information and propose a method that exhibits non-trivial out-of-variable generalization performance when facing an overlapping, yet distinct, set of causal predictors.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-04-16T21:29:54Z</published>
+    <arxiv:comment>Accepted at ICLR 2024</arxiv:comment>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Siyuan Guo</name>
+    </author>
+    <author>
+      <name>Jonas Wildberger</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2305.01764v1</id>
+    <title>Psychologically-Inspired Causal Prompts</title>
+    <updated>2023-05-02T20:06:00Z</updated>
+    <link href="https://arxiv.org/abs/2305.01764v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2305.01764v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>NLP datasets are richer than just input-output pairs; rather, they carry causal relations between the input and output variables. In this work, we take sentiment classification as an example and look into the causal relations between the review (X) and sentiment (Y). As psychology studies show that language can affect emotion, different psychological processes are evoked when a person first makes a rating and then self-rationalizes their feeling in a review (where the sentiment causes the review, i.e., Y -&gt; X), versus first describes their experience, and weighs the pros and cons to give a final rating (where the review causes the sentiment, i.e., X -&gt; Y ). Furthermore, it is also a completely different psychological process if an annotator infers the original rating of the user by theory of mind (ToM) (where the review causes the rating, i.e., X -ToM-&gt; Y ). In this paper, we verbalize these three causal mechanisms of human psychological processes of sentiment classification into three different causal prompts, and study (1) how differently they perform, and (2) what nature of sentiment classification data leads to agreement or diversity in the model responses elicited by the prompts. We suggest future work raise awareness of different causal structures in NLP tasks. Our code and data are at https://github.com/cogito233/psych-causal-prompt</summary>
+    <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="stat.ME" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-05-02T20:06:00Z</published>
+    <arxiv:primary_category term="cs.CL"/>
+    <author>
+      <name>Zhiheng Lyu</name>
+    </author>
+    <author>
+      <name>Zhijing Jin</name>
+    </author>
+    <author>
+      <name>Justus Mattern</name>
+    </author>
+    <author>
+      <name>Rada Mihalcea</name>
+    </author>
+    <author>
+      <name>Mrinmaya Sachan</name>
+    </author>
+    <author>
+      <name>Bernhard Schoelkopf</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2305.10898v2</id>
+    <title>Estimation Beyond Data Reweighting: Kernel Method of Moments</title>
+    <updated>2023-06-13T12:35:33Z</updated>
+    <link href="https://arxiv.org/abs/2305.10898v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2305.10898v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Moment restrictions and their conditional counterparts emerge in many areas of machine learning and statistics ranging from causal inference to reinforcement learning. Estimators for these tasks, generally called methods of moments, include the prominent generalized method of moments (GMM) which has recently gained attention in causal inference. GMM is a special case of the broader family of empirical likelihood estimators which are based on approximating a population distribution by means of minimizing a $\varphi$-divergence to an empirical distribution. However, the use of $\varphi$-divergences effectively limits the candidate distributions to reweightings of the data samples. We lift this long-standing limitation and provide a method of moments that goes beyond data reweighting. This is achieved by defining an empirical likelihood estimator based on maximum mean discrepancy which we term the kernel method of moments (KMM). We provide a variant of our estimator for conditional moment restrictions and show that it is asymptotically first-order optimal for such problems. Finally, we show that our method achieves competitive performance on several conditional moment restriction tasks.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-05-18T11:52:43Z</published>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Heiner Kremer</name>
+    </author>
+    <author>
+      <name>Yassine Nemmour</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Jia-Jie Zhu</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2305.17139v3</id>
+    <title>A Measure-Theoretic Axiomatisation of Causality</title>
+    <updated>2024-06-06T09:06:33Z</updated>
+    <link href="https://arxiv.org/abs/2305.17139v3" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2305.17139v3" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Causality is a central concept in a wide range of research areas, yet there is still no universally agreed axiomatisation of causality. We view causality both as an extension of probability theory and as a study of \textit{what happens when one intervenes on a system}, and argue in favour of taking Kolmogorov's measure-theoretic axiomatisation of probability as the starting point towards an axiomatisation of causality. To that end, we propose the notion of a \textit{causal space}, consisting of a probability space along with a collection of transition probability kernels, called \textit{causal kernels}, that encode the causal information of the space. Our proposed framework is not only rigorously grounded in measure theory, but it also sheds light on long-standing limitations of existing frameworks including, for example, cycles, latent variables and stochastic processes.</summary>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="math.ST" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-05-19T13:15:48Z</published>
+    <arxiv:primary_category term="cs.AI"/>
+    <author>
+      <name>Junhyung Park</name>
+    </author>
+    <author>
+      <name>Simon Buchholz</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Krikamol Muandet</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2305.17225v3</id>
+    <title>Causal Component Analysis</title>
+    <updated>2024-01-17T14:22:19Z</updated>
+    <link href="https://arxiv.org/abs/2305.17225v3" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2305.17225v3" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Independent Component Analysis (ICA) aims to recover independent latent variables from observed mixtures thereof. Causal Representation Learning (CRL) aims instead to infer causally related (thus often statistically dependent) latent variables, together with the unknown graph encoding their causal relationships. We introduce an intermediate problem termed Causal Component Analysis (CauCA). CauCA can be viewed as a generalization of ICA, modelling the causal dependence among the latent components, and as a special case of CRL. In contrast to CRL, it presupposes knowledge of the causal graph, focusing solely on learning the unmixing function and the causal mechanisms. Any impossibility results regarding the recovery of the ground truth in CauCA also apply for CRL, while possibility results may serve as a stepping stone for extensions to CRL. We characterize CauCA identifiability from multiple datasets generated through different types of interventions on the latent causal variables. As a corollary, this interventional perspective also leads to new identifiability results for nonlinear ICA -- a special case of CauCA with an empty graph -- requiring strictly fewer datasets than previous results. We introduce a likelihood-based approach using normalizing flows to estimate both the unmixing function and the causal mechanisms, and demonstrate its effectiveness through extensive synthetic experiments in the CauCA and ICA setting.</summary>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-05-26T19:34:35Z</published>
+    <arxiv:comment>NeurIPS 2023 final camera-ready version</arxiv:comment>
+    <arxiv:primary_category term="stat.ML"/>
+    <author>
+      <name>Liang Wendong</name>
+    </author>
+    <author>
+      <name>Armin Kekić</name>
+    </author>
+    <author>
+      <name>Julius von Kügelgen</name>
+    </author>
+    <author>
+      <name>Simon Buchholz</name>
+    </author>
+    <author>
+      <name>Michel Besserve</name>
+    </author>
+    <author>
+      <name>Luigi Gresele</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2306.00542v2</id>
+    <title>Nonparametric Identifiability of Causal Representations from Unknown Interventions</title>
+    <updated>2023-10-28T11:54:37Z</updated>
+    <link href="https://arxiv.org/abs/2306.00542v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2306.00542v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>We study causal representation learning, the task of inferring latent causal variables and their causal relations from high-dimensional mixtures of the variables. Prior work relies on weak supervision, in the form of counterfactual pre- and post-intervention views or temporal structure; places restrictive assumptions, such as linearity, on the mixing function or latent causal model; or requires partial knowledge of the generative process, such as the causal graph or intervention targets. We instead consider the general setting in which both the causal model and the mixing function are nonparametric. The learning signal takes the form of multiple datasets, or environments, arising from unknown interventions in the underlying causal model. Our goal is to identify both the ground truth latents and their causal graph up to a set of ambiguities which we show to be irresolvable from interventional data. We study the fundamental setting of two causal variables and prove that the observational distribution and one perfect intervention per node suffice for identifiability, subject to a genericity condition. This condition rules out spurious solutions that involve fine-tuning of the intervened and observational distributions, mirroring similar conditions for nonlinear cause-effect inference. For an arbitrary number of variables, we show that at least one pair of distinct perfect interventional domains per node guarantees identifiability. Further, we demonstrate that the strengths of causal influences among the latent variables are preserved by all equivalent solutions, rendering the inferred representation appropriate for drawing causal conclusions from new data. Our study provides the first identifiability results for the general nonparametric setting with unknown interventions, and elucidates what is possible and impossible for causal representation learning without more direct supervision.</summary>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-06-01T10:51:58Z</published>
+    <arxiv:comment>NeurIPS 2023 camera-ready version; 36 pages, 4 figures</arxiv:comment>
+    <arxiv:primary_category term="stat.ML"/>
+    <author>
+      <name>Julius von Kügelgen</name>
+    </author>
+    <author>
+      <name>Michel Besserve</name>
+    </author>
+    <author>
+      <name>Liang Wendong</name>
+    </author>
+    <author>
+      <name>Luigi Gresele</name>
+    </author>
+    <author>
+      <name>Armin Kekić</name>
+    </author>
+    <author>
+      <name>Elias Bareinboim</name>
+    </author>
+    <author>
+      <name>David M. Blei</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2306.01157v1</id>
+    <title>Delphic Offline Reinforcement Learning under Nonidentifiable Hidden Confounding</title>
+    <updated>2023-06-01T21:27:22Z</updated>
+    <link href="https://arxiv.org/abs/2306.01157v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2306.01157v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>A prominent challenge of offline reinforcement learning (RL) is the issue of hidden confounding: unobserved variables may influence both the actions taken by the agent and the observed outcomes. Hidden confounding can compromise the validity of any causal conclusion drawn from data and presents a major obstacle to effective offline RL. In the present paper, we tackle the problem of hidden confounding in the nonidentifiable setting. We propose a definition of uncertainty due to hidden confounding bias, termed delphic uncertainty, which uses variation over world models compatible with the observations, and differentiate it from the well-known epistemic and aleatoric uncertainties. We derive a practical method for estimating the three types of uncertainties, and construct a pessimistic offline RL algorithm to account for them. Our method does not assume identifiability of the unobserved confounders, and attempts to reduce the amount of confounding bias. We demonstrate through extensive experiments and ablations the efficacy of our approach on a sepsis management benchmark, as well as on electronic health records. Our results suggest that nonidentifiable hidden confounding bias can be mitigated to improve offline RL solutions in practice.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-06-01T21:27:22Z</published>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Alizée Pace</name>
+    </author>
+    <author>
+      <name>Hugo Yèche</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Gunnar Rätsch</name>
+    </author>
+    <author>
+      <name>Guy Tennenholtz</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2306.02235v2</id>
+    <title>Learning Linear Causal Representations from Interventions under General Nonlinear Mixing</title>
+    <updated>2023-12-18T15:19:43Z</updated>
+    <link href="https://arxiv.org/abs/2306.02235v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2306.02235v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>We study the problem of learning causal representations from unknown, latent interventions in a general setting, where the latent distribution is Gaussian but the mixing function is completely general. We prove strong identifiability results given unknown single-node interventions, i.e., without having access to the intervention targets. This generalizes prior works which have focused on weaker classes, such as linear maps or paired counterfactual data. This is also the first instance of causal identifiability from non-paired interventions for deep neural network embeddings. Our proof relies on carefully uncovering the high-dimensional geometric structure present in the data distribution after a non-linear density transformation, which we capture by analyzing quadratic forms of precision matrices of the latent distributions. Finally, we propose a contrastive algorithm to identify the latent variables in practice and evaluate its performance on various tasks.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="math.ST" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="stat.ME" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-06-04T02:32:12Z</published>
+    <arxiv:comment>Accepted as Oral paper at NeurIPS 2023</arxiv:comment>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Simon Buchholz</name>
+    </author>
+    <author>
+      <name>Goutham Rajendran</name>
+    </author>
+    <author>
+      <name>Elan Rosenfeld</name>
+    </author>
+    <author>
+      <name>Bryon Aragam</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Pradeep Ravikumar</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2306.05836v3</id>
+    <title>Can Large Language Models Infer Causation from Correlation?</title>
+    <updated>2024-04-17T04:27:10Z</updated>
+    <link href="https://arxiv.org/abs/2306.05836v3" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2306.05836v3" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Causal inference is one of the hallmarks of human intelligence. While the field of CausalNLP has attracted much interest in the recent years, existing causal inference datasets in NLP primarily rely on discovering causality from empirical knowledge (e.g., commonsense knowledge). In this work, we propose the first benchmark dataset to test the pure causal inference skills of large language models (LLMs). Specifically, we formulate a novel task Corr2Cause, which takes a set of correlational statements and determines the causal relationship between the variables. We curate a large-scale dataset of more than 200K samples, on which we evaluate seventeen existing LLMs. Through our experiments, we identify a key shortcoming of LLMs in terms of their causal inference skills, and show that these models achieve almost close to random performance on the task. This shortcoming is somewhat mitigated when we try to re-purpose LLMs for this skill via finetuning, but we find that these models still fail to generalize -- they can only perform causal inference in in-distribution settings when variable names and textual expressions used in the queries are similar to those in the training set, but fail in out-of-distribution settings generated by perturbing these queries. Corr2Cause is a challenging task for LLMs, and would be helpful in guiding future research on improving LLMs' pure reasoning skills and generalizability. Our data is at https://huggingface.co/datasets/causalnlp/corr2cause. Our code is at https://github.com/causalNLP/corr2cause.</summary>
+    <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-06-09T12:09:15Z</published>
+    <arxiv:comment>ICLR 2024</arxiv:comment>
+    <arxiv:primary_category term="cs.CL"/>
+    <author>
+      <name>Zhijing Jin</name>
+    </author>
+    <author>
+      <name>Jiarui Liu</name>
+    </author>
+    <author>
+      <name>Zhiheng Lyu</name>
+    </author>
+    <author>
+      <name>Spencer Poff</name>
+    </author>
+    <author>
+      <name>Mrinmaya Sachan</name>
+    </author>
+    <author>
+      <name>Rada Mihalcea</name>
+    </author>
+    <author>
+      <name>Mona Diab</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2306.06002v1</id>
+    <title>Causal Effect Estimation from Observational and Interventional Data Through Matrix Weighted Linear Estimators</title>
+    <updated>2023-06-09T16:16:53Z</updated>
+    <link href="https://arxiv.org/abs/2306.06002v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2306.06002v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>We study causal effect estimation from a mixture of observational and interventional data in a confounded linear regression model with multivariate treatments. We show that the statistical efficiency in terms of expected squared error can be improved by combining estimators arising from both the observational and interventional setting. To this end, we derive methods based on matrix weighted linear estimators and prove that our methods are asymptotically unbiased in the infinite sample limit. This is an important improvement compared to the pooled estimator using the union of interventional and observational data, for which the bias only vanishes if the ratio of observational to interventional data tends to zero. Studies on synthetic data confirm our theoretical findings. In settings where confounding is substantial and the ratio of observational to interventional data is large, our estimators outperform a Stein-type estimator and various other baselines.</summary>
+    <category term="stat.ME" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-06-09T16:16:53Z</published>
+    <arxiv:primary_category term="stat.ME"/>
+    <arxiv:journal_ref>UAI 2023</arxiv:journal_ref>
+    <author>
+      <name>Klaus-Rudolf Kladny</name>
+    </author>
+    <author>
+      <name>Julius von Kügelgen</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Michael Muehlebach</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2310.07665v4</id>
+    <title>Deep Backtracking Counterfactuals for Causally Compliant Explanations</title>
+    <updated>2024-08-10T15:18:14Z</updated>
+    <link href="https://arxiv.org/abs/2310.07665v4" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2310.07665v4" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Counterfactuals answer questions of what would have been observed under altered circumstances and can therefore offer valuable insights. Whereas the classical interventional interpretation of counterfactuals has been studied extensively, backtracking constitutes a less studied alternative where all causal laws are kept intact. In the present work, we introduce a practical method called deep backtracking counterfactuals (DeepBC) for computing backtracking counterfactuals in structural causal models that consist of deep generative components. We propose two distinct versions of our method--one utilizing Langevin Monte Carlo sampling and the other employing constrained optimization--to generate counterfactuals for high-dimensional data. As a special case, our formulation reduces to methods in the field of counterfactual explanations. Compared to these, our approach represents a causally compliant, versatile and modular alternative. We demonstrate these properties experimentally on a modified version of MNIST and CelebA.</summary>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-10-11T17:11:10Z</published>
+    <arxiv:primary_category term="cs.AI"/>
+    <author>
+      <name>Klaus-Rudolf Kladny</name>
+    </author>
+    <author>
+      <name>Julius von Kügelgen</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Michael Muehlebach</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2310.17405v2</id>
+    <title>Causal Modeling with Stationary Diffusions</title>
+    <updated>2024-03-16T17:58:33Z</updated>
+    <link href="https://arxiv.org/abs/2310.17405v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2310.17405v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>We develop a novel approach towards causal inference. Rather than structural equations over a causal graph, we learn stochastic differential equations (SDEs) whose stationary densities model a system's behavior under interventions. These stationary diffusion models do not require the formalism of causal graphs, let alone the common assumption of acyclicity. We show that in several cases, they generalize to unseen interventions on their variables, often better than classical approaches. Our inference method is based on a new theoretical result that expresses a stationarity condition on the diffusion's generator in a reproducing kernel Hilbert space. The resulting kernel deviation from stationarity (KDS) is an objective function of independent interest.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-10-26T14:01:17Z</published>
+    <arxiv:comment>AISTATS 2024</arxiv:comment>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Lars Lorch</name>
+    </author>
+    <author>
+      <name>Andreas Krause</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2311.02790v3</id>
+    <title>CausalCite: A Causal Formulation of Paper Citations</title>
+    <updated>2024-05-27T20:31:14Z</updated>
+    <link href="https://arxiv.org/abs/2311.02790v3" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2311.02790v3" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Citation count of a paper is a commonly used proxy for evaluating the significance of a paper in the scientific community. Yet citation measures are widely criticized for failing to accurately reflect the true impact of a paper. Thus, we propose CausalCite, a new way to measure the significance of a paper by assessing the causal impact of the paper on its follow-up papers. CausalCite is based on a novel causal inference method, TextMatch, which adapts the traditional matching framework to high-dimensional text embeddings. TextMatch encodes each paper using text embeddings from large language models (LLMs), extracts similar samples by cosine similarity, and synthesizes a counterfactual sample as the weighted average of similar papers according to their similarity values. We demonstrate the effectiveness of CausalCite on various criteria, such as high correlation with paper impact as reported by scientific experts on a previous dataset of 1K papers, (test-of-time) awards for past papers, and its stability across various subfields of AI. We also provide a set of findings that can serve as suggested ways for future researchers to use our metric for a better understanding of the quality of a paper. Our code is available at https://github.com/causalNLP/causal-cite.</summary>
+    <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CY" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.IR" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-11-05T23:09:39Z</published>
+    <arxiv:comment>ACL 2024 Findings</arxiv:comment>
+    <arxiv:primary_category term="cs.CL"/>
+    <author>
+      <name>Ishan Kumar</name>
+    </author>
+    <author>
+      <name>Zhijing Jin</name>
+    </author>
+    <author>
+      <name>Ehsan Mokhtarian</name>
+    </author>
+    <author>
+      <name>Siyuan Guo</name>
+    </author>
+    <author>
+      <name>Yuen Chen</name>
+    </author>
+    <author>
+      <name>Mrinmaya Sachan</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2311.08605v2</id>
+    <title>Exploring the Jungle of Bias: Political Bias Attribution in Language Models via Dependency Analysis</title>
+    <updated>2024-05-12T13:56:25Z</updated>
+    <link href="https://arxiv.org/abs/2311.08605v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2311.08605v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>The rapid advancement of Large Language Models (LLMs) has sparked intense debate regarding the prevalence of bias in these models and its mitigation. Yet, as exemplified by both results on debiasing methods in the literature and reports of alignment-related defects from the wider community, bias remains a poorly understood topic despite its practical relevance. To enhance the understanding of the internal causes of bias, we analyse LLM bias through the lens of causal fairness analysis, which enables us to both comprehend the origins of bias and reason about its downstream consequences and mitigation. To operationalize this framework, we propose a prompt-based method for the extraction of confounding and mediating attributes which contribute to the LLM decision process. By applying Activity Dependency Networks (ADNs), we then analyse how these attributes influence an LLM's decision process. We apply our method to LLM ratings of argument quality in political debates. We find that the observed disparate treatment can at least in part be attributed to confounding and mitigating attributes and model misalignment, and discuss the consequences of our findings for human-AI alignment and bias mitigation. Our code and data are at https://github.com/david-jenny/LLM-Political-Study.</summary>
+    <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CY" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.SI" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-11-15T00:02:25Z</published>
+    <arxiv:primary_category term="cs.CL"/>
+    <author>
+      <name>David F. Jenny</name>
+    </author>
+    <author>
+      <name>Yann Billeter</name>
+    </author>
+    <author>
+      <name>Mrinmaya Sachan</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Zhijing Jin</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2311.08743v1</id>
+    <title>Kernel-based independence tests for causal structure learning on functional data</title>
+    <updated>2023-11-15T07:23:28Z</updated>
+    <link href="https://arxiv.org/abs/2311.08743v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2311.08743v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Measurements of systems taken along a continuous functional dimension, such as time or space, are ubiquitous in many fields, from the physical and biological sciences to economics and engineering.Such measurements can be viewed as realisations of an underlying smooth process sampled over the continuum. However, traditional methods for independence testing and causal learning are not directly applicable to such data, as they do not take into account the dependence along the functional dimension. By using specifically designed kernels, we introduce statistical tests for bivariate, joint, and conditional independence for functional variables. Our method not only extends the applicability to functional data of the HSIC and its d-variate version (d-HSIC), but also allows us to introduce a test for conditional independence by defining a novel statistic for the CPT based on the HSCIC, with optimised regularisation strength estimated through an evaluation rejection rate. Our empirical results of the size and power of these tests on synthetic functional data show good performance, and we then exemplify their application to several constraint- and regression-based causal structure learning problems, including both synthetic examples and real socio-economic data.</summary>
+    <category term="stat.ME" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-11-15T07:23:28Z</published>
+    <arxiv:primary_category term="stat.ME"/>
+    <author>
+      <name>Felix Laumann</name>
+    </author>
+    <author>
+      <name>Julius von Kügelgen</name>
+    </author>
+    <author>
+      <name>Junhyung Park</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Mauricio Barahona</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2311.08815v2</id>
+    <title>Self-Supervised Disentanglement by Leveraging Structure in Data Augmentations</title>
+    <updated>2024-08-20T15:33:12Z</updated>
+    <link href="https://arxiv.org/abs/2311.08815v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2311.08815v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Self-supervised representation learning often uses data augmentations to induce some invariance to "style" attributes of the data. However, with downstream tasks generally unknown at training time, it is difficult to deduce a priori which attributes of the data are indeed "style" and can be safely discarded. To deal with this, current approaches try to retain some style information by tuning the degree of invariance to some particular task, such as ImageNet object classification. However, prior work has shown that such task-specific tuning can lead to significant performance degradation on other tasks that rely on the discarded style. To address this, we introduce a more principled approach that seeks to disentangle style features rather than discard them. The key idea is to add multiple style embedding spaces where: (i) each is invariant to all-but-one augmentation; and (ii) joint entropy is maximized. We formalize our structured data-augmentation procedure from a causal latent-variable-model perspective, and prove identifiability of both content and individual style variables. We empirically demonstrate the benefits of our approach on both synthetic and real-world data.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-11-15T09:34:08Z</published>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Cian Eastwood</name>
+    </author>
+    <author>
+      <name>Julius von Kügelgen</name>
+    </author>
+    <author>
+      <name>Linus Ericsson</name>
+    </author>
+    <author>
+      <name>Diane Bouchacourt</name>
+    </author>
+    <author>
+      <name>Pascal Vincent</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Mark Ibrahim</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2311.18639v2</id>
+    <title>Targeted Reduction of Causal Models</title>
+    <updated>2024-06-03T13:45:44Z</updated>
+    <link href="https://arxiv.org/abs/2311.18639v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2311.18639v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Why does a phenomenon occur? Addressing this question is central to most scientific inquiries and often relies on simulations of scientific models. As models become more intricate, deciphering the causes behind phenomena in high-dimensional spaces of interconnected variables becomes increasingly challenging. Causal Representation Learning (CRL) offers a promising avenue to uncover interpretable causal patterns within these simulations through an interventional lens. However, developing general CRL frameworks suitable for practical applications remains an open challenge. We introduce Targeted Causal Reduction (TCR), a method for condensing complex intervenable models into a concise set of causal factors that explain a specific target phenomenon. We propose an information theoretic objective to learn TCR from interventional data of simulations, establish identifiability for continuous variables under shift interventions and present a practical algorithm for learning TCRs. Its ability to generate interpretable high-level explanations from complex models is demonstrated on toy and mechanical systems, illustrating its potential to assist scientists in the study of complex phenomena in a broad range of disciplines.</summary>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-11-30T15:46:22Z</published>
+    <arxiv:primary_category term="stat.ML"/>
+    <author>
+      <name>Armin Kekić</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Michel Besserve</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2312.04350v3</id>
+    <title>CLadder: Assessing Causal Reasoning in Language Models</title>
+    <updated>2024-01-17T14:41:55Z</updated>
+    <link href="https://arxiv.org/abs/2312.04350v3" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2312.04350v3" rel="related" type="application/pdf" title="pdf"/>
+    <summary>The ability to perform causal reasoning is widely considered a core feature of intelligence. In this work, we investigate whether large language models (LLMs) can coherently reason about causality. Much of the existing work in natural language processing (NLP) focuses on evaluating commonsense causal reasoning in LLMs, thus failing to assess whether a model can perform causal inference in accordance with a set of well-defined formal rules. To address this, we propose a new NLP task, causal inference in natural language, inspired by the "causal inference engine" postulated by Judea Pearl et al. We compose a large dataset, CLadder, with 10K samples: based on a collection of causal graphs and queries (associational, interventional, and counterfactual), we obtain symbolic questions and ground-truth answers, through an oracle causal inference engine. These are then translated into natural language. We evaluate multiple LLMs on our dataset, and we introduce and evaluate a bespoke chain-of-thought prompting strategy, CausalCoT. We show that our task is highly challenging for LLMs, and we conduct an in-depth analysis to gain deeper insights into the causal reasoning abilities of LLMs. Our data is open-sourced at https://huggingface.co/datasets/causalNLP/cladder, and our code can be found at https://github.com/causalNLP/cladder.</summary>
+    <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-12-07T15:12:12Z</published>
+    <arxiv:comment>NeurIPS 2023; updated with CLadder dataset v1.5</arxiv:comment>
+    <arxiv:primary_category term="cs.CL"/>
+    <author>
+      <name>Zhijing Jin</name>
+    </author>
+    <author>
+      <name>Yuen Chen</name>
+    </author>
+    <author>
+      <name>Felix Leeb</name>
+    </author>
+    <author>
+      <name>Luigi Gresele</name>
+    </author>
+    <author>
+      <name>Ojasv Kamal</name>
+    </author>
+    <author>
+      <name>Zhiheng Lyu</name>
+    </author>
+    <author>
+      <name>Kevin Blin</name>
+    </author>
+    <author>
+      <name>Fernando Gonzalez Adauto</name>
+    </author>
+    <author>
+      <name>Max Kleiman-Weiner</name>
+    </author>
+    <author>
+      <name>Mrinmaya Sachan</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2402.06665v2</id>
+    <title>The Essential Role of Causality in Foundation World Models for Embodied AI</title>
+    <updated>2024-04-29T23:21:33Z</updated>
+    <link href="https://arxiv.org/abs/2402.06665v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2402.06665v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Recent advances in foundation models, especially in large multi-modal models and conversational agents, have ignited interest in the potential of generally capable embodied agents. Such agents will require the ability to perform new tasks in many different real-world environments. However, current foundation models fail to accurately model physical interactions and are therefore insufficient for Embodied AI. The study of causality lends itself to the construction of veridical world models, which are crucial for accurately predicting the outcomes of possible interactions. This paper focuses on the prospects of building foundation world models for the upcoming generation of embodied agents and presents a novel viewpoint on the significance of causality within these. We posit that integrating causal considerations is vital to facilitating meaningful physical interactions with the world. Finally, we demystify misconceptions about causality in this context and present our outlook for future research.</summary>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.RO" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-02-06T17:15:33Z</published>
+    <arxiv:primary_category term="cs.AI"/>
+    <author>
+      <name>Tarun Gupta</name>
+    </author>
+    <author>
+      <name>Wenbo Gong</name>
+    </author>
+    <author>
+      <name>Chao Ma</name>
+    </author>
+    <author>
+      <name>Nick Pawlowski</name>
+    </author>
+    <author>
+      <name>Agrin Hilmkil</name>
+    </author>
+    <author>
+      <name>Meyer Scetbon</name>
+    </author>
+    <author>
+      <name>Marc Rigter</name>
+    </author>
+    <author>
+      <name>Ade Famoti</name>
+    </author>
+    <author>
+      <name>Ashley Juan Llorens</name>
+    </author>
+    <author>
+      <name>Jianfeng Gao</name>
+    </author>
+    <author>
+      <name>Stefan Bauer</name>
+    </author>
+    <author>
+      <name>Danica Kragic</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Cheng Zhang</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2402.09236v2</id>
+    <title>Learning Interpretable Concepts: Unifying Causal Representation Learning and Foundation Models</title>
+    <updated>2024-12-09T09:00:53Z</updated>
+    <link href="https://arxiv.org/abs/2402.09236v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2402.09236v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>To build intelligent machine learning systems, there are two broad approaches. One approach is to build inherently interpretable models, as endeavored by the growing field of causal representation learning. The other approach is to build highly-performant foundation models and then invest efforts into understanding how they work. In this work, we relate these two approaches and study how to learn human-interpretable concepts from data. Weaving together ideas from both fields, we formally define a notion of concepts and show that they can be provably recovered from diverse data. Experiments on synthetic data and large language models show the utility of our unified approach.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="math.ST" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-02-14T15:23:59Z</published>
+    <arxiv:comment>To appear in NeurIPS 2024 under the modified title 'From Causal to Concept-Based Representation Learning'</arxiv:comment>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Goutham Rajendran</name>
+    </author>
+    <author>
+      <name>Simon Buchholz</name>
+    </author>
+    <author>
+      <name>Bryon Aragam</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Pradeep Ravikumar</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2402.12874v1</id>
+    <title>Skill or Luck? Return Decomposition via Advantage Functions</title>
+    <updated>2024-02-20T10:09:00Z</updated>
+    <link href="https://arxiv.org/abs/2402.12874v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2402.12874v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Learning from off-policy data is essential for sample-efficient reinforcement learning. In the present work, we build on the insight that the advantage function can be understood as the causal effect of an action on the return, and show that this allows us to decompose the return of a trajectory into parts caused by the agent's actions (skill) and parts outside of the agent's control (luck). Furthermore, this decomposition enables us to naturally extend Direct Advantage Estimation (DAE) to off-policy settings (Off-policy DAE). The resulting method can learn from off-policy trajectories without relying on importance sampling techniques or truncating off-policy actions. We draw connections between Off-policy DAE and previous methods to demonstrate how it can speed up learning and when the proposed off-policy corrections are important. Finally, we use the MinAtar environments to illustrate how ignoring off-policy corrections can lead to suboptimal policy optimization performance.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-02-20T10:09:00Z</published>
+    <arxiv:comment>ICLR 2024</arxiv:comment>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Hsiao-Ru Pan</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2404.11055v2</id>
+    <title>Do LLMs Think Fast and Slow? A Causal Study on Sentiment Analysis</title>
+    <updated>2024-10-27T23:50:25Z</updated>
+    <link href="https://arxiv.org/abs/2404.11055v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2404.11055v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Sentiment analysis (SA) aims to identify the sentiment expressed in a text, such as a product review. Given a review and the sentiment associated with it, this work formulates SA as a combination of two tasks: (1) a causal discovery task that distinguishes whether a review "primes" the sentiment (Causal Hypothesis C1), or the sentiment "primes" the review (Causal Hypothesis C2); and (2) the traditional prediction task to model the sentiment using the review as input. Using the peak-end rule in psychology, we classify a sample as C1 if its overall sentiment score approximates an average of all the sentence-level sentiments in the review, and C2 if the overall sentiment score approximates an average of the peak and end sentiments. For the prediction task, we use the discovered causal mechanisms behind the samples to improve LLM performance by proposing causal prompts that give the models an inductive bias of the underlying causal graph, leading to substantial improvements by up to 32.13 F1 points on zero-shot five-class SA. Our code is at https://github.com/cogito233/causal-sa</summary>
+    <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-04-17T04:04:34Z</published>
+    <arxiv:comment>EMNLP 2024 Findings</arxiv:comment>
+    <arxiv:primary_category term="cs.CL"/>
+    <author>
+      <name>Zhiheng Lyu</name>
+    </author>
+    <author>
+      <name>Zhijing Jin</name>
+    </author>
+    <author>
+      <name>Fernando Gonzalez</name>
+    </author>
+    <author>
+      <name>Rada Mihalcea</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Mrinmaya Sachan</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2405.14808v2</id>
+    <title>Implicit Personalization in Language Models: A Systematic Study</title>
+    <updated>2024-10-31T14:19:49Z</updated>
+    <link href="https://arxiv.org/abs/2405.14808v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2405.14808v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Implicit Personalization (IP) is a phenomenon of language models inferring a user's background from the implicit cues in the input prompts and tailoring the response based on this inference. While previous work has touched upon various instances of this problem, there lacks a unified framework to study this behavior. This work systematically studies IP through a rigorous mathematical formulation, a multi-perspective moral reasoning framework, and a set of case studies. Our theoretical foundation for IP relies on a structural causal model and introduces a novel method, indirect intervention, to estimate the causal effect of a mediator variable that cannot be directly intervened upon. Beyond the technical approach, we also introduce a set of moral reasoning principles based on three schools of moral philosophy to study when IP may or may not be ethically appropriate. Equipped with both mathematical and ethical insights, we present three diverse case studies illustrating the varied nature of the IP problem and offer recommendations for future research. Our code is at https://github.com/jiarui-liu/IP, and our data is at https://huggingface.co/datasets/Jerry999/ImplicitPersonalizationData.</summary>
+    <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CY" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.HC" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-05-23T17:18:46Z</published>
+    <arxiv:comment>EMNLP 2024 Findings</arxiv:comment>
+    <arxiv:primary_category term="cs.CL"/>
+    <author>
+      <name>Zhijing Jin</name>
+    </author>
+    <author>
+      <name>Nils Heil</name>
+    </author>
+    <author>
+      <name>Jiarui Liu</name>
+    </author>
+    <author>
+      <name>Shehzaad Dhuliawala</name>
+    </author>
+    <author>
+      <name>Yahang Qi</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Rada Mihalcea</name>
+    </author>
+    <author>
+      <name>Mrinmaya Sachan</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2405.18836v1</id>
+    <title>Do Finetti: On Causal Effects for Exchangeable Data</title>
+    <updated>2024-05-29T07:31:18Z</updated>
+    <link href="https://arxiv.org/abs/2405.18836v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2405.18836v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>We study causal effect estimation in a setting where the data are not i.i.d. (independent and identically distributed). We focus on exchangeable data satisfying an assumption of independent causal mechanisms. Traditional causal effect estimation frameworks, e.g., relying on structural causal models and do-calculus, are typically limited to i.i.d. data and do not extend to more general exchangeable generative processes, which naturally arise in multi-environment data. To address this gap, we develop a generalized framework for exchangeable data and introduce a truncated factorization formula that facilitates both the identification and estimation of causal effects in our setting. To illustrate potential applications, we introduce a causal Pólya urn model and demonstrate how intervention propagates effects in exchangeable data settings. Finally, we develop an algorithm that performs simultaneous causal discovery and effect estimation given multi-environment data.</summary>
+    <category term="stat.ME" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-05-29T07:31:18Z</published>
+    <arxiv:primary_category term="stat.ME"/>
+    <author>
+      <name>Siyuan Guo</name>
+    </author>
+    <author>
+      <name>Chi Zhang</name>
+    </author>
+    <author>
+      <name>Karthika Mohan</name>
+    </author>
+    <author>
+      <name>Ferenc Huszár</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2405.20318v4</id>
+    <title>Quriosity: Analyzing Human Questioning Behavior and Causal Inquiry through Curiosity-Driven Queries</title>
+    <updated>2025-11-09T13:31:00Z</updated>
+    <link href="https://arxiv.org/abs/2405.20318v4" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2405.20318v4" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Recent progress in Large Language Model (LLM) technology has changed our role in interacting with these models. Instead of primarily testing these models with questions we already know answers to, we are now using them for queries where the answers are unknown to us, driven by human curiosity. This shift highlights the growing need to understand curiosity-driven human questions - those that are more complex, open-ended, and reflective of real-world needs. To this end, we present Quriosity, a collection of 13.5K naturally occurring questions from three diverse sources: human-to-search-engine queries, human-to-human interactions, and human-to-LLM conversations. Our comprehensive collection enables a rich understanding of human curiosity across various domains and contexts. Our analysis reveals a significant presence of causal questions (up to 42%) in the dataset, for which we develop an iterative prompt improvement framework to identify all causal queries and examine their unique linguistic properties, cognitive complexity and source distribution. Our paper paves the way for future work on causal question identification and open-ended chatbot interactions. Our code and data are at https://github.com/roberto-ceraolo/quriosity.</summary>
+    <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-05-30T17:55:28Z</published>
+    <arxiv:comment>IJCNLP-AACL 2025 Findings</arxiv:comment>
+    <arxiv:primary_category term="cs.CL"/>
+    <author>
+      <name>Roberto Ceraolo</name>
+    </author>
+    <author>
+      <name>Dmitrii Kharlapenko</name>
+    </author>
+    <author>
+      <name>Ahmad Khan</name>
+    </author>
+    <author>
+      <name>Amélie Reymond</name>
+    </author>
+    <author>
+      <name>Punya Syon Pandey</name>
+    </author>
+    <author>
+      <name>Rada Mihalcea</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Mrinmaya Sachan</name>
+    </author>
+    <author>
+      <name>Zhijing Jin</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2406.00388v2</id>
+    <title>Products, Abstractions and Inclusions of Causal Spaces</title>
+    <updated>2024-06-06T09:12:07Z</updated>
+    <link href="https://arxiv.org/abs/2406.00388v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2406.00388v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Causal spaces have recently been introduced as a measure-theoretic framework to encode the notion of causality. While it has some advantages over established frameworks, such as structural causal models, the theory is so far only developed for single causal spaces. In many mathematical theories, not least the theory of probability spaces of which causal spaces are a direct extension, combinations of objects and maps between objects form a central part. In this paper, taking inspiration from such objects in probability theory, we propose the definitions of products of causal spaces, as well as (stochastic) transformations between causal spaces. In the context of causality, these quantities can be given direct semantic interpretations as causally independent components, abstractions and extensions.</summary>
+    <category term="math.ST" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-06-01T10:03:13Z</published>
+    <arxiv:primary_category term="math.ST"/>
+    <author>
+      <name>Simon Buchholz</name>
+    </author>
+    <author>
+      <name>Junhyung Park</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2406.11601v3</id>
+    <title>Standardizing Structural Causal Models</title>
+    <updated>2025-03-17T14:26:33Z</updated>
+    <link href="https://arxiv.org/abs/2406.11601v3" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2406.11601v3" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Synthetic datasets generated by structural causal models (SCMs) are commonly used for benchmarking causal structure learning algorithms. However, the variances and pairwise correlations in SCM data tend to increase along the causal ordering. Several popular algorithms exploit these artifacts, possibly leading to conclusions that do not generalize to real-world settings. Existing metrics like $\operatorname{Var}$-sortability and $\operatorname{R^2}$-sortability quantify these patterns, but they do not provide tools to remedy them. To address this, we propose internally-standardized structural causal models (iSCMs), a modification of SCMs that introduces a standardization operation at each variable during the generative process. By construction, iSCMs are not $\operatorname{Var}$-sortable. We also find empirical evidence that they are mostly not $\operatorname{R^2}$-sortable for commonly-used graph families. Moreover, contrary to the post-hoc standardization of data generated by standard SCMs, we prove that linear iSCMs are less identifiable from prior knowledge on the weights and do not collapse to deterministic relationships in large systems, which may make iSCMs a useful model in causal inference beyond the benchmarking problem studied here. Our code is publicly available at: https://github.com/werkaaa/iscm.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-06-17T14:52:21Z</published>
+    <arxiv:comment>Added additional benchmarks, including PC algorithm, GES, GOLEM. Evaluated Var-sortability and R2-sortability of the heuristics for mitigating variance accumulation</arxiv:comment>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Weronika Ormaniec</name>
+    </author>
+    <author>
+      <name>Scott Sussex</name>
+    </author>
+    <author>
+      <name>Lars Lorch</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Andreas Krause</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2406.14302v3</id>
+    <title>Identifiable Exchangeable Mechanisms for Causal Structure and Representation Learning</title>
+    <updated>2025-02-08T06:19:37Z</updated>
+    <link href="https://arxiv.org/abs/2406.14302v3" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2406.14302v3" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Identifying latent representations or causal structures is important for good generalization and downstream task performance. However, both fields have been developed rather independently. We observe that several methods in both representation and causal structure learning rely on the same data-generating process (DGP), namely, exchangeable but not i.i.d. (independent and identically distributed) data. We provide a unified framework, termed Identifiable Exchangeable Mechanisms (IEM), for representation and structure learning under the lens of exchangeability. IEM provides new insights that let us relax the necessary conditions for causal structure identification in exchangeable non--i.i.d. data. We also demonstrate the existence of a duality condition in identifiable representation learning, leading to new identifiability results. We hope this work will pave the way for further research in causal representation learning.</summary>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-06-20T13:30:25Z</published>
+    <arxiv:comment>ICLR2025 camera ready</arxiv:comment>
+    <arxiv:primary_category term="stat.ML"/>
+    <author>
+      <name>Patrik Reizinger</name>
+    </author>
+    <author>
+      <name>Siyuan Guo</name>
+    </author>
+    <author>
+      <name>Ferenc Huszár</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Wieland Brendel</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2406.19307v2</id>
+    <title>The Odyssey of Commonsense Causality: From Foundational Benchmarks to Cutting-Edge Reasoning</title>
+    <updated>2024-08-29T13:51:34Z</updated>
+    <link href="https://arxiv.org/abs/2406.19307v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2406.19307v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Understanding commonsense causality is a unique mark of intelligence for humans. It helps people understand the principles of the real world better and benefits the decision-making process related to causation. For instance, commonsense causality is crucial in judging whether a defendant's action causes the plaintiff's loss in determining legal liability. Despite its significance, a systematic exploration of this topic is notably lacking. Our comprehensive survey bridges this gap by focusing on taxonomies, benchmarks, acquisition methods, qualitative reasoning, and quantitative measurements in commonsense causality, synthesizing insights from over 200 representative articles. Our work aims to provide a systematic overview, update scholars on recent advancements, provide a pragmatic guide for beginners, and highlight promising future research directions in this vital field.</summary>
+    <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-06-27T16:30:50Z</published>
+    <arxiv:comment>42 pages</arxiv:comment>
+    <arxiv:primary_category term="cs.CL"/>
+    <author>
+      <name>Shaobo Cui</name>
+    </author>
+    <author>
+      <name>Zhijing Jin</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Boi Faltings</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2407.00529v1</id>
+    <title>Detecting and Identifying Selection Structure in Sequential Data</title>
+    <updated>2024-06-29T20:56:34Z</updated>
+    <link href="https://arxiv.org/abs/2407.00529v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2407.00529v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>We argue that the selective inclusion of data points based on latent objectives is common in practical situations, such as music sequences. Since this selection process often distorts statistical analysis, previous work primarily views it as a bias to be corrected and proposes various methods to mitigate its effect. However, while controlling this bias is crucial, selection also offers an opportunity to provide a deeper insight into the hidden generation process, as it is a fundamental mechanism underlying what we observe. In particular, overlooking selection in sequential data can lead to an incomplete or overcomplicated inductive bias in modeling, such as assuming a universal autoregressive structure for all dependencies. Therefore, rather than merely viewing it as a bias, we explore the causal structure of selection in sequential data to delve deeper into the complete causal process. Specifically, we show that selection structure is identifiable without any parametric assumptions or interventional experiments. Moreover, even in cases where selection variables coexist with latent confounders, we still establish the nonparametric identifiability under appropriate structural conditions. Meanwhile, we also propose a provably correct algorithm to detect and identify selection structures as well as other types of dependencies. The framework has been validated empirically on both synthetic data and real-world music.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.SD" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="eess.AS" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="math.ST" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-06-29T20:56:34Z</published>
+    <arxiv:comment>ICML 2024</arxiv:comment>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Yujia Zheng</name>
+    </author>
+    <author>
+      <name>Zeyu Tang</name>
+    </author>
+    <author>
+      <name>Yiwen Qiu</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Kun Zhang</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2409.01794v2</id>
+    <title>Estimating Joint Interventional Distributions from Marginal Interventional Data</title>
+    <updated>2026-04-17T13:19:03Z</updated>
+    <link href="https://arxiv.org/abs/2409.01794v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2409.01794v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>In this paper we show how to exploit interventional data to acquire the joint conditional distribution of all the variables using the Maximum Entropy principle. To this end, we extend the Causal Maximum Entropy method to make use of interventional data in addition to observational data. Using Lagrange duality, we prove that the solution to the Causal Maximum Entropy problem with interventional constraints lies in the exponential family, as in the Maximum Entropy solution. Our method allows us to perform two tasks of interest when marginal interventional distributions are provided for any subset of the variables. First, we show how to perform causal feature selection from a mixture of observational and single-variable interventional data, and, second, how to infer joint interventional distributions. For the former task, we show on synthetically generated data, that our proposed method outperforms the state-of-the-art method on merging datasets, and yields comparable results to the KCI-test which requires access to joint observations of all variables.</summary>
+    <category term="stat.ME" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-09-03T11:18:35Z</published>
+    <arxiv:comment>Accepted at the Causal Reasoning and Learning (CLeaR) conference 2026</arxiv:comment>
+    <arxiv:primary_category term="stat.ME"/>
+    <author>
+      <name>Sergio Hernan Garrido Mejia</name>
+    </author>
+    <author>
+      <name>Elke Kirschbaum</name>
+    </author>
+    <author>
+      <name>Armin Kekić</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Atalanti Mastakouri</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2411.03275v1</id>
+    <title>Causal Responsibility Attribution for Human-AI Collaboration</title>
+    <updated>2024-11-05T17:17:45Z</updated>
+    <link href="https://arxiv.org/abs/2411.03275v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2411.03275v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>As Artificial Intelligence (AI) systems increasingly influence decision-making across various fields, the need to attribute responsibility for undesirable outcomes has become essential, though complicated by the complex interplay between humans and AI. Existing attribution methods based on actual causality and Shapley values tend to disproportionately blame agents who contribute more to an outcome and rely on real-world measures of blameworthiness that may misalign with responsible AI standards. This paper presents a causal framework using Structural Causal Models (SCMs) to systematically attribute responsibility in human-AI systems, measuring overall blameworthiness while employing counterfactual reasoning to account for agents' expected epistemic levels. Two case studies illustrate the framework's adaptability in diverse human-AI collaboration scenarios.</summary>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.HC" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="stat.AP" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-11-05T17:17:45Z</published>
+    <arxiv:primary_category term="cs.AI"/>
+    <author>
+      <name>Yahang Qi</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Zhijing Jin</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2411.06890v3</id>
+    <title>SPARTAN: A Sparse Transformer World Model Attending to What Matters</title>
+    <updated>2025-12-05T16:14:50Z</updated>
+    <link href="https://arxiv.org/abs/2411.06890v3" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2411.06890v3" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Capturing the interactions between entities in a structured way plays a central role in world models that flexibly adapt to changes in the environment. Recent works motivate the benefits of models that explicitly represent the structure of interactions and formulate the problem as discovering local causal structures. In this work, we demonstrate that reliably capturing these relationships in complex settings remains challenging. To remedy this shortcoming, we postulate that sparsity is a critical ingredient for the discovery of such local structures. To this end, we present the SPARse TrANsformer World model (SPARTAN), a Transformer-based world model that learns context-dependent interaction structures between entities in a scene. By applying sparsity regularisation on the attention patterns between object-factored tokens, SPARTAN learns sparse, context-dependent interaction graphs that accurately predict future object states. We further extend our model to adapt to sparse interventions with unknown targets in the dynamics of the environment. This results in a highly interpretable world model that can efficiently adapt to changes. Empirically, we evaluate SPARTAN against the current state-of-the-art in object-centric world models in observation-based environments and demonstrate that our model can learn local causal graphs that accurately reflect the underlying interactions between objects, achieving significantly improved few-shot adaptation to dynamics changes, as well as robustness against distractors.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-11-11T11:42:48Z</published>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Anson Lei</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Ingmar Posner</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2411.14003v2</id>
+    <title>Generative Intervention Models for Causal Perturbation Modeling</title>
+    <updated>2025-06-30T18:38:56Z</updated>
+    <link href="https://arxiv.org/abs/2411.14003v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2411.14003v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>We consider the problem of predicting perturbation effects via causal models. In many applications, it is a priori unknown which mechanisms of a system are modified by an external perturbation, even though the features of the perturbation are available. For example, in genomics, some properties of a drug may be known, but not their causal effects on the regulatory pathways of cells. We propose a generative intervention model (GIM) that learns to map these perturbation features to distributions over atomic interventions in a jointly-estimated causal model. Contrary to prior approaches, this enables us to predict the distribution shifts of unseen perturbation features while gaining insights about their mechanistic effects in the underlying data-generating process. On synthetic data and scRNA-seq drug perturbation data, GIMs achieve robust out-of-distribution predictions on par with unstructured approaches, while effectively inferring the underlying perturbation mechanisms, often better than other causal inference methods.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-11-21T10:37:57Z</published>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Nora Schneider</name>
+    </author>
+    <author>
+      <name>Lars Lorch</name>
+    </author>
+    <author>
+      <name>Niki Kilbertus</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Andreas Krause</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2501.08426v1</id>
+    <title>Causal vs. Anticausal merging of predictors</title>
+    <updated>2025-01-14T20:38:15Z</updated>
+    <link href="https://arxiv.org/abs/2501.08426v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2501.08426v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>We study the differences arising from merging predictors in the causal and anticausal directions using the same data. In particular we study the asymmetries that arise in a simple model where we merge the predictors using one binary variable as target and two continuous variables as predictors. We use Causal Maximum Entropy (CMAXENT) as inductive bias to merge the predictors, however, we expect similar differences to hold also when we use other merging methods that take into account asymmetries between cause and effect. We show that if we observe all bivariate distributions, the CMAXENT solution reduces to a logistic regression in the causal direction and Linear Discriminant Analysis (LDA) in the anticausal direction. Furthermore, we study how the decision boundaries of these two solutions differ whenever we observe only some of the bivariate distributions implications for Out-Of-Variable (OOV) generalisation.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="stat.ME" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-01-14T20:38:15Z</published>
+    <arxiv:comment>Presented at the 38th Conference on Neural Information Processing Systems (NeurIPS 2024)</arxiv:comment>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Sergio Hernan Garrido Mejia</name>
+    </author>
+    <author>
+      <name>Patrick Blöbaum</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Dominik Janzing</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2502.04210v3</id>
+    <title>Algorithmic causal structure emerging through compression</title>
+    <updated>2025-03-21T14:54:04Z</updated>
+    <link href="https://arxiv.org/abs/2502.04210v3" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2502.04210v3" rel="related" type="application/pdf" title="pdf"/>
+    <summary>We explore the relationship between causality, symmetry, and compression. We build on and generalize the known connection between learning and compression to a setting where causal models are not identifiable. We propose a framework where causality emerges as a consequence of compressing data across multiple environments. We define algorithmic causality as an alternative definition of causality when traditional assumptions for causal identifiability do not hold. We demonstrate how algorithmic causal and symmetric structures can emerge from minimizing upper bounds on Kolmogorov complexity, without knowledge of intervention targets. We hypothesize that these insights may also provide a novel perspective on the emergence of causality in machine learning models, such as large language models, where causal relationships may not be explicitly identifiable.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CC" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.IT" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-02-06T16:50:57Z</published>
+    <arxiv:comment>Extended version of the camera-ready paper accepted at CLeaR 2025</arxiv:comment>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Liang Wendong</name>
+    </author>
+    <author>
+      <name>Simon Buchholz</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2502.05085v1</id>
+    <title>Causality can systematically address the monsters under the bench(marks)</title>
+    <updated>2025-02-07T17:01:37Z</updated>
+    <link href="https://arxiv.org/abs/2502.05085v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2502.05085v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Effective and reliable evaluation is essential for advancing empirical machine learning. However, the increasing accessibility of generalist models and the progress towards ever more complex, high-level tasks make systematic evaluation more challenging. Benchmarks are plagued by various biases, artifacts, or leakage, while models may behave unreliably due to poorly explored failure modes. Haphazard treatments and inconsistent formulations of such "monsters" can contribute to a duplication of efforts, a lack of trust in results, and unsupported inferences. In this position paper, we argue causality offers an ideal framework to systematically address these challenges. By making causal assumptions in an approach explicit, we can faithfully model phenomena, formulate testable hypotheses with explanatory power, and leverage principled tools for analysis. To make causal model design more accessible, we identify several useful Common Abstract Topologies (CATs) in causal graphs which help gain insight into the reasoning abilities in large language models. Through a series of case studies, we demonstrate how the precise yet pragmatic language of causality clarifies the strengths and limitations of a method and inspires new approaches for systematic progress.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-02-07T17:01:37Z</published>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Felix Leeb</name>
+    </author>
+    <author>
+      <name>Zhijing Jin</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2502.21123v6</id>
+    <title>Causality Is Key to Understand and Balance Multiple Goals in Trustworthy ML and Foundation Models</title>
+    <updated>2026-06-05T15:22:36Z</updated>
+    <link href="https://arxiv.org/abs/2502.21123v6" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2502.21123v6" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Ensuring trustworthiness in machine learning (ML) systems is crucial as they become increasingly embedded in high-stakes domains. This paper advocates for integrating causal methods into machine learning to navigate the trade-offs among key principles of trustworthy ML, including fairness, privacy, robustness, accuracy, and explainability. While these objectives should ideally be satisfied simultaneously, they are often addressed in isolation, leading to conflicts and suboptimal solutions. Drawing on existing applications of causality in ML that successfully align goals such as fairness and accuracy or privacy and robustness, this paper argues that a causal approach is essential for balancing multiple competing objectives in both trustworthy ML and foundation models. Beyond highlighting these trade-offs, we examine how causality can be practically integrated into ML and foundation models, offering solutions to enhance their reliability and interpretability. Finally, we discuss the challenges, limitations, and opportunities in adopting causal frameworks, paving the way for more accountable and ethically sound AI systems.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-02-28T14:57:33Z</published>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Ruta Binkyte</name>
+    </author>
+    <author>
+      <name>Ivaxi Sheth</name>
+    </author>
+    <author>
+      <name>Zhijing Jin</name>
+    </author>
+    <author>
+      <name>Mohammad Havaei</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Mario Fritz</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2505.19212v2</id>
+    <title>When Ethics and Payoffs Diverge: LLM Agents in Morally Charged Social Dilemmas</title>
+    <updated>2026-07-24T14:18:32Z</updated>
+    <link href="https://arxiv.org/abs/2505.19212v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2505.19212v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Recent advances in LLMs have enabled their use in complex agentic roles, involving decision-making with humans or other agents, making ethical alignment a critical concern. While prior work has examined LLMs' moral judgment and strategic behavior separately, there is limited understanding of how they act when moral imperatives directly conflict with profit incentives. We introduce \msimfull (\msim) to evaluate how LLMs behave in the prisoner's dilemma and public goods game embedded in morally charged contexts, varying moral framing, opponent behavior, and survival pressure across nine models. Beyond measuring behavior, we estimate the causal effect of each factor via average treatment effects (ATEs) and analyze agents' own reasoning traces to characterize the motives behind their choices. We find that no model remains consistently moral, with cooperation rates ranging from 7.9\% to 76.3\%. Game structure and moral framing are the strongest causal drivers of moral behavior, while reasoning-trace analysis reveals distinct motive profiles across models, ranging from predominantly payoff-maximizing to moral- and reputation-oriented. Together, these results expose the situational brittleness of current LLMs' moral behavior and the risk of deploying them where profit incentives conflict with ethical guidelines.</summary>
+    <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CY" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-05-25T16:19:24Z</published>
+    <arxiv:primary_category term="cs.CL"/>
+    <author>
+      <name>Steffen Backmann</name>
+    </author>
+    <author>
+      <name>David Guzman Piedrahita</name>
+    </author>
+    <author>
+      <name>Terry Jingchen Zhang</name>
+    </author>
+    <author>
+      <name>Emanuel Tewolde</name>
+    </author>
+    <author>
+      <name>Rada Mihalcea</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Zhijing Jin</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2506.04945v1</id>
+    <title>Learning Joint Interventional Effects from Single-Variable Interventions in Additive Models</title>
+    <updated>2025-06-05T12:20:50Z</updated>
+    <link href="https://arxiv.org/abs/2506.04945v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2506.04945v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Estimating causal effects of joint interventions on multiple variables is crucial in many domains, but obtaining data from such simultaneous interventions can be challenging. Our study explores how to learn joint interventional effects using only observational data and single-variable interventions. We present an identifiability result for this problem, showing that for a class of nonlinear additive outcome mechanisms, joint effects can be inferred without access to joint interventional data. We propose a practical estimator that decomposes the causal effect into confounded and unconfounded contributions for each intervention variable. Experiments on synthetic data demonstrate that our method achieves performance comparable to models trained directly on joint interventional data, outperforming a purely observational estimator.</summary>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-06-05T12:20:50Z</published>
+    <arxiv:comment>To be published at the International Conference on Machine Learning (ICML) 2025</arxiv:comment>
+    <arxiv:primary_category term="stat.ML"/>
+    <author>
+      <name>Armin Kekić</name>
+    </author>
+    <author>
+      <name>Sergio Hernan Garrido Mejia</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2506.06039v3</id>
+    <title>Do-PFN: In-Context Learning for Causal Effect Estimation</title>
+    <updated>2025-11-20T09:43:04Z</updated>
+    <link href="https://arxiv.org/abs/2506.06039v3" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2506.06039v3" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Estimation of causal effects is critical to a range of scientific disciplines. Existing methods for this task either require interventional data, knowledge about the ground truth causal graph, or rely on assumptions such as unconfoundedness, restricting their applicability in real-world settings. In the domain of tabular machine learning, Prior-data fitted networks (PFNs) have achieved state-of-the-art predictive performance, having been pre-trained on synthetic data to solve tabular prediction problems via in-context learning. To assess whether this can be transferred to the harder problem of causal effect estimation, we pre-train PFNs on synthetic data drawn from a wide variety of causal structures, including interventions, to predict interventional outcomes given observational data. Through extensive experiments on synthetic case studies, we show that our approach allows for the accurate estimation of causal effects without knowledge of the underlying causal graph. We also perform ablation studies that elucidate Do-PFN's scalability and robustness across datasets with a variety of causal characteristics.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-06-06T12:43:57Z</published>
+    <arxiv:comment>Neurips 2025</arxiv:comment>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Jake Robertson</name>
+    </author>
+    <author>
+      <name>Arik Reuter</name>
+    </author>
+    <author>
+      <name>Siyuan Guo</name>
+    </author>
+    <author>
+      <name>Noah Hollmann</name>
+    </author>
+    <author>
+      <name>Frank Hutter</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2507.14901v1</id>
+    <title>Learning Nonlinear Causal Reductions to Explain Reinforcement Learning Policies</title>
+    <updated>2025-07-20T10:25:24Z</updated>
+    <link href="https://arxiv.org/abs/2507.14901v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2507.14901v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Why do reinforcement learning (RL) policies fail or succeed? This is a challenging question due to the complex, high-dimensional nature of agent-environment interactions. In this work, we take a causal perspective on explaining the behavior of RL policies by viewing the states, actions, and rewards as variables in a low-level causal model. We introduce random perturbations to policy actions during execution and observe their effects on the cumulative reward, learning a simplified high-level causal model that explains these relationships. To this end, we develop a nonlinear Causal Model Reduction framework that ensures approximate interventional consistency, meaning the simplified high-level model responds to interventions in a similar way as the original complex system. We prove that for a class of nonlinear causal models, there exists a unique solution that achieves exact interventional consistency, ensuring learned explanations reflect meaningful causal patterns. Experiments on both synthetic causal models and practical RL tasks-including pendulum control and robot table tennis-demonstrate that our approach can uncover important behavioral patterns, biases, and failure modes in trained RL policies.</summary>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-07-20T10:25:24Z</published>
+    <arxiv:primary_category term="stat.ML"/>
+    <author>
+      <name>Armin Kekić</name>
+    </author>
+    <author>
+      <name>Jan Schneider</name>
+    </author>
+    <author>
+      <name>Dieter Büchler</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Michel Besserve</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2511.02091v1</id>
+    <title>Natural Building Blocks for Structured World Models: Theory, Evidence, and Scaling</title>
+    <updated>2025-11-03T22:02:04Z</updated>
+    <link href="https://arxiv.org/abs/2511.02091v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2511.02091v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>The field of world modeling is fragmented, with researchers developing bespoke architectures that rarely build upon each other. We propose a framework that specifies the natural building blocks for structured world models based on the fundamental stochastic processes that any world model must capture: discrete processes (logic, symbols) and continuous processes (physics, dynamics); the world model is then defined by the hierarchical composition of these building blocks. We examine Hidden Markov Models (HMMs) and switching linear dynamical systems (sLDS) as natural building blocks for discrete and continuous modeling--which become partially-observable Markov decision processes (POMDPs) and controlled sLDS when augmented with actions. This modular approach supports both passive modeling (generation, forecasting) and active control (planning, decision-making) within the same architecture. We avoid the combinatorial explosion of traditional structure learning by largely fixing the causal architecture and searching over only four depth parameters. We review practical expressiveness through multimodal generative modeling (passive) and planning from pixels (active), with performance competitive to neural approaches while maintaining interpretability. The core outstanding challenge is scalable joint structure-parameter learning; current methods finesse this by cleverly growing structure and parameters incrementally, but are limited in their scalability. If solved, these natural building blocks could provide foundational infrastructure for world modeling, analogous to how standardized layers enabled progress in deep learning.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-11-03T22:02:04Z</published>
+    <arxiv:comment>13 pages, 3 figures, under review for World Modeling Workshop 2026</arxiv:comment>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Lancelot Da Costa</name>
+    </author>
+    <author>
+      <name>Sanjeev Namjoshi</name>
+    </author>
+    <author>
+      <name>Mohammed Abbas Ansari</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2601.15341v1</id>
+    <title>Latent Causal Diffusions for Single-Cell Perturbation Modeling</title>
+    <updated>2026-01-20T16:15:38Z</updated>
+    <link href="https://arxiv.org/abs/2601.15341v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2601.15341v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Perturbation screens hold the potential to systematically map regulatory processes at single-cell resolution, yet modeling and predicting transcriptome-wide responses to perturbations remains a major computational challenge. Existing methods often underperform simple baselines, fail to disentangle measurement noise from biological signal, and provide limited insight into the causal structure governing cellular responses. Here, we present the latent causal diffusion (LCD), a generative model that frames single-cell gene expression as a stationary diffusion process observed under measurement noise. LCD outperforms established approaches in predicting the distributional shifts of unseen perturbation combinations in single-cell RNA-sequencing screens while simultaneously learning a mechanistic dynamical system of gene regulation. To interpret these learned dynamics, we develop an approach we call causal linearization via perturbation responses (CLIPR), which yields an approximation of the direct causal effects between all genes modeled by the diffusion. CLIPR provably identifies causal effects under a linear drift assumption and recovers causal structure in both simulated systems and a genome-wide perturbation screen, where it clusters genes into coherent functional modules and resolves causal relationships that standard differential expression analysis cannot. The LCD-CLIPR framework bridges generative modeling with causal inference to predict unseen perturbation effects and map the underlying regulatory mechanisms of the transcriptome.</summary>
+    <category term="q-bio.MN" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-01-20T16:15:38Z</published>
+    <arxiv:primary_category term="q-bio.MN"/>
+    <author>
+      <name>Lars Lorch</name>
+    </author>
+    <author>
+      <name>Jiaqi Zhang</name>
+    </author>
+    <author>
+      <name>Charlotte Bunne</name>
+    </author>
+    <author>
+      <name>Andreas Krause</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Caroline Uhler</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2602.04718v5</id>
+    <title>Superposition Without Interference? Towards Isolated Interventions via Almost Orthogonal Features in Language Models</title>
+    <updated>2026-08-12T07:38:21Z</updated>
+    <link href="https://arxiv.org/abs/2602.04718v5" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2602.04718v5" rel="related" type="application/pdf" title="pdf"/>
+    <summary>A central premise in mechanistic interpretability is that meaningful concepts in language models are represented by linear features in activation space. For such features to support reliable interventions, manipulating one feature should not substantially alter the effects of others. In practice, however, feature entanglement leads to interference such that localized interventions can have unintended downstream effects. Motivated by the _Independent Causal Mechanisms_ principle, we propose to constrain internal features to be almost orthogonal. We argue that this promotes modular representations amenable to causal intervention. We formalize this problem by characterizing the gap between an idealized isolated intervention and its realized effect on model outputs in terms of feature interference. We upper-bound the propagation of feature interference in terms of the self-coherence of the feature dictionary, and relate this discrepancy to an explicit orthogonality regularization on the dictionary itself. Empirically, we show that this regularization enables more isolated interventions on mathematical reasoning concepts while preserving model performance. Our code is available under https://github.com/mrtzmllr/sae-icm.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-02-04T16:29:14Z</published>
+    <arxiv:comment>Published as a conference paper at the Conference on Language Modeling (COLM) 2026</arxiv:comment>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Moritz Miller</name>
+    </author>
+    <author>
+      <name>Florent Draye</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2602.14972v2</id>
+    <title>Use What You Know: Causal Foundation Models with Partial Graphs</title>
+    <updated>2026-06-25T14:41:05Z</updated>
+    <link href="https://arxiv.org/abs/2602.14972v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2602.14972v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Estimating causal quantities traditionally relies on bespoke estimators tailored to specific assumptions. Recently proposed Causal Foundation Models (CFMs) promise a more unified approach by amortising causal discovery and inference in a single step. However, in their current state, they do not allow for the incorporation of any domain knowledge, which can lead to suboptimal predictions. We bridge this gap by introducing methods to condition CFMs on causal information, such as the causal graph or more readily available ancestral information. When access to complete causal graph information is too strict a requirement, our approach also effectively leverages partial causal information. We systematically evaluate conditioning strategies and find that injecting learnable biases into the attention mechanism, together with a graph-convolutional encoder, is a highly effective method to utilise full and partial causal information. Our experiments show that this conditioning allows a general-purpose CFM to match the performance of specialised models trained on specific causal structures. Overall, our approach addresses a central hurdle on the path towards all-in-one causal foundation models: the capability to answer causal queries in a data-driven manner while effectively leveraging any amount of domain expertise.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-02-16T17:56:37Z</published>
+    <arxiv:primary_category term="cs.LG"/>
+    <arxiv:journal_ref>ICML 2026</arxiv:journal_ref>
+    <author>
+      <name>Arik Reuter</name>
+    </author>
+    <author>
+      <name>Anish Dhir</name>
+    </author>
+    <author>
+      <name>Cristiana Diaconu</name>
+    </author>
+    <author>
+      <name>Jake Robertson</name>
+    </author>
+    <author>
+      <name>Ole Ossen</name>
+    </author>
+    <author>
+      <name>Frank Hutter</name>
+    </author>
+    <author>
+      <name>Adrian Weller</name>
+    </author>
+    <author>
+      <name>Mark van der Wilk</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2605.02640v2</id>
+    <title>Trustworthy AI Suffers from Invariance Conflicts and Causality is The Solution</title>
+    <updated>2026-06-01T13:27:17Z</updated>
+    <link href="https://arxiv.org/abs/2605.02640v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2605.02640v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>As artificial intelligence (AI), including machine learning (ML) models and foundation models (FMs), are increasingly deployed in high-stakes domains, ensuring their trustworthiness has become a central challenge. However, the core trustworthy AI objectives, such as fairness, robustness, privacy, and explainability, are hard to achieve simultaneously, especially while preserving utility. This position paper argues that causality is necessary to understand and balance trade-offs in performance and multiple objectives of trustworthy AI. We ground our arguments in re-interpreting trustworthy AI trade-offs as incompatible invariance requirements under different changes to the data-generating process. We then illustrate this argument through case-study analyses from the literature and a stylized synthetic-data simulation, showing that causality provides a unifying framework for understanding how trade-offs in trustworthy AI arise and how they can be softened or resolved through selective invariance. This perspective applies to both classical ML models and large-scale FMs. Finally, we outline open challenges and opportunities for using causality to build both trustworthy and high-performing AI.</summary>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-05-04T14:26:28Z</published>
+    <arxiv:primary_category term="cs.AI"/>
+    <arxiv:journal_ref>Proceedings of the 43rd International Conference on Machine Learning, Seoul, South Korea. PMLR 306, 2026</arxiv:journal_ref>
+    <author>
+      <name>Ruta Binkyte</name>
+    </author>
+    <author>
+      <name>Ivaxi Sheth</name>
+    </author>
+    <author>
+      <name>Zhijing Jin</name>
+    </author>
+    <author>
+      <name>Mohammad Havaei</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Mario Fritz</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2606.05165v1</id>
+    <title>STRIDE: Training Data Attribution via Sparse Recovery from Subset Perturbations</title>
+    <updated>2026-06-03T17:59:36Z</updated>
+    <link href="https://arxiv.org/abs/2606.05165v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2606.05165v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Training Data Attribution (TDA) seeks to trace a model's predictions back to its training data. The gold standard for TDA relies on causal interventions, observing how a model changes when data is added or removed, but repeated retraining is computationally challenging for Large Language Models (LLMs). Consequently, most approaches approximate this effect in the parameter space using gradients. However, tracking gradients across billions of parameters is not only prohibitively expensive but relies on local approximations. In this work, we propose a shift: rather than estimating parameter changes, we model the functional effect of training data in the activation space. We introduce STRIDE (Steering-based Training Data Influence Decomposition), a framework that formulates TDA as a sparse recovery problem in the spirit of compressive sensing. STRIDE learns lightweight "steering operators" that mimic the behavioral shift caused by training on data subsets. By measuring how these operators perturb test predictions, we recover individual training example influences via sparse linear decomposition. STRIDE achieves state-of-the-art for LLM pre-training attribution while being an order of magnitude ($13\times$) faster than previous art. We further validate its practical utility through downstream applications including data selection, data contamination, and qualitative analysis.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-06-03T17:59:36Z</published>
+    <arxiv:comment>project page: https://stride-tda.github.io/</arxiv:comment>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Rishit Dagli</name>
+    </author>
+    <author>
+      <name>Abir Harrasse</name>
+    </author>
+    <author>
+      <name>Luke Zhang</name>
+    </author>
+    <author>
+      <name>Florent Draye</name>
+    </author>
+    <author>
+      <name>Amirali Abdullah</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Zhijing Jin</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2607.12474v2</id>
+    <title>From Observation to Insight: Mechanistic World Models and the Quest for Autonomous Discovery</title>
+    <updated>2026-07-15T16:13:32Z</updated>
+    <link href="https://arxiv.org/abs/2607.12474v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2607.12474v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Recent advances in foundation models have transformed AI for Science, enabling remarkably accurate predictive performance across domains ranging from protein folding to weather forecasting. Yet prediction alone does not constitute scientific discovery. Scientific understanding depends on uncovering the reusable explanatory mechanisms that generate observations, whereas contemporary machine learning remains fundamentally organised around predictive mappings rather than explanatory structure. In this paper, we argue that scientific discovery is fundamentally a problem of knowledge organisation. To this end, we introduce Mechanistic World Models, a new design paradigm that places reusable mechanisms at the centre of representation, computation and learning. Drawing on insights from the philosophy of science, we derive the computational capabilities required for discovery, identify the design principles and inductive pressures that encourage explanatory knowledge to emerge, and formalise the anatomy of a mechanism-centric world model. Finally, we show how diverse research directions including mechanistic interpretability, causal representation learning, equation discovery and modular architectures capture complementary ingredients of this paradigm while lacking a unified framework. We propose Mechanistic World Models as a conceptual foundation and computational blueprint for moving AI beyond predictive forecasting towards autonomous scientific discovery.</summary>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-07-14T08:03:27Z</published>
+    <arxiv:primary_category term="cs.AI"/>
+    <author>
+      <name>Ingmar Posner</name>
+    </author>
+    <author>
+      <name>Anson Lei</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2607.18114v1</id>
+    <title>How Does Alignment Tuning Shape Representations of Sycophancy and Related Cue-Induced Biases in LLMs?</title>
+    <updated>2026-07-20T16:10:06Z</updated>
+    <link href="https://arxiv.org/abs/2607.18114v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2607.18114v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Modern LLMs are alarmingly susceptible to surprisingly simple immaterial changes of input prompts: a casual hint, an incorrectly labeled few-shot example, or a fake prior assistant turn often flips an originally correct answer. We study where this susceptibility, spanning sycophancy and related cue-induced biases, lives inside the model. Across five model families and seven BCT bias types, we extract a per-bias direction from hidden states and triangulate it through three measures: probing, leave-one-dataset-out transfer, and causal intervention. The susceptibility is largely installed by alignment tuning rather than pretraining: pretrained base models barely cave to these biases, and their activations carry no cue-specific signal beyond question content. Within aligned models, each bias becomes a single coherent direction that we can both decode and steer along, recovering the unbiased answer across every family we test. The biases stay representationally distinct, however: cross-bias entanglement is model-specific rather than a property of the bias category, and even behaviorally similar biases occupy different directions. The same intervention also serves as a modest debiasing tool, recovering a meaningful share of bias-induced errors while preserving most correct answers across all instruct families. Cue-induced bias is therefore best understood not as a single flaw in LLMs but as a family of distinct, causally active directions that alignment tuning installs.</summary>
+    <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-07-20T16:10:06Z</published>
+    <arxiv:primary_category term="cs.CL"/>
+    <author>
+      <name>Prakhar Gupta</name>
+    </author>
+    <author>
+      <name>Terry Jingchen Zhang</name>
+    </author>
+    <author>
+      <name>Florent Draye</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Zhijing Jin</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2608.27510v1</id>
+    <title>How Do Linear Probes Emerge? A Circuit-Tracing Framework with Concept-Targeted Attribution</title>
+    <updated>2026-08-27T08:12:49Z</updated>
+    <link href="https://arxiv.org/abs/2608.27510v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2608.27510v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Transcoder attribution graphs are usually trained to explain why a model assigns high probability to a particular next token. We introduce Concept-Targeted Attribution (CTA), which instead trains attribution graphs with respect to a linear probe direction. CTA therefore yields probe-specific circuits that explain why an internal concept representation arises in a prompt, independently of whether it is expressed in the generated token. Using Cross-Layer Transcoders, we show that these probe-targeted graphs contain predictive structure: graph-level features predict probe accuracy across four widely studied concept categories ($ρ= 0.91$, $R^2 = 0.84$), while local features identify the sparse components driving per-prompt classification. This connects probe performance to interpretable circuit structure, allowing us to ask not only whether a probe works, but which internal computations make it work. Causal ablations further show that probe-targeted and logit-targeted graphs capture functionally distinct mechanisms. Removing probe-relevant features reduces internal concept scores while largely preserving generated tokens, whereas removing logit-relevant features changes the generated token in 92% to 100% of cases with near-zero effect on probe scores. CTA provides a framework for moving from behavioral probe accuracy to mechanistic explanations of probe performance, enabling more detailed audits of internal concept representations, including safety-critical ones. Our code is available at https://github.com/vedantpalit/concept-targeted-attribution</summary>
+    <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-08-27T08:12:49Z</published>
+    <arxiv:comment>Accepted to EMNLP 2026 (Main Conference). 29 pages, 18 figures, 9 tables</arxiv:comment>
+    <arxiv:primary_category term="cs.CL"/>
+    <author>
+      <name>Vedant Palit</name>
+    </author>
+    <author>
+      <name>Florent Draye</name>
+    </author>
+    <author>
+      <name>Terry Jingchen Zhang</name>
+    </author>
+    <author>
+      <name>Bernhard Schölkopf</name>
+    </author>
+    <author>
+      <name>Zhijing Jin</name>
+    </author>
+  </entry>
+</feed>

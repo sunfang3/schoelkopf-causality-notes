@@ -1,0 +1,4 @@
+Optimal experimental design via Bayesian optimization: active causal structure learning for Gaussian process networks
+Julius von Kügelgen, Paul K Rubenstein, Bernhard Schölkopf, Adrian Weller
+2019-10-09
+We study the problem of causal discovery through targeted interventions. Starting from few observational measurements, we follow a Bayesian active learning approach to perform those experiments which, in expectation with respect to the current model, are maximally informative about the underlying causal structure. Unlike previous work, we consider the setting of continuous random variables with non-linear functional relationships, modelled with Gaussian process priors. To address the arising problem of choosing from an uncountable set of possible interventions, we propose to use Bayesian optimisation to efficiently maximise a Monte Carlo estimate of the expected information gain.

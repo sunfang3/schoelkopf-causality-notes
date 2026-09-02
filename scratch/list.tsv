@@ -1,0 +1,75 @@
+2008-04-23	0804.3678v1	Causal inference using the algorithmic Markov condition	Dominik Janzing; Bernhard Schoelkopf
+2009-09-24	0909.4386v1	Telling cause from effect based on high-dimensional observations	Dominik Janzing; Patrik O. Hoyer; Bernhard Schoelkopf
+2009-10-29	0910.5561v1	Distinguishing Cause and Effect via Second Order Exponential Models	Dominik Janzing; Xiaohai Sun; Bernhard Schoelkopf
+2009-11-02	0911.0280v1	Causal Inference on Discrete Data using Additive Noise Models	Jonas Peters; Dominik Janzing; Bernhard Schölkopf
+2010-02-22	1002.4020v1	Causal Markov condition for submodular information measures	Bastian Steudel; Dominik Janzing; Bernhard Schoelkopf
+2011-12-12	1112.2738v1	Robust Learning via Cause-Effect Models	Bernhard Schölkopf; Dominik Janzing; Jonas Peters; Kun Zhang
+2012-02-14	1202.3737v1	Detecting low-complexity unobserved causes	Dominik Janzing; Eleni Sgouritsa; Oliver Stegle; Jonas Peters; Bernhard Schoelkopf
+2012-02-14	1202.3775v1	Kernel-based Conditional Independence Test and Application in Causal Discovery	Kun Zhang; Jonas Peters; Dominik Janzing; Bernhard Schoelkopf
+2012-02-14	1202.3757v1	Identifiability of Causal Graphs using Functional Models	Jonas Peters; Joris Mooij; Dominik Janzing; Bernhard Schoelkopf
+2012-03-15	1203.3475v1	Inferring deterministic causal relations	Povilas Daniusis; Dominik Janzing; Joris Mooij; Jakob Zscheischler; Bastian Steudel; Kun Zhang; Bernhard Schoelkopf
+2012-03-15	1203.3534v1	Invariant Gaussian Process Latent Variable Models and Application in Causal Discovery	Kun Zhang; Bernhard Schoelkopf; Dominik Janzing
+2012-03-29	1203.6502v2	Quantifying causal influences	Dominik Janzing; David Balduzzi; Moritz Grosse-Wentrup; Bernhard Schölkopf
+2012-06-27	1206.6471v1	On Causal and Anticausal Learning	Bernhard Schoelkopf; Dominik Janzing; Jonas Peters; Eleni Sgouritsa; Kun Zhang; Joris Mooij
+2012-07-21	1207.5136v1	Causal Inference on Time Series using Structural Equation Models	Jonas Peters; Dominik Janzing; Bernhard Schölkopf
+2013-04-30	1304.7920v1	From Ordinary Differential Equations to Structural Causal Models: the deterministic case	Joris M. Mooij; Dominik Janzing; Bernhard Schölkopf
+2013-09-26	1309.6779v4	Causal Discovery with Continuous Additive Noise Models	Jonas Peters; Joris Mooij; Dominik Janzing; Bernhard Schölkopf
+2013-12-19	1312.5770v3	Consistency of Causal Inference under the Additive Noise Model	Samory Kpotufe; Eleni Sgouritsa; Dominik Janzing; Bernhard Schölkopf
+2014-02-11	1402.2499v1	Justifying Information-Geometric Causal Inference	Dominik Janzing; Bastian Steudel; Naji Shajarisales; Bernhard Schölkopf
+2014-07-08	1407.2256v1	Inferring latent structures via information inequalities	R. Chaves; L. Luft; T. O. Maciel; D. Gross; D. Janzing; B. Schölkopf
+2014-08-09	1408.2063v1	From Ordinary Differential Equations to Structural Causal Models: the deterministic case	Joris Mooij; Dominik Janzing; Bernhard Schoelkopf
+2014-11-14	1411.3972v4	Causal Inference by Identification of Vector Autoregressive Processes with Hidden Components	Philipp Geiger; Kun Zhang; Mingming Gong; Dominik Janzing; Bernhard Schölkopf
+2014-12-11	1412.3773v3	Distinguishing cause from effect using observational data: methods and benchmarks	Joris M. Mooij; Jonas Peters; Dominik Janzing; Jakob Zscheischler; Bernhard Schölkopf
+2015-01-27	1501.06794v1	Computing Functions of Random Variables via Reproducing Kernel Hilbert Space Representations	Bernhard Schölkopf; Krikamol Muandet; Kenji Fukumizu; Jonas Peters
+2015-02-09	1502.02398v2	Towards a Learning Theory of Cause-Effect Inference	David Lopez-Paz; Krikamol Muandet; Bernhard Schölkopf; Ilya Tolstikhin
+2015-03-04	1503.01299v1	Telling cause from effect in deterministic linear dynamical systems	Naji Shajarisales; Dominik Janzing; Bernhard Shoelkopf; Michel Besserve
+2015-04-22	1504.05651v1	Distinguishing Cause from Effect Based on Exogeneity	Kun Zhang; Jiji Zhang; Bernhard Schölkopf
+2015-05-12	1505.03036v1	Removing systematic errors for exoplanet search via latent causes	Bernhard Schölkopf; David W. Hogg; Dun Wang; Daniel Foreman-Mackey; Dominik Janzing; Carl-Johann Simon-Gabriel; Jonas Peters
+2015-07-19	1507.05333v4	Invariant Models for Causal Transfer Learning	Mateo Rojas-Carulla; Bernhard Schölkopf; Richard Turner; Jonas Peters
+2015-08-08	1508.01853v2	A Causal, Data-Driven Approach to Modeling the Kepler Data	Dun Wang; David W. Hogg; Dan Foreman-Mackey; Bernhard Schölkopf
+2015-09-27	1509.08056v3	Discovery and Visualization of Nonstationary Causal Models	Kun Zhang; Biwei Huang; Jiji Zhang; Bernhard Schölkopf; Clark Glymour
+2015-11-11	1511.03643v3	Unifying distillation and privileged information	David Lopez-Paz; Léon Bottou; Bernhard Schölkopf; Vladimir Vapnik
+2015-11-15	1511.04780v1	Causal interpretation rules for encoding and decoding models in neuroimaging	Sebastian Weichwald; Timm Meyer; Ozan Özdenizci; Bernhard Schölkopf; Tonio Ball; Moritz Grosse-Wentrup
+2015-12-07	1512.02057v1	Algorithmic independence of initial condition and dynamical law in thermodynamics and causal inference	Dominik Janzing; Rafael Chaves; Bernhard Schoelkopf
+2015-12-15	1512.04808v1	Causal and anti-causal learning in pattern recognition for neuroimaging	Sebastian Weichwald; Bernhard Schölkopf; Tonio Ball; Moritz Grosse-Wentrup
+2016-03-01	1603.00285v3	Kernel-based Tests for Joint Independence	Niklas Pfister; Peter Bühlmann; Bernhard Schölkopf; Jonas Peters
+2016-03-02	1603.00784v1	The Arrow of Time in Multivariate Time Series	Stefan Bauer; Bernhard Schölkopf; Jonas Peters
+2016-03-04	1603.01581v8	Causal inference for data-driven debugging and decision making in cloud computing	Philipp Geiger; Lucian Carata; Bernhard Schoelkopf
+2016-05-02	1605.00391v2	Recovery of non-linear cause-effect relationships from linearly mixed neuroimaging data	Sebastian Weichwald; Arthur Gretton; Bernhard Schölkopf; Moritz Grosse-Wentrup
+2016-05-26	1605.08179v2	Discovering Causal Signals in Images	David Lopez-Paz; Robert Nishihara; Soumith Chintala; Bernhard Schölkopf; Léon Bottou
+2016-05-31	1605.09522v4	Kernel Mean Embedding of Distributions: A Review and Beyond	Krikamol Muandet; Kenji Fukumizu; Bharath Sriperumbudur; Bernhard Schölkopf
+2016-06-14	1606.04250v3	Experimental and causal view on information integration in autonomous agents	Philipp Geiger; Katja Hofmann; Bernhard Schölkopf
+2016-08-29	1608.08028v2	From Deterministic ODEs to Dynamic Structural Causal Models	Paul K. Rubenstein; Stephan Bongers; Bernhard Schoelkopf; Joris M. Mooij
+2016-11-18	1611.06221v6	Foundations of Structural Causal Models with Cycles and Latent Variables	Stephan Bongers; Patrick Forré; Jonas Peters; Joris M. Mooij
+2017-05-05	1705.02212v1	Group invariance principles for causal generative models	Michel Besserve; Naji Shajarisales; Bernhard Schölkopf; Dominik Janzing
+2017-06-08	1706.02744v2	Avoiding Discrimination through Causal Reasoning	Niki Kilbertus; Mateo Rojas-Carulla; Giambattista Parascandolo; Moritz Hardt; Dominik Janzing; Bernhard Schölkopf
+2017-06-30	1706.10234v1	Probabilistic Active Learning of Functions in Structural Causal Models	Paul K. Rubenstein; Ilya Tolstikhin; Philipp Hennig; Bernhard Schoelkopf
+2017-07-04	1707.00819v1	Causal Consistency of Structural Equation Models	Paul K. Rubenstein; Sebastian Weichwald; Stephan Bongers; Joris M. Mooij; Dominik Janzing; Moritz Grosse-Wentrup; Bernhard Schölkopf
+2017-10-06	1710.02428v2	A pixel-level model for event discovery in time-domain imaging	Dun Wang; David W. Hogg; Daniel Foreman-Mackey; Bernhard Schölkopf
+2017-12-04	1712.00961v5	Learning Independent Causal Mechanisms	Giambattista Parascandolo; Niki Kilbertus; Mateo Rojas-Carulla; Bernhard Schölkopf
+2018-02-19	1802.06698v2	Analysis of cause-effect inference by comparing regression errors	Patrick Blöbaum; Dominik Janzing; Takashi Washio; Shohei Shimizu; Bernhard Schölkopf
+2018-03-02	1803.00810v1	Detecting non-causal artifacts in multivariate linear regression models	Dominik Janzing; Bernhard Schoelkopf
+2018-04-11	1804.03911v1	Structural causal models for macro-variables in time-series	Dominik Janzing; Paul Rubenstein; Bernhard Schölkopf
+2018-04-30	1804.11130v4	Competitive Training of Mixtures of Independent Deep Generative Models	Francesco Locatello; Damien Vincent; Ilya Tolstikhin; Gunnar Rätsch; Sylvain Gelly; Bernhard Schölkopf
+2018-06-04	1806.01094v3	Robustifying Independent Component Analysis by Adjusting for Group-Wise Stationary Noise	Niklas Pfister; Sebastian Weichwald; Peter Bühlmann; Bernhard Schölkopf
+2018-10-31	1811.00007v2	Robustly Disentangled Causal Mechanisms: Validating Deep Representations for Interventional Robustness	Raphael Suter; Đorđe Miladinović; Bernhard Schölkopf; Stefan Bauer
+2018-12-03	1812.00524v1	Generalization in anti-causal learning	Niki Kilbertus; Giambattista Parascandolo; Bernhard Schölkopf
+2019-02-08	1902.02979v4	Fair Decisions Despite Imperfect Predictions	Niki Kilbertus; Manuel Gomez-Rodriguez; Bernhard Schölkopf; Krikamol Muandet; Isabel Valera
+2019-03-05	1903.01672v5	Causal Discovery from Heterogeneous/Nonstationary Data with Independent Changes	Biwei Huang; Kun Zhang; Jiji Zhang; Joseph Ramsey; Ruben Sanchez-Romero; Clark Glymour; Bernhard Schölkopf
+2019-03-06	1903.02456v2	Orthogonal Structure Search for Efficient Causal Discovery from Observational Data	Anant Raj; Luigi Gresele; Michel Besserve; Bernhard Schölkopf; Stefan Bauer
+2019-05-28	1905.12081v4	Semi-Supervised Learning, Causality and the Conditional Cluster Assumption	Julius von Kügelgen; Alexander Mey; Marco Loog; Bernhard Schölkopf
+2019-10-09	1910.03962v1	Optimal experimental design via Bayesian optimization: active causal structure learning for Gaussian process networks	Julius von Kügelgen; Paul K Rubenstein; Bernhard Schölkopf; Adrian Weller
+2019-11-24	1911.10500v2	Causality for Machine Learning	Bernhard Schölkopf
+2020-02-14	2002.06278v4	Algorithmic Recourse: from Counterfactual Explanations to Interventions	Amir-Hossein Karimi; Bernhard Schölkopf; Isabel Valera
+2020-04-01	2004.00184v2	A theory of independent mechanisms for extrapolation in generative models	Michel Besserve; Rémy Sun; Dominik Janzing; Bernhard Schölkopf
+2020-04-27	2004.12906v1	Towards causal generative scene models via competition of experts	Julius von Kügelgen; Ivan Ustyuzhaninov; Peter Gehler; Matthias Bethge; Bernhard Schölkopf
+2020-05-14	2005.07180v3	Simpson's paradox in Covid-19 case fatality rates: a mediation analysis of age-related causal effects	Julius von Kügelgen; Luigi Gresele; Bernhard Schölkopf
+2020-05-18	2005.08543v3	Necessary and sufficient conditions for causal feature selection in time series with latent common causes	Atalanti A. Mastakouri; Bernhard Schölkopf; Dominik Janzing
+2020-06-11	2006.06831v3	Algorithmic recourse under imperfect causal knowledge: a probabilistic approach	Amir-Hossein Karimi; Julius von Kügelgen; Bernhard Schölkopf; Isabel Valera
+2020-06-14	2006.07886v3	On Disentangled Representations Learned From Correlated Data	Frederik Träuble; Elliot Creager; Niki Kilbertus; Francesco Locatello; Andrea Dittadi; Anirudh Goyal; Bernhard Schölkopf; Stefan Bauer
+2020-07-06	2007.02938v3	Causal Feature Selection via Orthogonal Search	Ashkan Soleymani; Anant Raj; Stefan Bauer; Bernhard Schölkopf; Michel Besserve
+2020-07-23	2007.11896v2	Causal analysis of Covid-19 spread in Germany	Atalanti A. Mastakouri; Bernhard Schölkopf
+2020-10-07	2010.03110v4	Causal Curiosity: RL Agents Discovering Self-supervised Experiments for Causal Representation Learning	Sumedh A. Sontakke; Arash Mehrjou; Laurent Itti; Bernhard Schölkopf
+2020-10-08	2010.04296v2	CausalWorld: A Robotic Manipulation Benchmark for Causal Structure and Transfer Learning	Ossama Ahmed; Frederik Träuble; Anirudh Goyal; Alexander Neitz; Yoshua Bengio; Bernhard Schölkopf; Manuel Wüthrich; Stefan Bauer
+2020-10-13	2010.06529v5	On the Fairness of Causal Algorithmic Recourse	Julius von Kügelgen; Amir-Hossein Karimi; Umang Bhatt; Isabel Valera; Adrian Weller; Bernhard Schölkopf
+2020-12-16	2012.09092v1	Sample-Efficient Reinforcement Learning via Counterfactual-Based Data Augmentation	Chaochao Lu; Biwei Huang; Ke Wang; José Miguel Hernández-Lobato; Kun Zhang; Bernhard Schölkopf

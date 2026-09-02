@@ -1,0 +1,4 @@
+Products, Abstractions and Inclusions of Causal Spaces
+Simon Buchholz, Junhyung Park, Bernhard Schölkopf
+2024-06-01
+Causal spaces have recently been introduced as a measure-theoretic framework to encode the notion of causality. While it has some advantages over established frameworks, such as structural causal models, the theory is so far only developed for single causal spaces. In many mathematical theories, not least the theory of probability spaces of which causal spaces are a direct extension, combinations of objects and maps between objects form a central part. In this paper, taking inspiration from such objects in probability theory, we propose the definitions of products of causal spaces, as well as (stochastic) transformations between causal spaces. In the context of causality, these quantities can be given direct semantic interpretations as causally independent components, abstractions and extensions.

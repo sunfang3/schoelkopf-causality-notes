@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN" xml:lang="zh-CN"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="把「数据由独立因果机制生成」的偏置变成训练算法：K 个生成模型在判别器裁定下竞争训练点，各自专攻分布的一块；证明该目标 f-散度上界可解耦并行训练，且退化为 k-means。合成数据对数似然与 MNIST/celebA 的 FID 均优于 bagging 与单一模型。">
+
+<title>独立深度生成模型混合体的竞争训练 – Schölkopf 因果论文阅读站</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-66b4df7ba86f8287dc76b7fb130027a6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "没有结果",
+    "search-matching-documents-text": "匹配的文档",
+    "search-copy-link-title": "复制搜索链接",
+    "search-hide-matches-text": "隐藏其它匹配结果",
+    "search-more-match-text": "更多匹配结果",
+    "search-more-matches-text": "更多匹配结果",
+    "search-clear-button-title": "清除",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "取消",
+    "search-submit-button-title": "提交",
+    "search-label": "搜索"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Schölkopf 因果论文阅读站</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="搜索"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="展开或折叠导航栏" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">首页</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../schoelkopf-causality-arxiv-2008-2026.html"> 
+<span class="menu-text">全景（按年）</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../glossary.html"> 
+<span class="menu-text">术语表</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../notes.html"> 
+<span class="menu-text">逐篇笔记</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">独立深度生成模型混合体的竞争训练</h1>
+<p class="subtitle lead">Francesco Locatello et al., arXiv:1804.11130 (2018)</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">因果推断</div>
+    <div class="quarto-category">生成模型</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    把「数据由独立因果机制生成」的偏置变成训练算法：K 个生成模型在判别器裁定下竞争训练点，各自专攻分布的一块；证明该目标 f-散度上界可解耦并行训练，且退化为 k-means。合成数据对数似然与 MNIST/celebA 的 FID 均优于 bagging 与单一模型。
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">发布于</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">2018年4月30日</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="导览" class="level2">
+<h2 class="anchored" data-anchor-id="导览">导览</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>作者</td>
+<td>Francesco Locatello（MPI IS, Tübingen；ETH Zurich BMI）、Damien Vincent（Google Brain）、Ilya Tolstikhin（Google Brain；工作时在 MPI）、Gunnar Rätsch（MPI）、Sylvain Gelly（Google Brain）、Bernhard Schölkopf（MPI IS）</td>
+</tr>
+<tr class="even">
+<td>出处</td>
+<td>arXiv:1804.11130 [cs.LG]；v1 2018-04-30，站内 PDF 为 v4（2019-03-03）</td>
+</tr>
+<tr class="odd">
+<td>日期</td>
+<td>2018-04-30</td>
+</tr>
+<tr class="even">
+<td>页数</td>
+<td>20 页（正文与文献 14 页 + 附录 6 页）</td>
+</tr>
+</tbody>
+</table>
+<p>一句话定位：沿 1712.00961 的「机制竞争」思想，把独立因果机制（independent causal mechanisms）假设移植到深度生成模型的密度估计上——用判别器把训练点分配给最能生成它们的模型，使每个小模型各自逼近一个机制，介于 VAE 的「全覆盖但模糊」与 GAN 的「模式坍塌」之间。</p>
+</section>
+<section id="问题与模型" class="level2">
+<h2 class="anchored" data-anchor-id="问题与模型">问题与模型</h2>
+<p>研究问题：VAE 由最大似然驱动，被迫覆盖全支撑，会在模式间「搭桥」产生支撑外样本（Figure 2）；GAN 容量不足时干脆丢弃部分模式。能否并行训练一组生成模型，让混合体覆盖全分布、而每个成员只需生成逼真样本？</p>
+<p>因果动机（§2）：设 <span class="math inline">\(X\)</span> 由 <span class="math inline">\(K\)</span> 个无父节点的独立源 <span class="math inline">\(g_1,\dots,g_K\)</span> 生成，按因果分解 <span class="math inline">\(p(X,g_1,\dots,g_K)=p(X\mid g_1,\dots,g_K)\prod_j p(g_j)\)</span>（式 2），混合条件写作结构方程 <span class="math inline">\(X:=f(g_1,\dots,g_K,c)\equiv g_c\)</span>（式 3），离散噪声 <span class="math inline">\(c\in\{1,\dots,K\}\)</span> 决定混合系数。Janzing &amp; Schölkopf（2010）论证真实因果分解的条件复杂度总和最小，故从混合观察中恢复机制是病态逆问题；本文以 <span class="math inline">\(P_\text{model}=\sum_{j=1}^k \alpha_j P_{g_j}\)</span>（式 4）显式建模。关键简化假设：各机制支集不重叠，并采用收敛更快的硬指派（Kearns et al., 1998）。因果独立性（式 3）正是对 Locatello et al.（2018c, Theorem 1）无偏置解耦不可能的对称性的显式破除。</p>
+</section>
+<section id="识别或主要命题" class="level2">
+<h2 class="anchored" data-anchor-id="识别或主要命题">识别或主要命题</h2>
+<p>无识别定理，两个引理构成算法依据（证明在附录 A/B）：</p>
+<p><strong>Lemma 1</strong>：对固定划分函数 <span class="math inline">\(c_j^{(t)}\)</span>，各模型独立最小化 <span class="math inline">\(\sum_j \alpha_j D_f(P_{g_j}\,\|\,P_{X_j}^{(t)})\)</span>（式 5），它是混合模型 f-散度 <span class="math inline">\(D_f(P_\text{model}\,\|\,P_X)\)</span> 的上界——支集互斥把 <span class="math inline">\(P_X\)</span> 写成 <span class="math inline">\(\sum_j\alpha_j P_{X_j}\)</span>，再用 f-散度联合凸性即得。上界可分解，故 K 个模型可完全并行训练。</p>
+<p><strong>Lemma 2</strong>：取退化生成模型（式 7 的 <span class="math inline">\(\mu\)</span>-中心加性高斯噪声，可用常数编码器 + 恒等解码器的退化 VAE 实现）时，Algorithm 1 恰退化为 k-means——「框架严格强于 k-means、密度比技巧未改变训练本质」的健全性检验；也解释了为何用 K 个判别器而非单个 K+1 分类器（后者输出不是 <span class="math inline">\(P_{g_j}(x_i)\)</span> 的估计，会破坏 Lemma 2）。</p>
+</section>
+<section id="估计经验" class="level2">
+<h2 class="anchored" data-anchor-id="估计经验">估计/经验</h2>
+<p><strong>Algorithm 1</strong>（p.4）：迭代 (i) 给定指派，各 <span class="math inline">\(g_j\)</span> 最小化 <span class="math inline">\(\alpha_j D_f(P_{g_j}\|P_{X_j}^{(t)})\)</span>；(ii) 训练 K 个判别器 <span class="math inline">\(D_{g_j}(x)\approx dP_X/(dP_X+dP_{g_j})\)</span>（式 6），经密度比技巧 <span class="math inline">\(P_{g_j}(x_i)\approx\frac{1}{Z_j}\frac{1-D_{g_j}(x_i)}{D_{g_j}(x_i)}\)</span> 估计似然，把每点指派给似然最大的模型。判别器只改变训练信号分布、不回传显式梯度。图像低层特征跨机制共享使独立性近似被违反，对策为均匀预训练 + 负载均衡（失利的模型继续在其最佳点上训练并更新先验，可恢复再赢点）。</p>
+<p>实验（§5，标准架构标准超参）：(1) 合成数据：64 000 点混合高斯、第二维经 <span class="math inline">\(x_2\leftarrow x_2+0.04x_1^2-100\cdot0.04\)</span> 偏斜，小 VAE（两层 50 单位），KDE 对数似然（Table 1）：kVAEs 在 3/5/9 模式下 <span class="math inline">\(-4.59/-2.74/-2.51\)</span>，优于 bag（<span class="math inline">\(-6.49/-7.7/-7.05\)</span>）与 VAE-150（<span class="math inline">\(-5.42/-5.71/-6.83\)</span>）。(2) MNIST：15 个 VAE，FID 9.99（Table 2），优于 bag 15.33、同容量 VAE-8 的 17.96，接近 8 倍容量 VAE-64 的 9.44；聚类按字形/风格而非数字类别分裂（Figure 4）。(3) celebA：5 分量 FID 64.55（Table 3），优于 bag 71.90 与 VAE-96 的 67.06，聚类由背景与发色主导（Figure 5）。(4) GAN 容量消融（Table 4，64/128/256/512 滤波器）：3-GANs 对单 GAN 为 55.61 vs 64.16、31.64 vs 40.03、23.75 vs 23.63、19.38 vs 21.18——单生成器容量不足（≤128）时收益显著，容量充足后消失。</p>
+</section>
+<section id="开放问题" class="level2">
+<h2 class="anchored" data-anchor-id="开放问题">开放问题</h2>
+<ol type="1">
+<li><strong>机制数 K 的自适应选择（作者自列，§6）</strong>：K 全程人工指定（MNIST 取 15 只沿 AdaGAN 惯例），「自适应选分量数没有平凡解」，作者寄望聚类文献的模型选择方法，本文未做。</li>
+<li><strong>独立性假设在图像上明确不成立（作者自认，§3）</strong>：低层特征跨机制共享，<span class="math inline">\(D_f(P_{g_j}\|P_{X_{[K]\setminus j}})\)</span> 并不严格不变；均匀预训练与负载均衡只是工程缓解，无条件保证收敛到「真实机制」划分。</li>
+<li><strong>无收敛性理论（我识别）</strong>：Lemma 1 只对固定划分成立，交替最小化（划分↔︎模型）与 EM 一样只有局部收敛性质，负载均衡等修正完全在理论之外。</li>
+<li><strong>判别器似然估计的偏差未量化（我识别）</strong>：密度比技巧要求判别器收敛到最优；MNIST 上判别器训练不足则对初始化敏感、过长则只认模糊纹理（附录 D），而指派质量直接决定算法成败。</li>
+<li><strong>收益边界已由自身实验划出（我识别）</strong>：Table 4 显示生成器容量足够（≥256 滤波器）时竞争训练无增益，方法定位于「容量受限 + 多机制」夹缝，未在复杂数据集（ImageNet 级）验证。</li>
+<li><strong>恢复机制 ≠ 恢复因果语义（后续文献）</strong>：Figure 4/5 的聚类按笔画风格与发色分裂，与「独立因果机制」的对应只是事后叙事；Locatello et al.（2019, ICML）的大规模评测进一步表明此类归纳偏置的选择缺乏原则性指导。</li>
+<li><strong>并行化换凸性（我识别）</strong>：作者自述失去 AdaGAN 式凸性，但未给出两者样本复杂度或收敛速度的比较。</li>
+</ol>
+</section>
+<section id="文献谱系" class="level2">
+<h2 class="anchored" data-anchor-id="文献谱系">文献谱系</h2>
+<p>前作：Tolstikhin et al.（2017b, AdaGAN）——序贯 boosting 训练生成器混合，本文直接对照，保留凸性但激励不了专注单模式，本文以并行竞争取而代之；Locatello et al.（2018a,b）——作者此前的 boosting 凸性工作；Parascandolo et al.（2018, 站内 1712.00961）——「机制竞争学习」思想出处，本文把竞争单元从可逆变换专家换成生成模型；Janzing &amp; Schölkopf（2010）——因果分解最简性论证；Peters et al.（2017）与 Spirtes/Pearl——独立机制与结构方程框架；Locatello et al.（2018c）——无偏置解耦不可能定理，本文以 IM 假设规避并与之划界。竞争性多生成器对照：Hoang et al.（2017, MGAN，分类器熵正则需调参且不能指派真实点）、Ghosh et al.（2017，单判别器）、Banijamali et al.（2017，EM + 核相似度、混合系数固定均匀）、Arora et al.（2017，纯均衡 GAN，无指派概念）——差异核心均在判别器似然指派。聚类侧：Jordan &amp; Jacobs（1994）混合专家 + EM、Kearns et al.（1998）硬指派、Kocaoglu et al.（2017, causalGAN）与 Liu &amp; Tuzel（2016, CoGAN）。后续：Locatello et al.（2019, ICML）大规模解耦评测中此类混合模型未获青睐，该路线基本止步于此。</p>
+</section>
+<section id="明确不覆盖" class="level2">
+<h2 class="anchored" data-anchor-id="明确不覆盖">明确不覆盖</h2>
+<p>不学习因子级解耦表示（与 Higgins/Kim/Chen/Kumar 一线明确划界）；不做机制数选择；不完整分析支集重叠或软指派；无收敛理论；不做文本/音频模态；不恢复完整结构方程（离散混合噪声 <span class="math inline">\(c\)</span> 已知）；除合成数据外不检验「学到的分量 = 真实机制」。</p>
+</section>
+<section id="阅读路径" class="level2">
+<h2 class="anchored" data-anchor-id="阅读路径">阅读路径</h2>
+<p>先读 §1 末贡献列表与 §2 全节（因果设定与式 2–4 是动机钥匙）；§3 按 Algorithm 1 → 密度比式 (6) → 「Independence as inductive bias」段（预训练与负载均衡的原因）→ Lemma 2 的顺序；§4 只读与 MGAN/AdaGAN/Arora 的对比句；§5 从 Table 1（合成）到 Table 2/3（MNIST/celebA）再到 Table 4（容量消融，适用边界）；§6 自列的扩展方向即开放问题清单；附录 B（k-means 退化证明）与 C–E（超参）按需。姊妹篇对照：站内 1712.00961（机制竞争源头，竞争单元与打分函数几乎相同）；Locatello et al.（2018c, arXiv:1811.12359，同第一作者的不可能性定理，说明本文 IM 假设的地位）；站内 1811.00007（同为「独立机制 → 表示学习」路线，但走验证度量而非训练算法）。</p>
+</section>
+<section id="术语对照" class="level2">
+<h2 class="anchored" data-anchor-id="术语对照">术语对照</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>中文</th>
+<th>English</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>独立生成机制</td>
+<td>independent generative mechanisms</td>
+</tr>
+<tr class="even">
+<td>隐式生成模型</td>
+<td>implicit generative model</td>
+</tr>
+<tr class="odd">
+<td>混合生成模型</td>
+<td>mixture of generative models</td>
+</tr>
+<tr class="even">
+<td>竞争训练</td>
+<td>competitive training</td>
+</tr>
+<tr class="odd">
+<td>划分/指派函数</td>
+<td>partition / assignment function</td>
+</tr>
+<tr class="even">
+<td>密度比技巧</td>
+<td>density ratio trick</td>
+</tr>
+<tr class="odd">
+<td>f-散度</td>
+<td>f-divergence</td>
+</tr>
+<tr class="even">
+<td>模式坍塌</td>
+<td>mode collapse</td>
+</tr>
+<tr class="odd">
+<td>负载均衡</td>
+<td>load balancing</td>
+</tr>
+<tr class="even">
+<td>均匀预训练</td>
+<td>uniform pre-training</td>
+</tr>
+<tr class="odd">
+<td>退化 VAE</td>
+<td>degenerate VAE</td>
+</tr>
+<tr class="even">
+<td>提升/序贯训练</td>
+<td>boosting / sequential training</td>
+</tr>
+<tr class="odd">
+<td>生成器混合体袋装基线</td>
+<td>bagging baseline</td>
+</tr>
+<tr class="even">
+<td>支撑外样本</td>
+<td>samples outside the support</td>
+</tr>
+<tr class="odd">
+<td>因果条件分布</td>
+<td>causal conditional</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="来源定位" class="level2">
+<h2 class="anchored" data-anchor-id="来源定位">来源定位</h2>
+<p><code>papers/1804.11130.pdf</code>（20 页）。关键内容：因果分解式 (2)–(4)（p.3）；Algorithm 1 与 Lemma 1 式 (5)、密度比式 (6)（p.4–5）；Lemma 2（p.6）；相关工作对比 §4（p.7）；Table 1/2（p.8）、Table 3 与 Table 4 容量消融（p.10）；结论 §6（p.11）；Lemma 1/2 证明附录 A/B（p.15）；架构超参附录 C–E（p.16–19）。</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "已复制");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "已复制");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

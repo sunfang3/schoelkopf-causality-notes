@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN" xml:lang="zh-CN"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="为运行在均衡点的循环结构因果模型建立基于李群的可微软干预参数化，用深度均衡模型把自洽方程做成隐式层做梯度优化，并以不变干预与区室化干预抑制反弹等系统性副作用，应用于可持续经济转型。">
+
+<title>均衡系统中李群软干预的可微设计与优化 – Schölkopf 因果论文阅读站</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-66b4df7ba86f8287dc76b7fb130027a6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "没有结果",
+    "search-matching-documents-text": "匹配的文档",
+    "search-copy-link-title": "复制搜索链接",
+    "search-hide-matches-text": "隐藏其它匹配结果",
+    "search-more-match-text": "更多匹配结果",
+    "search-more-matches-text": "更多匹配结果",
+    "search-clear-button-title": "清除",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "取消",
+    "search-submit-button-title": "提交",
+    "search-label": "搜索"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Schölkopf 因果论文阅读站</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="搜索"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="展开或折叠导航栏" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">首页</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../schoelkopf-causality-arxiv-2008-2026.html"> 
+<span class="menu-text">全景（按年）</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../glossary.html"> 
+<span class="menu-text">术语表</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../notes.html"> 
+<span class="menu-text">逐篇笔记</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">均衡系统中李群软干预的可微设计与优化</h1>
+<p class="subtitle lead">Michel Besserve et al., arXiv:2112.05729 (2021)</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">因果推断</div>
+    <div class="quarto-category">循环因果模型</div>
+    <div class="quarto-category">计算可持续性</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    为运行在均衡点的循环结构因果模型建立基于李群的可微软干预参数化，用深度均衡模型把自洽方程做成隐式层做梯度优化，并以不变干预与区室化干预抑制反弹等系统性副作用，应用于可持续经济转型。
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">发布于</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">2021年12月10日</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="导览" class="level2">
+<h2 class="anchored" data-anchor-id="导览">导览</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>作者</td>
+<td>Michel Besserve、Bernhard Schölkopf（Empirical Inference 部门，MPI for Intelligent Systems, Tübingen）</td>
+</tr>
+<tr class="even">
+<td>出处</td>
+<td>arXiv:2112.05729 [cs.LG]；v1 2021-12-10，v2 2022-12-14；UAI 2022 接收</td>
+</tr>
+<tr class="odd">
+<td>日期</td>
+<td>2021-12-10</td>
+</tr>
+<tr class="even">
+<td>页数</td>
+<td>16 页（正文 9 页 + 文献 + 附录 A–E，证明在附录 B）</td>
+</tr>
+</tbody>
+</table>
+<p>一句话定位：把「干预设计」推进到含反馈回路的均衡系统——用李群（Lie group）参数化不改变因果图的软干预（soft intervention），用深度均衡模型（deep equilibrium model）反传梯度，并在 Leontief 投入产出经济上展示减排—就业权衡与反弹控制。</p>
+</section>
+<section id="问题与模型" class="level2">
+<h2 class="anchored" data-anchor-id="问题与模型">问题与模型</h2>
+<p>研究问题：循环因果图（cyclic causal graph）中干预后果须重新求解均衡点，不能由图直接读出；自洽方程一般无解析解，高维时设计最优干预更难。三大驱动挑战：社会可接受性（减排伴随就业损失）、部门间循环依赖（电力—风机—金属—电力）、反弹效应（rebound effect：能效提高经价格下降推高总需求，极端时 backfire 使节能为负）。</p>
+<p>载体是 Leontief 投入产出模型：部门产出均衡 <span class="math inline">\(x^*=Ax^*+y\)</span>（式 1，<span class="math inline">\(A\)</span> 为技术系数矩阵）、影响向量 <span class="math inline">\(s=Rx\)</span>（式 2，<span class="math inline">\(R\)</span> 为足迹强度矩阵）、<span class="math inline">\(x^*=(I-A)^{-1}y\)</span>（式 3）；价格自洽 <span class="math inline">\(p^*=A^\top p^*+\beta\delta_e\)</span>，需求曲线 <span class="math inline">\(y_i=d_i(p_i)\)</span> 一旦依赖价格系统即非线性。理论框架：<strong>Definition 1</strong> 平滑结构因果模型（SSCM）为四元组 <span class="math inline">\((\mathcal X,\mathcal T,\mathcal S,G)\)</span>——变量流形、参数流形、结构指派 <span class="math inline">\(x_j:=f_j(\mathrm{Pa}_j,\theta_j)\)</span>（光滑映射，外生随机变量换成流形上的确定性参数）与允许环的有向图；<strong>Definition 2</strong> 局部唯一可解。 ## 识别或主要命题</p>
+<p><strong>Proposition 1（局部微分同胚）</strong>：若 <span class="math inline">\((x^\text{ref},\theta^\text{ref})\)</span> 是解且 <span class="math inline">\(x\mapsto x-f(x,\theta^\text{ref})\)</span> 的雅可比可逆，则 SSCM 在参考点附近唯一可解且 <span class="math inline">\(\theta\mapsto x^*(\theta)\)</span> 光滑。<strong>Definition 3（李干预）</strong>：李群 <span class="math inline">\(L\)</span> 经光滑群作用 <span class="math inline">\(\phi:L\times\mathcal S\to\mathcal S\)</span> 作用于结构指派集，恒等元给出原模型，故不改变因果图；<strong>Proposition 2</strong>：局部微分同胚时恒等元邻域内的李干预均为软干预、保持局部唯一可解且 <span class="math inline">\((g,\theta)\mapsto x^{(g)}(\theta)\)</span> 光滑——这正是梯度可优化的根源。典型实例是乘性李干预（<span class="math inline">\((\mathbb R_+,\times)\)</span> 缩放结构指派 <span class="math inline">\(\alpha\cdot\mathcal S|_I=\{x_k:=\alpha_k f_k\}\)</span>，可解释为调节部门需求），另有加性平移干预等。<strong>Definition 4（不变软干预）</strong>：对干预节点 <span class="math inline">\(i\)</span> 的李干预，借助辅助节点 <span class="math inline">\(k\)</span> 的软干预（<span class="math inline">\(k\)</span> 只能用其原父节点信息，无需监控全系统的外部监督）使不变节点 <span class="math inline">\(j\)</span> 满足 <span class="math inline">\(x_j^{(u)}(\theta)=x_j^*(\theta)\)</span>；<strong>Proposition 3</strong> 给充分条件（去掉 <span class="math inline">\(j\)</span> 后雅可比可逆、参数到 <span class="math inline">\(\mathrm{Pa}_k\)</span> 的均衡雅可比满列秩、<span class="math inline">\(\partial x_j^*/\partial x_k\neq 0\)</span>），其构造依赖隐函数定理，故须以 MLP 学习该非参数干预。<strong>Definition 5 与 Proposition 4（区室化干预）</strong>：分区后若每区室所有向其他区室有出边的节点均被保持不变，则各区室干预互不传播、可独立设计。</p>
+</section>
+<section id="估计经验" class="level2">
+<h2 class="anchored" data-anchor-id="估计经验">估计/经验</h2>
+<p>计算上把 SSCM 实现为均衡层（Bai et al.&nbsp;2019），前向/反向均用 Anderson 加速（<span class="math inline">\(m=5\)</span>，松弛 <span class="math inline">\(\beta=2.0\)</span>）求不动点。四组实验：(1) 均衡估计——<span class="math inline">\(A,y\)</span> 取自 Exiobase 3 数据集 2012–2018 年、法德意美英五国（Pymrio 估计），以相对误差 <span class="math inline">\(\|x^*-f_\theta(x^*)\|/\|x^*\|\)</span> 评估：低维时前向迭代最准，维度超过 50 时 Anderson（<span class="math inline">\(\beta=2.0\)</span>）占优，<span class="math inline">\(\beta=1.0\)</span> 最差。(2) 乘性李干预优化——对每国全部 200 个部门做分布式干预，目标 <span class="math inline">\(L(u)=c^\top x^{(u)}+\lambda\|e(u)-e^*\|_1\)</span>（式 5，<span class="math inline">\(c\)</span> 为 GHG 排放强度、<span class="math inline">\(e\)</span> 为就业分布），得减排—就业权衡曲线：德国比法国更早触及就业损失，就业削减最大的部门因国而异。(3) 反弹控制——三部门玩具模型（能源+目标部门+其余）：单纯对能效系数做李干预触发价格反弹乃至 backfire（总能耗不降反升），而把目标部门需求取为不变节点、用两层 MLP 学出自适应税收型软干预维持价格，实现相对未干预系统的真实能耗下降。(4) 区室化——双区室 Leontief 模型中区室 1 的不变节点对两区室参数 <span class="math inline">\((u,v)\)</span> 均不变、被干预节点只随本区室 <span class="math inline">\(u\)</span> 变化。</p>
+</section>
+<section id="开放问题" class="level2">
+<h2 class="anchored" data-anchor-id="开放问题">开放问题</h2>
+<ol type="1">
+<li><strong>模型辨识缺位（自认）</strong>：全文假设系统处于均衡且模型参数已知，从观测或实验数据辨识 SSCM 被明确列为后续必要工作；<span class="math inline">\(A,R\)</span> 的估计误差与干预设计的敏感性完全没有分析。</li>
+<li><strong>线性经济模型（自认）</strong>：Leontief 线性模型只是为可解释性与参数可估计性而选；迈向非线性模型（如综合评估模型 IAM）被框架允许但未实现，反弹实验仅是三部门玩具模型。</li>
+<li><strong>多均衡问题（自认）</strong>：均衡层收敛到哪个均衡取决于初始化（吸引域），最一般情形需网格搜索所有均衡；本文靠 Hawkins–Simon 条件保证非负产出均衡唯一，实验固定零初始化，若模拟均衡与观测均衡不符须手动在预期均衡附近初始化，无系统化方案。</li>
+<li><strong>充分而非必要条件（我识别）</strong>：Prop. 3 的雅可比条件只是不变软干预存在的充分条件，何时必要、如何检验、远离参考参数处不变性是否维持均未讨论；MLP 学到的干预只在参考点邻域有保证。</li>
+<li><strong>静态均衡的局限（我识别）</strong>：就业保持被压成 <span class="math inline">\(L_1\)</span> 距离，转型动力学（劳动力再配置路径、多均衡间迁移）与分配公平等实质维度均不在模型内。</li>
+</ol>
+</section>
+<section id="文献谱系" class="level2">
+<h2 class="anchored" data-anchor-id="文献谱系">文献谱系</h2>
+<p>前作（在本文中的角色）：Bongers et al.&nbsp;2016/2021——循环 SCM 的唯一可解与边际化理论，Defn 2 的对照系；Mooij et al.&nbsp;2013（ODE→SCM）——均衡作为动态系统渐近态的因果解释，附录 A 沿此论证投入产出均衡；Rothenhäusler et al.&nbsp;2015 与 Blom, van Diepen &amp; Mooij 2020——软干预既有理论（平移干预、循环图中干预的定性性质），本文补上定量设计与优化；Blom &amp; Mooij 2021——反馈维持均衡从而违反忠实性/无环性的动机来源；Besserve et al.&nbsp;2018——李群工具的同组前作；Bai et al.&nbsp;2019、El Ghaoui et al.&nbsp;2021、Amos et al.&nbsp;2018——深度均衡模型/隐式深度学习/可微 MPC 的算法底座；Leontief 1951、Hawkins &amp; Simon 1949、Stadler et al.&nbsp;2018（Exiobase 3）——经济建模与数据；Wiebe/Wood et al.&nbsp;2018、Johari et al.&nbsp;2022——只处理特定干预或双边市场，被本文推广为通用优化框架。后续：作者自称这是首个在理论与算法上研究循环因果模型软干预设计的工作，开辟计算可持续性（computational sustainability）方向。</p>
+</section>
+<section id="明确不覆盖" class="level2">
+<h2 class="anchored" data-anchor-id="明确不覆盖">明确不覆盖</h2>
+<p>不做因果结构学习（图已知）；不处理非均衡动力学（只研究均衡点邻域）；不做从数据辨识参数；不涉及硬干预（改图）；不处理随机干预或噪声目标下的鲁棒优化；不做真实政策评估，实验均为半合成。</p>
+</section>
+<section id="阅读路径" class="level2">
+<h2 class="anchored" data-anchor-id="阅读路径">阅读路径</h2>
+<p>先读 §1 与 Fig. 1（三大挑战）；§2.1–2.2 看 Leontief 模型与循环图动机；§3 是理论核心：Defn 1–2 + Prop 1（p.4）→ Defn 3 + Prop 2（p.5）→ Defn 4 + Prop 3（pp.5–6）→ Defn 5 + Prop 4（p.6）；§4 架构；§5 按 Fig. 3–5 顺读四组实验；§6 局限。姊妹篇对照：站内 1304.7920 / 1408.2063（ODE→SCM：均衡态因果语义的源头）与 1608.08028（ODE 极限做成动态 SCM）——本文把该脉络从结构分析翻转为干预设计；同组 2202.01300 从多数据集聚合视角处理因果模型，与本文「设计已知模型的干预」互补。</p>
+</section>
+<section id="术语对照" class="level2">
+<h2 class="anchored" data-anchor-id="术语对照">术语对照</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>中文</th>
+<th>English</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>平滑结构因果模型</td>
+<td>smooth structural causal model (SSCM)</td>
+</tr>
+<tr class="even">
+<td>李干预</td>
+<td>Lie intervention</td>
+</tr>
+<tr class="odd">
+<td>乘性李干预</td>
+<td>multiplicative Lie intervention</td>
+</tr>
+<tr class="even">
+<td>不变软干预</td>
+<td>invariant soft intervention</td>
+</tr>
+<tr class="odd">
+<td>区室化干预</td>
+<td>compartmentalized intervention</td>
+</tr>
+<tr class="even">
+<td>局部微分同胚</td>
+<td>local diffeomorphism</td>
+</tr>
+<tr class="odd">
+<td>局部唯一可解</td>
+<td>local unique solvability</td>
+</tr>
+<tr class="even">
+<td>深度均衡模型</td>
+<td>deep equilibrium model (DEQ)</td>
+</tr>
+<tr class="odd">
+<td>Anderson 加速</td>
+<td>Anderson acceleration</td>
+</tr>
+<tr class="even">
+<td>反弹效应 / backfire</td>
+<td>rebound effect / backfire</td>
+</tr>
+<tr class="odd">
+<td>投入产出模型</td>
+<td>input-output (IO) model</td>
+</tr>
+<tr class="even">
+<td>技术系数矩阵</td>
+<td>technical coefficients matrix</td>
+</tr>
+<tr class="odd">
+<td>足迹强度矩阵</td>
+<td>footprint intensity matrix</td>
+</tr>
+<tr class="even">
+<td>吸引域</td>
+<td>basin of attraction</td>
+</tr>
+<tr class="odd">
+<td>计算可持续性</td>
+<td>computational sustainability</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="来源定位" class="level2">
+<h2 class="anchored" data-anchor-id="来源定位">来源定位</h2>
+<p><code>papers/2112.05729.pdf</code>（16 页）。关键内容：Leontief 均衡与三大挑战 §2.1（pp.2–3，式 1–3 与价格自洽式）；Defn 1–2、Prop 1（§3.1, p.4）；李干预 Defn 3、Prop 2（§3.2, p.5）；不变软干预 Defn 4、例 (4)、Prop 3（§3.3, pp.5–6）；区室化 Defn 5、Prop 4（§3.4, p.6）；可微架构 §4（p.7）；实验 Figs. 3–5（§5, pp.7–8）；局限 §6（p.9）；证明附录 B，MLP 细节附录 D。</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "已复制");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "已复制");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

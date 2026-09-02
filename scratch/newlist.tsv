@@ -1,0 +1,96 @@
+2021-02-22	2102.11107v1	Towards Causal Representation Learning	Bernhard Schölkopf; Francesco Locatello; Stefan Bauer; Nan Rosemary Ke; Nal Kalchbrenner; Anirudh Goyal; Yoshua Bengio
+2021-02-24	2102.12353v6	Nonlinear Invariant Risk Minimization: A Causal Approach	Chaochao Lu; Yuhuai Wu; Jośe Miguel Hernández-Lobato; Bernhard Schölkopf
+2021-05-25	2105.11839v3	DiBS: Differentiable Bayesian Structure Learning	Lars Lorch; Jonas Rothfuss; Bernhard Schölkopf; Andreas Krause
+2021-06-07	2106.03340v1	Instrument Space Selection for Kernel Maximum Moment Restriction	Rui Zhang; Krikamol Muandet; Bernhard Schölkopf; Masaaki Imaizumi
+2021-06-07	2106.03443v2	Causal Influence Detection for Improving Efficiency in Reinforcement Learning	Maximilian Seitzer; Bernhard Schölkopf; Georg Martius
+2021-06-08	2106.04619v4	Self-Supervised Learning with Data Augmentations Provably Isolates Content from Style	Julius von Kügelgen; Yash Sharma; Luigi Gresele; Wieland Brendel; Bernhard Schölkopf; Michel Besserve; Francesco Locatello
+2021-06-09	2106.05200v3	Independent mechanism analysis, a new concept?	Luigi Gresele; Julius von Kügelgen; Vincent Stimper; Bernhard Schölkopf; Michel Besserve
+2021-06-11	2106.06196v2	CausalAdv: Adversarial Robustness through the Lens of Causality	Yonggang Zhang; Mingming Gong; Tongliang Liu; Gang Niu; Xinmei Tian; Bo Han; Bernhard Schölkopf; Kun Zhang
+2021-06-22	2106.11849v1	Algorithmic Recourse in Partially and Fully Confounded Settings Through Bounding Counterfactual Effects	Julius von Kügelgen; Nikita Agarwal; Jakob Zeitler; Afsaneh Mastouri; Bernhard Schölkopf
+2021-06-29	2106.15063v2	The unpopular Package: a Data-driven Approach to De-trend TESS Full Frame Image Light Curves	Soichiro Hattori; Daniel Foreman-Mackey; David W. Hogg; Benjamin T. Montet; Ruth Angus; T. A. Pritchard; Jason L. Curtis; Bernhard Schölkopf
+2021-06-30	2106.16091v4	Exploring the Latent Space of Autoencoders with Interventional Assays	Felix Leeb; Stefan Bauer; Michel Besserve; Bernhard Schölkopf
+2021-09-06	2109.02429v2	Learning Neural Causal Models with Active Interventions	Nino Scherrer; Olexa Bilaniuk; Yashas Annadani; Anirudh Goyal; Patrick Schwab; Bernhard Schölkopf; Michael C. Mozer; Yoshua Bengio; Stefan Bauer; Nan Rosemary Ke
+2021-09-13	2109.06093v3	Direct Advantage Estimation	Hsiao-Ru Pan; Nico Gürtler; Alexander Neitz; Bernhard Schölkopf
+2021-10-07	2110.03618v2	Causal Direction of Data Collection Matters: Implications of Causal and Anticausal Learning for NLP	Zhijing Jin; Julius von Kügelgen; Jingwei Ni; Tejas Vaidhya; Ayush Kaushal; Mrinmaya Sachan; Bernhard Schölkopf
+2021-10-11	2110.05304v1	You Mostly Walk Alone: Analyzing Feature Attribution in Trajectory Prediction	Osama Makansi; Julius von Kügelgen; Francesco Locatello; Peter Gehler; Dominik Janzing; Thomas Brox; Bernhard Schölkopf
+2021-10-13	2110.06562v2	Unsupervised Object Learning via Common Fate	Matthias Tangemann; Steffen Schneider; Julius von Kügelgen; Francesco Locatello; Peter Gehler; Thomas Brox; Matthias Kümmerer; Matthias Bethge; Bernhard Schölkopf
+2021-10-29	2110.15489v1	GalilAI: Out-of-Task Distribution Detection using Causal Active Experimentation for Safe Transfer RL	Sumedh A Sontakke; Stephen Iota; Zizhao Hu; Arash Mehrjou; Laurent Itti; Bernhard Schölkopf
+2021-10-29	2110.15595v1	Cause-effect inference through spectral independence in linear dynamical systems: theoretical foundations	Michel Besserve; Naji Shajarisales; Dominik Janzing; Bernhard Schölkopf
+2021-12-10	2112.05729v2	Learning soft interventions in complex equilibrium systems	Michel Besserve; Bernhard Schölkopf
+2022-02-02	2202.01300v3	Causal Inference Through the Structural Causal Marginal Problem	Luigi Gresele; Julius von Kügelgen; Jonas M. Kübler; Elke Kirschbaum; Bernhard Schölkopf; Dominik Janzing
+2022-02-14	2202.06844v1	On Pitfalls of Identifiability in Unsupervised Learning. A Note on: "Desiderata for Representation Learning: A Causal Perspective"	Shubhangi Ghosh; Luigi Gresele; Julius von Kügelgen; Michel Besserve; Bernhard Schölkopf
+2022-03-03	2203.02016v3	Interventions, Where and How? Experimental Design for Causal Models at Scale	Panagiotis Tigas; Yashas Annadani; Andrew Jesson; Bernhard Schölkopf; Yarin Gal; Stefan Bauer
+2022-03-08	2203.04413v1	Score matching enables causal discovery of nonlinear additive noise models	Paul Rolland; Volkan Cevher; Matthäus Kleindessner; Chris Russel; Bernhard Schölkopf; Dominik Janzing; Francesco Locatello
+2022-03-29	2203.15756v3	Causal de Finetti: On the Identification of Invariant Causal Structure in Exchangeable Data	Siyuan Guo; Viktor Tóth; Bernhard Schölkopf; Ferenc Huszár
+2022-04-01	2204.00607v1	From Statistical to Causal Learning	Bernhard Schölkopf; Julius von Kügelgen
+2022-04-07	2204.03439v1	Half-sibling regression meets exoplanet imaging: PSF modeling and subtraction using a flexible, domain knowledge-driven, causal framework	Timothy D. Gebhard; Markus J. Bonse; Sascha P. Quanz; Bernhard Schölkopf
+2022-05-04	2205.02293v3	Original or Translated? A Causal Analysis of the Impact of Translationese on Machine Translation Performance	Jingwei Ni; Zhijing Jin; Markus Freitag; Mrinmaya Sachan; Bernhard Schölkopf
+2022-05-25	2205.12934v4	Amortized Inference for Causal Structure Learning	Lars Lorch; Scott Sussex; Jonas Rothfuss; Andreas Krause; Bernhard Schölkopf
+2022-06-03	2206.01665v2	BaCaDI: Bayesian Causal Discovery with Unknown Interventions	Alexander Hägele; Jonas Rothfuss; Lars Lorch; Vignesh Ram Somnath; Bernhard Schölkopf; Andreas Krause
+2022-06-04	2206.02013v2	Causal Discovery in Heterogeneous Environments Under the Sparse Mechanism Shift Hypothesis	Ronan Perry; Julius von Kügelgen; Bernhard Schölkopf
+2022-06-22	2206.11131v1	Variational Causal Dynamics: Discovering Modular World Models from Interventions	Anson Lei; Bernhard Schölkopf; Ingmar Posner
+2022-07-11	2207.04771v2	Functional Generalized Empirical Likelihood Estimation for Conditional Moment Restrictions	Heiner Kremer; Jia-Jie Zhu; Krikamol Muandet; Bernhard Schölkopf
+2022-07-13	2207.06137v1	Probing the Robustness of Independent Mechanism Analysis for Representation Learning	Joanna Sliwa; Shubhangi Ghosh; Vincent Stimper; Luigi Gresele; Bernhard Schölkopf
+2022-07-20	2207.09944v4	Probable Domain Generalization via Quantile Risk Minimization	Cian Eastwood; Alexander Robey; Shashank Singh; Julius von Kügelgen; Hamed Hassani; George J. Pappas; Bernhard Schölkopf
+2022-07-20	2207.10156v1	Structural Causal 3D Reconstruction	Weiyang Liu; Zhen Liu; Liam Paull; Adrian Weller; Bernhard Schölkopf
+2022-10-13	2210.09054v2	On the Identifiability and Estimation of Causal Location-Scale Noise Models	Alexander Immer; Christoph Schultheiss; Julia E. Vogt; Bernhard Schölkopf; Peter Bühlmann; Alexander Marx
+2022-10-21	2210.12023v3	A Causal Framework to Quantify the Robustness of Mathematical Reasoning with Language Models	Alessandro Stolfo; Zhijing Jin; Kumar Shridhar; Bernhard Schölkopf; Mrinmaya Sachan
+2022-10-29	2210.16525v2	Spectral Representation Learning for Conditional Moment Models	Ziyu Wang; Yucen Luo; Yueru Li; Jun Zhu; Bernhard Schölkopf
+2022-11-07	2211.03846v4	Federated Causal Discovery From Interventions	Amin Abyaneh; Nino Scherrer; Patrick Schwab; Stefan Bauer; Bernhard Schölkopf; Arash Mehrjou
+2022-12-13	2212.06925v4	On the Relationship Between Explanation and Prediction: A Causal View	Amir-Hossein Karimi; Krikamol Muandet; Simon Kornblith; Bernhard Schölkopf; Been Kim
+2022-12-14	2212.08498v1	Evaluating vaccine allocation strategies using simulation-assisted causal modelling	Armin Kekić; Jonas Dehning; Luigi Gresele; Julius von Kügelgen; Viola Priesemann; Bernhard Schölkopf
+2023-01-12	2301.05169v2	Causal Triplet: An Open Challenge for Intervention-centric Causal Representation Learning	Yuejiang Liu; Alexandre Alahi; Chris Russell; Max Horn; Dominik Zietlow; Bernhard Schölkopf; Francesco Locatello
+2023-01-31	2301.13724v2	Towards fully covariant machine learning	Soledad Villar; David W. Hogg; Weichi Yao; George A. Kevrekidis; Bernhard Schölkopf
+2023-02-07	2302.03465v2	Robustness Implies Fairness in Causal Algorithmic Recourse	Ahmad-Reza Ehyaei; Amir-Hossein Karimi; Bernhard Schölkopf; Setareh Maghsudi
+2023-02-10	2302.05380v1	On the Interventional Kullback-Leibler Divergence	Jonas Wildberger; Siyuan Guo; Arnab Bhattacharyya; Bernhard Schölkopf
+2023-03-16	2303.09552v1	Dataflow graphs as complete causal graphs	Andrei Paleyes; Siyuan Guo; Bernhard Schölkopf; Neil D. Lawrence
+2023-04-16	2304.07896v3	Out-of-Variable Generalization for Discriminative Models	Siyuan Guo; Jonas Wildberger; Bernhard Schölkopf
+2023-05-18	2305.10898v2	Estimation Beyond Data Reweighting: Kernel Method of Moments	Heiner Kremer; Yassine Nemmour; Bernhard Schölkopf; Jia-Jie Zhu
+2023-05-19	2305.17139v3	A Measure-Theoretic Axiomatisation of Causality	Junhyung Park; Simon Buchholz; Bernhard Schölkopf; Krikamol Muandet
+2023-05-26	2305.17225v3	Causal Component Analysis	Liang Wendong; Armin Kekić; Julius von Kügelgen; Simon Buchholz; Michel Besserve; Luigi Gresele; Bernhard Schölkopf
+2023-06-01	2306.00542v2	Nonparametric Identifiability of Causal Representations from Unknown Interventions	Julius von Kügelgen; Michel Besserve; Liang Wendong; Luigi Gresele; Armin Kekić; Elias Bareinboim; David M. Blei; Bernhard Schölkopf
+2023-06-01	2306.01157v1	Delphic Offline Reinforcement Learning under Nonidentifiable Hidden Confounding	Alizée Pace; Hugo Yèche; Bernhard Schölkopf; Gunnar Rätsch; Guy Tennenholtz
+2023-06-04	2306.02235v2	Learning Linear Causal Representations from Interventions under General Nonlinear Mixing	Simon Buchholz; Goutham Rajendran; Elan Rosenfeld; Bryon Aragam; Bernhard Schölkopf; Pradeep Ravikumar
+2023-06-09	2306.05836v3	Can Large Language Models Infer Causation from Correlation?	Zhijing Jin; Jiarui Liu; Zhiheng Lyu; Spencer Poff; Mrinmaya Sachan; Rada Mihalcea; Mona Diab; Bernhard Schölkopf
+2023-06-09	2306.06002v1	Causal Effect Estimation from Observational and Interventional Data Through Matrix Weighted Linear Estimators	Klaus-Rudolf Kladny; Julius von Kügelgen; Bernhard Schölkopf; Michael Muehlebach
+2023-10-11	2310.07665v4	Deep Backtracking Counterfactuals for Causally Compliant Explanations	Klaus-Rudolf Kladny; Julius von Kügelgen; Bernhard Schölkopf; Michael Muehlebach
+2023-10-26	2310.17405v2	Causal Modeling with Stationary Diffusions	Lars Lorch; Andreas Krause; Bernhard Schölkopf
+2023-11-05	2311.02790v3	CausalCite: A Causal Formulation of Paper Citations	Ishan Kumar; Zhijing Jin; Ehsan Mokhtarian; Siyuan Guo; Yuen Chen; Mrinmaya Sachan; Bernhard Schölkopf
+2023-11-15	2311.08605v2	Exploring the Jungle of Bias: Political Bias Attribution in Language Models via Dependency Analysis	David F. Jenny; Yann Billeter; Mrinmaya Sachan; Bernhard Schölkopf; Zhijing Jin
+2023-11-15	2311.08743v1	Kernel-based independence tests for causal structure learning on functional data	Felix Laumann; Julius von Kügelgen; Junhyung Park; Bernhard Schölkopf; Mauricio Barahona
+2023-11-15	2311.08815v2	Self-Supervised Disentanglement by Leveraging Structure in Data Augmentations	Cian Eastwood; Julius von Kügelgen; Linus Ericsson; Diane Bouchacourt; Pascal Vincent; Bernhard Schölkopf; Mark Ibrahim
+2023-11-30	2311.18639v2	Targeted Reduction of Causal Models	Armin Kekić; Bernhard Schölkopf; Michel Besserve
+2023-12-07	2312.04350v3	CLadder: Assessing Causal Reasoning in Language Models	Zhijing Jin; Yuen Chen; Felix Leeb; Luigi Gresele; Ojasv Kamal; Zhiheng Lyu; Kevin Blin; Fernando Gonzalez Adauto; Max Kleiman-Weiner; Mrinmaya Sachan; Bernhard Schölkopf
+2024-02-06	2402.06665v2	The Essential Role of Causality in Foundation World Models for Embodied AI	Tarun Gupta; Wenbo Gong; Chao Ma; Nick Pawlowski; Agrin Hilmkil; Meyer Scetbon; Marc Rigter; Ade Famoti; Ashley Juan Llorens; Jianfeng Gao; Stefan Bauer; Danica Kragic; Bernhard Schölkopf; Cheng Zhang
+2024-02-14	2402.09236v2	Learning Interpretable Concepts: Unifying Causal Representation Learning and Foundation Models	Goutham Rajendran; Simon Buchholz; Bryon Aragam; Bernhard Schölkopf; Pradeep Ravikumar
+2024-02-20	2402.12874v1	Skill or Luck? Return Decomposition via Advantage Functions	Hsiao-Ru Pan; Bernhard Schölkopf
+2024-04-17	2404.11055v2	Do LLMs Think Fast and Slow? A Causal Study on Sentiment Analysis	Zhiheng Lyu; Zhijing Jin; Fernando Gonzalez; Rada Mihalcea; Bernhard Schölkopf; Mrinmaya Sachan
+2024-05-23	2405.14808v2	Implicit Personalization in Language Models: A Systematic Study	Zhijing Jin; Nils Heil; Jiarui Liu; Shehzaad Dhuliawala; Yahang Qi; Bernhard Schölkopf; Rada Mihalcea; Mrinmaya Sachan
+2024-05-29	2405.18836v1	Do Finetti: On Causal Effects for Exchangeable Data	Siyuan Guo; Chi Zhang; Karthika Mohan; Ferenc Huszár; Bernhard Schölkopf
+2024-05-30	2405.20318v4	Quriosity: Analyzing Human Questioning Behavior and Causal Inquiry through Curiosity-Driven Queries	Roberto Ceraolo; Dmitrii Kharlapenko; Ahmad Khan; Amélie Reymond; Punya Syon Pandey; Rada Mihalcea; Bernhard Schölkopf; Mrinmaya Sachan; Zhijing Jin
+2024-06-01	2406.00388v2	Products, Abstractions and Inclusions of Causal Spaces	Simon Buchholz; Junhyung Park; Bernhard Schölkopf
+2024-06-17	2406.11601v3	Standardizing Structural Causal Models	Weronika Ormaniec; Scott Sussex; Lars Lorch; Bernhard Schölkopf; Andreas Krause
+2024-06-20	2406.14302v3	Identifiable Exchangeable Mechanisms for Causal Structure and Representation Learning	Patrik Reizinger; Siyuan Guo; Ferenc Huszár; Bernhard Schölkopf; Wieland Brendel
+2024-06-27	2406.19307v2	The Odyssey of Commonsense Causality: From Foundational Benchmarks to Cutting-Edge Reasoning	Shaobo Cui; Zhijing Jin; Bernhard Schölkopf; Boi Faltings
+2024-06-29	2407.00529v1	Detecting and Identifying Selection Structure in Sequential Data	Yujia Zheng; Zeyu Tang; Yiwen Qiu; Bernhard Schölkopf; Kun Zhang
+2024-09-03	2409.01794v2	Estimating Joint Interventional Distributions from Marginal Interventional Data	Sergio Hernan Garrido Mejia; Elke Kirschbaum; Armin Kekić; Bernhard Schölkopf; Atalanti Mastakouri
+2024-11-05	2411.03275v1	Causal Responsibility Attribution for Human-AI Collaboration	Yahang Qi; Bernhard Schölkopf; Zhijing Jin
+2024-11-11	2411.06890v3	SPARTAN: A Sparse Transformer World Model Attending to What Matters	Anson Lei; Bernhard Schölkopf; Ingmar Posner
+2024-11-21	2411.14003v2	Generative Intervention Models for Causal Perturbation Modeling	Nora Schneider; Lars Lorch; Niki Kilbertus; Bernhard Schölkopf; Andreas Krause
+2025-01-14	2501.08426v1	Causal vs. Anticausal merging of predictors	Sergio Hernan Garrido Mejia; Patrick Blöbaum; Bernhard Schölkopf; Dominik Janzing
+2025-02-06	2502.04210v3	Algorithmic causal structure emerging through compression	Liang Wendong; Simon Buchholz; Bernhard Schölkopf
+2025-02-07	2502.05085v1	Causality can systematically address the monsters under the bench(marks)	Felix Leeb; Zhijing Jin; Bernhard Schölkopf
+2025-02-28	2502.21123v6	Causality Is Key to Understand and Balance Multiple Goals in Trustworthy ML and Foundation Models	Ruta Binkyte; Ivaxi Sheth; Zhijing Jin; Mohammad Havaei; Bernhard Schölkopf; Mario Fritz
+2025-05-25	2505.19212v2	When Ethics and Payoffs Diverge: LLM Agents in Morally Charged Social Dilemmas	Steffen Backmann; David Guzman Piedrahita; Terry Jingchen Zhang; Emanuel Tewolde; Rada Mihalcea; Bernhard Schölkopf; Zhijing Jin
+2025-06-05	2506.04945v1	Learning Joint Interventional Effects from Single-Variable Interventions in Additive Models	Armin Kekić; Sergio Hernan Garrido Mejia; Bernhard Schölkopf
+2025-06-06	2506.06039v3	Do-PFN: In-Context Learning for Causal Effect Estimation	Jake Robertson; Arik Reuter; Siyuan Guo; Noah Hollmann; Frank Hutter; Bernhard Schölkopf
+2025-07-20	2507.14901v1	Learning Nonlinear Causal Reductions to Explain Reinforcement Learning Policies	Armin Kekić; Jan Schneider; Dieter Büchler; Bernhard Schölkopf; Michel Besserve
+2025-11-03	2511.02091v1	Natural Building Blocks for Structured World Models: Theory, Evidence, and Scaling	Lancelot Da Costa; Sanjeev Namjoshi; Mohammed Abbas Ansari; Bernhard Schölkopf
+2026-01-20	2601.15341v1	Latent Causal Diffusions for Single-Cell Perturbation Modeling	Lars Lorch; Jiaqi Zhang; Charlotte Bunne; Andreas Krause; Bernhard Schölkopf; Caroline Uhler
+2026-02-04	2602.04718v5	Superposition Without Interference? Towards Isolated Interventions via Almost Orthogonal Features in Language Models	Moritz Miller; Florent Draye; Bernhard Schölkopf
+2026-02-16	2602.14972v2	Use What You Know: Causal Foundation Models with Partial Graphs	Arik Reuter; Anish Dhir; Cristiana Diaconu; Jake Robertson; Ole Ossen; Frank Hutter; Adrian Weller; Mark van der Wilk; Bernhard Schölkopf
+2026-05-04	2605.02640v2	Trustworthy AI Suffers from Invariance Conflicts and Causality is The Solution	Ruta Binkyte; Ivaxi Sheth; Zhijing Jin; Mohammad Havaei; Bernhard Schölkopf; Mario Fritz
+2026-06-03	2606.05165v1	STRIDE: Training Data Attribution via Sparse Recovery from Subset Perturbations	Rishit Dagli; Abir Harrasse; Luke Zhang; Florent Draye; Amirali Abdullah; Bernhard Schölkopf; Zhijing Jin
+2026-07-14	2607.12474v2	From Observation to Insight: Mechanistic World Models and the Quest for Autonomous Discovery	Ingmar Posner; Anson Lei; Bernhard Schölkopf
+2026-07-20	2607.18114v1	How Does Alignment Tuning Shape Representations of Sycophancy and Related Cue-Induced Biases in LLMs?	Prakhar Gupta; Terry Jingchen Zhang; Florent Draye; Bernhard Schölkopf; Zhijing Jin
+2026-08-27	2608.27510v1	How Do Linear Probes Emerge? A Circuit-Tracing Framework with Concept-Targeted Attribution	Vedant Palit; Florent Draye; Terry Jingchen Zhang; Bernhard Schölkopf; Zhijing Jin

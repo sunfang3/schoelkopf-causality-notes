@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN" xml:lang="zh-CN"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="用 Pearl 中介分析把国家对新冠病死率的总效应拆为「应对方式」直接效应与年龄结构间接效应：意大利直接效应于 2020 年 3 月中旬变号，与医疗系统过载报道时间吻合；132 对国家比较中 64 对两效应反号。整理并公开 75.6 万例年龄分层数据集。">
+
+<title>新冠病死率中的辛普森悖论：年龄中介效应分解 – Schölkopf 因果论文阅读站</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-66b4df7ba86f8287dc76b7fb130027a6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "没有结果",
+    "search-matching-documents-text": "匹配的文档",
+    "search-copy-link-title": "复制搜索链接",
+    "search-hide-matches-text": "隐藏其它匹配结果",
+    "search-more-match-text": "更多匹配结果",
+    "search-more-matches-text": "更多匹配结果",
+    "search-clear-button-title": "清除",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "取消",
+    "search-submit-button-title": "提交",
+    "search-label": "搜索"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Schölkopf 因果论文阅读站</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="搜索"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="展开或折叠导航栏" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">首页</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../schoelkopf-causality-arxiv-2008-2026.html"> 
+<span class="menu-text">全景（按年）</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../glossary.html"> 
+<span class="menu-text">术语表</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../notes.html"> 
+<span class="menu-text">逐篇笔记</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">新冠病死率中的辛普森悖论：年龄中介效应分解</h1>
+<p class="subtitle lead">Julius von Kügelgen et al., arXiv:2005.07180 (2020)</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">因果推断</div>
+    <div class="quarto-category">中介分析</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    用 Pearl 中介分析把国家对新冠病死率的总效应拆为「应对方式」直接效应与年龄结构间接效应：意大利直接效应于 2020 年 3 月中旬变号，与医疗系统过载报道时间吻合；132 对国家比较中 64 对两效应反号。整理并公开 75.6 万例年龄分层数据集。
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">发布于</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">2020年5月14日</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="导览" class="level2">
+<h2 class="anchored" data-anchor-id="导览">导览</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>作者</td>
+<td>Julius von Kügelgen、Luigi Gresele、Bernhard Schölkopf（MPI for Intelligent Systems, Tübingen；第一作者兼剑桥大学；前两人同等贡献）</td>
+</tr>
+<tr class="even">
+<td>出处</td>
+<td>arXiv:2005.07180 [stat.AP]；v1 2020-05-14，站内 PDF 为 v3（2021-06-23）；刊于 IEEE Transactions on Artificial Intelligence 2(1), 2021</td>
+</tr>
+<tr class="odd">
+<td>日期</td>
+<td>2020-05-14（v1）</td>
+</tr>
+<tr class="even">
+<td>页数</td>
+<td>28 页（正文 12 页 + 附录与文献 16 页）</td>
+</tr>
+</tbody>
+</table>
+<p>一句话定位：中介分析（mediation analysis）在新冠数据上的首个应用——作者自陈方法无新颖性，贡献在于把「中意病死率悖论」翻译成因果图、整理可复算的年龄分层数据集、并用自然直接/间接效应给出跨国跨时的透明比较范式。</p>
+</section>
+<section id="问题与模型" class="level2">
+<h2 class="anchored" data-anchor-id="问题与模型">问题与模型</h2>
+<p>动机（§II）：中国 CDC 72,314 例报告（2020-02-17）与意大利 ISS 3 月 9 日快照相比（Table III/Fig 1）：每个年龄组的病死率（case fatality rate, CFR）都是意大利更低，但总 CFR 意大利反而高（4.4% = 357/8,026 对 2.3% = 1,023/44,672）——辛普森悖论（Simpson’s paradox）。机理：意大利确诊病例中老年人占比远高（≥80 岁占 18.4% 对 3.2%，Table IV），而 CFR 随年龄陡增。</p>
+<p>模型（§III）：三元粗粒化因果图：国家 <span class="math inline">\(C\)</span>（类别）→ 年龄组 <span class="math inline">\(A\)</span>（有序，10 岁区间）→ 病死 <span class="math inline">\(F\)</span>（二值），加直接边 <span class="math inline">\(C\to F\)</span>。<span class="math inline">\(C\to A\)</span> 编码病例人口学（case demographic），<span class="math inline">\(C\to F\)</span> 汇总医疗资源、政策、干预等一切非年龄因素，合称国家的「应对方式」（approach）。假设：CFR 与年龄构成是观测样本；三变量间因果充分性（causal sufficiency，无共同隐混杂）——作者承认是强假设，但论证未观测因素可视为潜伏的中介变量而非混杂。</p>
+</section>
+<section id="识别或主要命题" class="level2">
+<h2 class="anchored" data-anchor-id="识别或主要命题">识别或主要命题</h2>
+<p>无定理，识别性主张是：因果充分性下干预分布等于条件分布，四类效应全部可由观测频率读出（§IV）。Def 1 总因果效应 <span class="math inline">\(\mathrm{TCE}^{0\to1}=E[Y\mid do(T{=}1)]-E[Y\mid do(T{=}0)]\)</span>（式 1，即总 CFR 之差）；Def 2 受控直接效应 <span class="math inline">\(\mathrm{CDE}^{0\to1}(x)\)</span>（式 2，固定年龄组的 CFR 差）；Def 3 自然直接效应 <span class="math inline">\(\mathrm{NDE}^{0\to1}=E[Y_{X(0)}\mid do(T{=}1)]-E[Y\mid do(T{=}0)]\)</span>（式 3，「沿用中国的年龄结构、只换成意大利的应对」）；Def 4 自然间接效应 <span class="math inline">\(\mathrm{NIE}^{0\to1}=E[Y_{X(1)}\mid do(T{=}0)]-E[Y\mid do(T{=}0)]\)</span>（式 4，「只把中国病例人口学换成意大利的」）。观测版中介公式（式 5–8）：如 <span class="math inline">\(\mathrm{NDE}^{0\to1}=\sum_x P(X{=}x\mid T{=}0)\,[E[Y\mid T{=}1,X{=}x]-E[Y\mid T{=}0,X{=}x]]\)</span>（式 7）。两点界限：因处理-中介交互（moderation），<span class="math inline">\(\mathrm{TCE}\neq\mathrm{NDE}+\mathrm{NIE}\)</span>，只有减法原则 <span class="math inline">\(\mathrm{TCE}^{0\to1}=\mathrm{NDE}^{0\to1}-\mathrm{NIE}^{1\to0}\)</span> 无条件成立（§IV.G、附录 A）；NDE/NIE 是反事实量，一般连实验都不可识别，本文靠因果充分性假设从观测表读出（附录 A）。</p>
+</section>
+<section id="估计经验" class="level2">
+<h2 class="anchored" data-anchor-id="估计经验">估计/经验</h2>
+<p>数据（§V.A）：11 国（阿根廷、中国、哥伦比亚、意大利、荷兰、葡萄牙、南非、西班牙、瑞典、瑞士、韩国）加钻石公主号邮轮的年龄分层（10 岁区间）确诊与死亡数，共 756,004 例、68,508 死，总 CFR 9.06%；数据与交互式笔记本公开。</p>
+<p>中意时间追踪（§V.B，Fig 3，中国固定为对照）：3 月 9 日 <span class="math inline">\(\mathrm{TCE}\approx2.2\%\)</span>、<span class="math inline">\(\mathrm{NDE}\approx-0.8\%\)</span>、<span class="math inline">\(\mathrm{NIE}\approx+3.3\%\)</span>（两效应反号即悖论的因果表述；附录 B 核算 <span class="math inline">\(2.2\%\neq-0.8\%+3.3\%\)</span>，证明存在交互）。至 5 月 26 日：TCE 三周内升至 9.5%、再缓升至 11.4%；NIE 稳定在 3–3.5%（病例人口学少变）；NDE 于 3 月中旬由负变号、4 月前陡升、随后趋平至约 3.8%——变号时点与意大利北部医疗系统「接近崩溃」的报道（Armocida et al.&nbsp;2020）吻合（作者明言只能猜测机制）。</p>
+<p>多国比较（§V.C，Fig 4/5）：按 NDE 排序，钻石公主、中国、葡萄牙、韩国居前，荷兰、瑞典、意大利垫底；按 NIE，南非、哥伦比亚、阿根廷受益最大，西班牙、荷兰、意大利、钻石公主受害最深。132 个有序国家对中 64 对 NDE 与 NIE 反号——这些对上比较总 CFR 会误导对「应对方式」的评估。两国排名几乎不相关（Spearman <span class="math inline">\(\rho=0.04,\ p=0.9\)</span>；逐对散点 Pearson <span class="math inline">\(r=0.174,\ p=0.037\)</span>），提示政策与病例人口学大体无关；NIE 排名与人口年龄中位数强相关（<span class="math inline">\(\rho=0.94,\ p=7\times10^{-6}\)</span>）。附录：西班牙亦见 NDE 于 3 月 30 日前后变号（E.1）；伦巴第血清学 IFR 数据（n=5,484）上 <span class="math inline">\(\mathrm{TCE}=-1.63\%\)</span>、<span class="math inline">\(\mathrm{NDE}=-1.57\%\)</span>、<span class="math inline">\(\mathrm{NIE}=+0.18\%\)</span>（附录 C，Table I/II）。</p>
+</section>
+<section id="开放问题" class="level2">
+<h2 class="anchored" data-anchor-id="开放问题">开放问题</h2>
+<ol type="1">
+<li><strong>粗粒化归并（作者自列，§VI）</strong>：<span class="math inline">\(C\to F\)</span> 把医疗资源、政策、检测等全部压进「应对方式」，NDE 无法归因到具体机制；多中介路径特定效应需更细数据。</li>
+<li><strong>选择偏差（作者自列，§VI.B）</strong>：CFR 以检测阳性为条件（Fig 6 右的 <span class="math inline">\(T\)</span>），检测策略依赖 <span class="math inline">\(C\)</span> 与 <span class="math inline">\(A\)</span>；钻石公主号 3,711 人检测 3,063、619 例确诊中 318 例无症状，其负 NDE 并非常规情形；作者指出的补救是从选择偏差恢复的方法（Bareinboim &amp; Tian 2015；Correa et al.&nbsp;2019）。</li>
+<li><strong>时滞与国家选择（作者自列，§VI.B）</strong>：感染-死亡延迟压低近期 CFR，应改用延迟校正的感染病死率（IFR）；且只纳入报告年龄分层数据的国家（多为重灾区），9.06% 的总 CFR 可能被系统性抬高。</li>
+<li><strong>IFR 数据稀缺（作者自列，§VI.C/附录 C）</strong>：年龄分层 IFR 估计极少且依赖模型假设（如 Verity et al.&nbsp;2020 的各年龄同攻击率假设），换用 IFR 的分析只在伦巴第小样本上示范。</li>
+<li><strong>无不确定性量化（我识别）</strong>：全部效应为点估计，无置信区间，也无对因果充分性违反的敏感性分析；小样本单元（如意大利 0–9 岁仅 43 例）的噪声未处理。</li>
+<li><strong>对照时点不对称（我识别）</strong>：中国固定在 2 月 17 日而意大利逐周更新，NDE 的时间演化混入了流行阶段差异；变号时点与医疗过载只是时间吻合而非受控比较。</li>
+<li><strong>数据口径（作者自列，脚注 5 与附录 E.1）</strong>：各国年龄分组约定不一（部分国家因此无法纳入），西班牙年龄分层死亡数偏低、可靠性存疑。</li>
+</ol>
+</section>
+<section id="文献谱系" class="level2">
+<h2 class="anchored" data-anchor-id="文献谱系">文献谱系</h2>
+<p>前作：Pearl（2001）——Def 1–4 与中介公式 (7)(8) 的直接出处；Pearl（2009《Causality》）——do-算子与图语言；Simpson（1951）、Hernán et al.（2011）、Pearl（2013, 2014）——悖论的因果解释传统，§VII.A 据此论证「悖论只能在因果模型内消解」；Bickel et al.（1975，伯克利招生）——§IV.H 以之展示同一工具在算法公平性中的角色（系别选择作中介，44% 对 35% 的表面性别偏差经中介分析逆转）；Kilbertus et al.（2017）、Kusner et al.（2017）——路径特定反事实公平性；Mackenzie（2020）——美国种族与新冠死亡率的同型悖论（种族为共同原因，脚注 1）；Schölkopf et al.（2012，站内 1206.6471）——§VII.B「机制稳定故可迁移、监督学习依赖虚假相关」论证的根据；Bareinboim &amp; Tian（2015）、Correa et al.（2019）——选择偏差恢复，指出的补救方向；Wu &amp; McGoogan（2020）与 ISS 通报——中意数据源；Verity et al.（2020）、Russell et al.（2020）、Rinaldi &amp; Paradisi（2020）——IFR 估计来源（附录 C）。后续：Besserve et al.（2020，arXiv:2012.01912）——同组对各国检测策略建模的跨国分析，被 §VII.B 引为先写因果模型再用 AI 的例证。</p>
+</section>
+<section id="明确不覆盖" class="level2">
+<h2 class="anchored" data-anchor-id="明确不覆盖">明确不覆盖</h2>
+<p>不建模感染与传播过程（只在「已检测阳性」条件下谈病死）；不处理患者级协变量（合并症、性别等）；不评估具体政策或治疗的效应（NDE 只是聚合量）；不自行估计未检测感染数（只在附录示范借用他人 IFR 模型）；不做预测或动力学建模（每快照为横断面比较）；不讨论年龄之外的中介变量。</p>
+</section>
+<section id="阅读路径" class="level2">
+<h2 class="anchored" data-anchor-id="阅读路径">阅读路径</h2>
+<p>先读 §II + Fig 1 与 Table III（悖论原始数据）；§III 的 Fig 2 与因果充分性小节是全部假设所在；§IV 按 Def 1 → Def 2 → Def 3/4 → 式 (5)–(8) → §IV.G（不可加性）顺序，再用附录 B 对着 Table III 手算四个量最有助于理解；§V.A 数据 → §V.B Fig 3（核心结果）→ §V.C Fig 4/5；§VI 的三小节局限比结论更重要；§VII 面向 AI 社群，可略读。姊妹篇对照：arXiv:2007.11896（Mastakouri &amp; Schölkopf，德国 Covid 传播的时序因果分析，同组「因果推断用于新冠」路线）；arXiv:2012.01912（检测策略建模）；站内 1206.6471（§VII.B 机制可迁移论证的原始出处）。</p>
+</section>
+<section id="术语对照" class="level2">
+<h2 class="anchored" data-anchor-id="术语对照">术语对照</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>中文</th>
+<th>English</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>病死率 / 病例病死率</td>
+<td>case fatality rate (CFR)</td>
+</tr>
+<tr class="even">
+<td>感染病死率</td>
+<td>infection fatality rate (IFR)</td>
+</tr>
+<tr class="odd">
+<td>中介分析</td>
+<td>mediation analysis</td>
+</tr>
+<tr class="even">
+<td>总因果效应</td>
+<td>total causal effect (TCE)</td>
+</tr>
+<tr class="odd">
+<td>受控直接效应</td>
+<td>controlled direct effect (CDE)</td>
+</tr>
+<tr class="even">
+<td>自然直接效应</td>
+<td>natural direct effect (NDE)</td>
+</tr>
+<tr class="odd">
+<td>自然间接效应</td>
+<td>natural indirect effect (NIE)</td>
+</tr>
+<tr class="even">
+<td>中介公式</td>
+<td>mediation formula</td>
+</tr>
+<tr class="odd">
+<td>调节 / 交互</td>
+<td>moderation / interaction</td>
+</tr>
+<tr class="even">
+<td>因果充分性</td>
+<td>causal sufficiency</td>
+</tr>
+<tr class="odd">
+<td>辛普森悖论</td>
+<td>Simpson’s paradox</td>
+</tr>
+<tr class="even">
+<td>病例人口学</td>
+<td>case demographic</td>
+</tr>
+<tr class="odd">
+<td>应对方式</td>
+<td>approach</td>
+</tr>
+<tr class="even">
+<td>选择偏差</td>
+<td>selection bias</td>
+</tr>
+<tr class="odd">
+<td>减法原则</td>
+<td>subtractivity principle</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="来源定位" class="level2">
+<h2 class="anchored" data-anchor-id="来源定位">来源定位</h2>
+<p><code>papers/2005.07180.pdf</code>（28 页，v3 期刊版）。关键内容：悖论数据 Fig 1 §II（p.2）与 Table III 附录 D（p.17）；因果图 Fig 2 与假设 §III（p.3）；Def 1–4 与式 (1)–(8) §IV（p.4–5）；数据集 §V.A（p.5）；时间追踪 Fig 3 §V.B（p.6）；132 对比较 Fig 4/5 §V.C（p.6–8）；局限 §VI 与选择偏差图 Fig 6（p.7–8）；识别性与减法原则附录 A（p.13）；手算例子附录 B（p.13–14）；IFR 附录 C 与 Table I/II（p.14–16）；西班牙演化附录 E.1（p.19）。</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "已复制");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "已复制");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

@@ -1,0 +1,4 @@
+From Ordinary Differential Equations to Structural Causal Models: the deterministic case
+Joris M. Mooij, Dominik Janzing, Bernhard Schölkopf
+2013-04-30
+We show how, and under which conditions, the equilibrium states of a first-order Ordinary Differential Equation (ODE) system can be described with a deterministic Structural Causal Model (SCM). Our exposition sheds more light on the concept of causality as expressed within the framework of Structural Causal Models, especially for cyclic models.

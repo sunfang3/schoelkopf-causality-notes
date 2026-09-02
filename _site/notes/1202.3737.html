@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN" xml:lang="zh-CN"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="只凭 P(X,Y) 判断两变量依赖来自直接因果边还是来自路径上的低值域隐变量，核心是条件分布在分布单纯形中的几何位置。">
+
+<title>用条件分布的纯性检测低复杂度隐原因 – Schölkopf 因果论文阅读站</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-66b4df7ba86f8287dc76b7fb130027a6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "没有结果",
+    "search-matching-documents-text": "匹配的文档",
+    "search-copy-link-title": "复制搜索链接",
+    "search-hide-matches-text": "隐藏其它匹配结果",
+    "search-more-match-text": "更多匹配结果",
+    "search-more-matches-text": "更多匹配结果",
+    "search-clear-button-title": "清除",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "取消",
+    "search-submit-button-title": "提交",
+    "search-label": "搜索"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Schölkopf 因果论文阅读站</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="搜索"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="展开或折叠导航栏" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">首页</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../schoelkopf-causality-arxiv-2008-2026.html"> 
+<span class="menu-text">全景（按年）</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../glossary.html"> 
+<span class="menu-text">术语表</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../notes.html"> 
+<span class="menu-text">逐篇笔记</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">用条件分布的纯性检测低复杂度隐原因</h1>
+<p class="subtitle lead">Janzing et al., arXiv:1202.3737 (2012)</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">因果推断</div>
+    <div class="quarto-category">隐混杂检测</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    只凭 P(X,Y) 判断两变量依赖来自直接因果边还是来自路径上的低值域隐变量，核心是条件分布在分布单纯形中的几何位置。
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">发布于</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">2012年2月14日</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="导览" class="level2">
+<h2 class="anchored" data-anchor-id="导览">导览</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>作者</td>
+<td>Dominik Janzing、Eleni Sgouritsa、Oliver Stegle（兼 MPI 发育生物学所）、Jonas Peters、Bernhard Schölkopf（均属 MPI for Intelligent Systems, Tübingen）</td>
+</tr>
+<tr class="even">
+<td>出处</td>
+<td>arXiv:1202.3737</td>
+</tr>
+<tr class="odd">
+<td>日期</td>
+<td>2012-02-14</td>
+</tr>
+<tr class="even">
+<td>页数</td>
+<td>9 页</td>
+</tr>
+</tbody>
+</table>
+<p>一句话定位：通过考察条件分布族 <span class="math inline">\(\{P(Y|x)\}\)</span> 在 Y 的分布单纯形（simplex）<span class="math inline">\(\mathcal{P}_Y\)</span> 中的位置（“纯性”）及其线性张成维数，仅凭观测分布 <span class="math inline">\(P(X,Y)\)</span> 判断 X 与 Y 之间是”直接”因果边还是所有因果路径上都含低复杂度（如二元）隐变量 Z。</p>
+</section>
+<section id="问题与模型" class="level2">
+<h2 class="anchored" data-anchor-id="问题与模型">问题与模型</h2>
+<p>研究问题源自统计遗传学：某 SNP 标记 X 与表型 Y 相关时，X 本身是因果的，还是仅仅与某个隐因果 SNP 连锁（<span class="math inline">\(X \leftrightarrow Z \to Y\)</span> 或 <span class="math inline">\(X \leftarrow Z \to Y\)</span>）。全文排除选择偏差情形；基本设定是区分 X→Y 与”因果路径上存在低值域（low range）变量 Z”两类。核心定义 1（纯条件分布，pure conditionals）：<span class="math inline">\(P(Y|X)\)</span> 称 k-wise pure，若任意 k 个不同 <span class="math inline">\(x\)</span> 对应的 <span class="math inline">\(P(Y|x)\)</span> 的任何含负系数的仿射组合都不是合法分布（必越出单纯形）；k=2 时称 pairwise pure。引理 1 给出可操作判据：pairwise pure 当且仅当对每对 <span class="math inline">\((x_1,x_2)\)</span>，<span class="math inline">\(\inf_y p(y|x_1)/p(y|x_2)=0\)</span>。</p>
+</section>
+<section id="主要命题" class="level2">
+<h2 class="anchored" data-anchor-id="主要命题">主要命题</h2>
+<p>支撑”纯性⇒直接因果”的两条工作假设：假设 1（因果相关性与纯性）——自然界多数因果机制产生纯条件分布，且即使另有含低值域变量的旁路，纯性仍可保持；假设 2（线性无关）——<span class="math inline">\(\{P(Y|x)\}\)</span> 张成空间的维数小于其个数是非常规（non-generic）的，需低维隐变量的因果解释。</p>
+<p>主要结果按论证顺序：</p>
+<ul>
+<li>引理 4：加性噪声模型（additive noise model, ANM）<span class="math inline">\(Y=f(X)+E\)</span>，f 单射且 <span class="math inline">\(d\log p(e)/de \to \pm\infty\)</span>（如高斯噪声）时 pairwise pure；<span class="math inline">\(\psi'\)</span> 有界则不纯。引理 5：等方差高斯条件分布 pure，一般高斯条件分布 one-sided pure。引理 6：纯性在 Y 的连续双射（后非线性变换）下不变。引理 7：同幂律尾部的条件分布不纯。</li>
+<li>引理 8（级联）：<span class="math inline">\(X \perp Y | Z\)</span> 时 <span class="math inline">\(P(Y|X)\)</span> 为 k-wise pure 蕴含 <span class="math inline">\(P(Z|X)\)</span> 也 k-wise pure——这是排除隐变量的桥梁。</li>
+<li>定理 1（排除有限 Z）：<span class="math inline">\(P(Y|X)\)</span> pairwise pure 时不存在值域满足 <span class="math inline">\(m(|Z|)&lt;|X|\)</span> 的 Z 使 <span class="math inline">\(X \perp Y|Z\)</span>，其中 m(k) 是反链最大规模；例如 X 为两个二元变量时无二元 Z 可作解释。</li>
+<li>定理 2（紧值域 Z）：pairwise pure 排除任何紧值域、条件密度连续严格正的 Z。</li>
+<li>定理 3（重构二元隐原因）：若二元 Z 使 <span class="math inline">\(X \perp Y|Z\)</span> 且 <span class="math inline">\(P(Y|Z)\)</span> pairwise pure，则 <span class="math inline">\(P(X,Z,Y)\)</span> 由 <span class="math inline">\(P(X,Y)\)</span> 唯一确定（至多翻转 Z）。</li>
+<li>维数方面：引理 10 / 推论 2：<span class="math inline">\(X \perp Y|Z\)</span> 蕴含凸维数 <span class="math inline">\(D^c(P(Y|X)) \le \min\{D^c(P(Y|Z)), D^c(P(Z|X))\} \le |Z|\)</span>；引理 11：k-wise pure 蕴含张成维数至少为 k。</li>
+</ul>
+</section>
+<section id="估计与实验" class="level2">
+<h2 class="anchored" data-anchor-id="估计与实验">估计与实验</h2>
+<p>有限样本上用高斯核密度估计 <span class="math inline">\(\hat P(Y|x)\)</span>，在观测值区间等距格点 <span class="math inline">\(\Psi\)</span> 上计算 purity ratio <span class="math inline">\(= \max_{(x,x')}\min_{y\in\Psi} \hat p(y|x)/\hat p(y|x')\)</span>；维数估计借助分布的 RKHS 嵌入（核嵌入）得到 Gram 矩阵 <span class="math inline">\(\hat M\)</span> 并估计其秩。实验一（合成）：X、Z 均二元、Y 连续，各 1000 次模拟、每次 1000 样本；X→Y（ANM、双峰混合高斯噪声）时 purity ratio 多小于 0.1，X←Z→Y 时显著更大；另演示了按定理 3 重构 <span class="math inline">\(P(Y|Z)\)</span>。实验二（半经验）：基于拟南芥 250K SNP 芯片、1200 个真实样本的 SNP 联合分布，模拟表型，各生成 1000 对因果/非因果 SNP-表型对；在中等损坏水平（corruption level）区间上 purity 的 ROC-AUC 一致高于相关系数 <span class="math inline">\(r^2\)</span>，强相关非因果 SNP 不产生纯性假阳性；损坏为 0（确定性耦合）或 0.5（无相关）时两法均无区分力。</p>
+</section>
+<section id="开放问题" class="level2">
+<h2 class="anchored" data-anchor-id="开放问题">开放问题</h2>
+<ol type="1">
+<li>作者自陈：需要发展 purity ratio 的高效估计器——现有核密度估计在格点 <span class="math inline">\(\Psi\)</span> 上取比值，纯性本质依赖分布尾部（引理 4、7），而高斯核恰好抹平尾部，统计性质未给出有限样本保证；基于 VC 维的精确界被作者省略，因其所需样本量超出实际。</li>
+<li>假设 1 只是被”若干理论结果支持”的工作假设，非定理：引理 9 已表明直接因果边也可不纯（存在旁路时），反向蕴含（纯⇒直接）只是证据性论证，没有错误率的任何界。</li>
+<li>假设 2（线性相关非常规）同样未形式化：引理 10 只给单边不等式，低维张成还可来自阈值机制等非隐变量原因，“维数低⇒隐变量”的推断缺乏识别性定理。</li>
+<li>经验验证空白：实验全部为模拟或半模拟（真实 SNP 边际 + 模拟表型），无真实已知因果 SNP 的验证；多变量 SNP（X 为 SNP 集合）情形只有定理 1 的排除性结论，无对应算法。</li>
+<li>后续文献指出的问题方向：此类”仅凭 P(X,Y) 检测混杂”的方法对测量模型敏感——若 X 与 Z 的耦合接近确定（文中 corruption→0 即失效），任何方法都不可识别，这是 Reichenbach 二分法固有的不可识别区，本文只给出经验上的失效区间描述而无理论刻画。</li>
+</ol>
+</section>
+<section id="文献谱系" class="level2">
+<h2 class="anchored" data-anchor-id="文献谱系">文献谱系</h2>
+<ul>
+<li>Reichenbach (1956)：三元二分法（X→Y / Y→X / 共同原因）作为问题的出发点。</li>
+<li>Hoyer et al.&nbsp;(2009)：非线性 ANM 因果发现，本文引理 4 论证”ANM 机制产生纯条件分布”的理论基石。</li>
+<li>Shimizu et al.&nbsp;(2009)：线性非高斯隐因子模型，作为已知隐混杂检测方法的对照。</li>
+<li>Janzing et al.&nbsp;(UAI 2009)：用 ANM 识别隐混杂，本文的直接前驱之一。</li>
+<li>Zhang &amp; Hyvärinen (2009)：后非线性模型，本文引理 6 说明纯性对后非线性变换不变，从而将其纳入框架。</li>
+<li>Smola et al.&nbsp;(2007)、Schölkopf &amp; Smola (2002)：分布的 RKHS 嵌入与核方法，提供维数估计工具。</li>
+<li>Platt et al.&nbsp;(2010)：GWAS 中相关性会”正向误导”的研究，本文半经验实验设计（corruption level）直接沿用其思路。</li>
+<li>Vapnik (1998)：VC 学习理论，支撑未展开的有限样本 purity 检验。</li>
+</ul>
+</section>
+<section id="明确不覆盖" class="level2">
+<h2 class="anchored" data-anchor-id="明确不覆盖">明确不覆盖</h2>
+<p>不处理方向未知的情形（默认时间序或先验知识排除 Y→X）；不处理选择偏差；不处理 X 与 Z 确定性耦合的不可识别区；不涉及三个及以上观测变量的因果图；未给出纯性检验的严格统计检验水平控制。</p>
+</section>
+<section id="阅读路径" class="level2">
+<h2 class="anchored" data-anchor-id="阅读路径">阅读路径</h2>
+<p>先读第 2 节（定义 1、假设 1 与引理 4–8，纯性概念的动机与性质），再读引理 8 + 定理 1–3（排除与重构隐变量的逻辑链），第 3 节（维数）可略读，第 4–5 节看估计与半经验实验。可与 Janzing et al.&nbsp;(UAI 2009, arXiv:0904.3678 同期工作) 对照”检测隐混杂”的两条路线，也可与同组 arXiv:1202.3757（IFMOC 全图识别）对读，理解”直接边检测”在更大因果发现版图中的位置。</p>
+</section>
+<section id="术语对照" class="level2">
+<h2 class="anchored" data-anchor-id="术语对照">术语对照</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>中文</th>
+<th>English</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>纯条件分布</td>
+<td>pure conditionals</td>
+</tr>
+<tr class="even">
+<td>单侧成对纯性</td>
+<td>one-sided pairwise purity</td>
+</tr>
+<tr class="odd">
+<td>分布单纯形</td>
+<td>simplex of distributions</td>
+</tr>
+<tr class="even">
+<td>低值域隐变量</td>
+<td>low range (unobserved) variable</td>
+</tr>
+<tr class="odd">
+<td>加性噪声模型</td>
+<td>additive noise model (ANM)</td>
+</tr>
+<tr class="even">
+<td>后非线性模型</td>
+<td>post-nonlinear model</td>
+</tr>
+<tr class="odd">
+<td>纯性比</td>
+<td>purity ratio</td>
+</tr>
+<tr class="even">
+<td>核嵌入 / RKHS</td>
+<td>kernel embedding / reproducing kernel Hilbert space</td>
+</tr>
+<tr class="odd">
+<td>凸维数</td>
+<td>convex dimension (<span class="math inline">\(D^c\)</span>)</td>
+</tr>
+<tr class="even">
+<td>损坏水平</td>
+<td>corruption level</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="来源定位" class="level2">
+<h2 class="anchored" data-anchor-id="来源定位">来源定位</h2>
+<p>来源：<code>papers/1202.3737.pdf</code>。关键结果原文编号：定义 1、假设 1–2、引理 1/4/8、定理 1（排除有限 Z）、定理 2（紧值域 Z）、定理 3（重构二元隐原因）、引理 10 与推论 2（维数上界）；实验图为 Figure 3（合成 purity ratio 直方图与重构）、Figure 4（purity 对 <span class="math inline">\(r^2\)</span> 散点）、Figure 5（AUC 随 corruption level 变化）。</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "已复制");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "已复制");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

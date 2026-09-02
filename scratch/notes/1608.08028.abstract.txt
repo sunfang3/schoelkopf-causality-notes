@@ -1,0 +1,4 @@
+From Deterministic ODEs to Dynamic Structural Causal Models
+Paul K. Rubenstein, Stephan Bongers, Bernhard Schoelkopf, Joris M. Mooij
+2016-08-29
+Structural Causal Models are widely used in causal modelling, but how they relate to other modelling tools is poorly understood. In this paper we provide a novel perspective on the relationship between Ordinary Differential Equations and Structural Causal Models. We show how, under certain conditions, the asymptotic behaviour of an Ordinary Differential Equation under non-constant interventions can be modelled using Dynamic Structural Causal Models. In contrast to earlier work, we study not only the effect of interventions on equilibrium states; rather, we model asymptotic behaviour that is dynamic under interventions that vary in time, and include as a special case the study of static equilibria.

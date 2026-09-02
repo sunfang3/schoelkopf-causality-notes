@@ -1,0 +1,4 @@
+Algorithmic independence of initial condition and dynamical law in thermodynamics and causal inference
+Dominik Janzing, Rafael Chaves, Bernhard Schoelkopf
+2015-12-07
+We postulate a principle stating that the initial condition of a physical system is typically algorithmically independent of the dynamical law. We argue that this links thermodynamics and causal inference. On the one hand, it entails behaviour that is similar to the usual arrow of time. On the other hand, it motivates a statistical asymmetry between cause and effect that has recently postulated in the field of causal inference, namely, that the probability distribution P(cause) contains no information about the conditional distribution P(effect|cause) and vice versa, while P(effect) may contain information about P(cause|effect).

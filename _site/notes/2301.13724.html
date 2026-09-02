@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN" xml:lang="zh-CN"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="凡表示数据涉及研究者任意选择（坐标系、单位、规范），学习方法就应精确等变于这些选择。以黑体辐射与弹簧双摆玩具实验演示：施加被动对称可让模型从数据中发现隐藏对象（普朗克常数、重力向量），并有利于分布外泛化。">
+
+<title>完全协变机器学习：把物理学的被动对称性引入数据分析 – Schölkopf 因果论文阅读站</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-66b4df7ba86f8287dc76b7fb130027a6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "没有结果",
+    "search-matching-documents-text": "匹配的文档",
+    "search-copy-link-title": "复制搜索链接",
+    "search-hide-matches-text": "隐藏其它匹配结果",
+    "search-more-match-text": "更多匹配结果",
+    "search-more-matches-text": "更多匹配结果",
+    "search-clear-button-title": "清除",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "取消",
+    "search-submit-button-title": "提交",
+    "search-label": "搜索"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Schölkopf 因果论文阅读站</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="搜索"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="展开或折叠导航栏" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">首页</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../schoelkopf-causality-arxiv-2008-2026.html"> 
+<span class="menu-text">全景（按年）</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../glossary.html"> 
+<span class="menu-text">术语表</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../notes.html"> 
+<span class="menu-text">逐篇笔记</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">完全协变机器学习：把物理学的被动对称性引入数据分析</h1>
+<p class="subtitle lead">Soledad Villar et al., arXiv:2301.13724 (2023)</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">因果推断</div>
+    <div class="quarto-category">等变机器学习</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    凡表示数据涉及研究者任意选择（坐标系、单位、规范），学习方法就应精确等变于这些选择。以黑体辐射与弹簧双摆玩具实验演示：施加被动对称可让模型从数据中发现隐藏对象（普朗克常数、重力向量），并有利于分布外泛化。
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">发布于</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">2023年1月31日</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="导览" class="level2">
+<h2 class="anchored" data-anchor-id="导览">导览</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>作者</td>
+<td>Soledad Villar（Johns Hopkins 应用数学系）、David W. Hogg（NYU 物理系 / MPI for Astronomy；与 Villar 共同一作）、Weichi Yao（NYU Stern）、George A. Kevrekidis（JHU / Los Alamos）、Bernhard Schölkopf（MPI-IS Tübingen）</td>
+</tr>
+<tr class="even">
+<td>出处</td>
+<td>arXiv:2301.13724 [stat.ML]（v1 2023-01-31，v2 2023-06-28）；投 TMLR（“Under review”）</td>
+</tr>
+<tr class="odd">
+<td>日期</td>
+<td>2023-01-31</td>
+</tr>
+<tr class="even">
+<td>页数</td>
+<td>20 页（正文 15 页 + 参考文献 3 页 + 附录 A 双摆实验细节 2 页）</td>
+</tr>
+</tbody>
+</table>
+<p>一句话定位：概念性（conceptual）论文——物理学的被动对称性（passive symmetry）：坐标自由、规范自由、单位协变（units covariance）——在几乎所有数据分析问题中在场却被机器学习普遍忽视，把这类「真 by definition」的精确对称加进模型结构，可以揭示隐藏对象并帮助分布外（OOD）泛化。</p>
+</section>
+<section id="问题与模型" class="level2">
+<h2 class="anchored" data-anchor-id="问题与模型">问题与模型</h2>
+<p>研究问题：等变机器学习（equivariant ML）文献几乎都在建模<strong>主动对称</strong>（active symmetry），即须经实验确立的经验不变性（如旋转平移不变，对应 Noether 守恒律）；而源于表示任意性的<strong>被动对称</strong>是精确的、无需观察即可确立，却只在图节点重标记等少数场合被实现。关键定义（第 2、5 节）：等变为交换图 (1)：<span class="math inline">\(f(\rho_X(g)(x))=\rho_Y(g)(f(x))\)</span>；形式化时设物理态空间 <span class="math inline">\(\mathcal X\)</span>、编码 <span class="math inline">\(\Phi_i:\mathcal X\to\mathcal H\)</span>，若每个编码记录全部必要信息，则任意两编码间存在可逆态射 <span class="math inline">\(\beta_{ji}\)</span> 使图 (2) 交换，被动对称群 <span class="math inline">\(P\)</span> 即这些 <span class="math inline">\(\beta_{ji}\)</span> 全体；主动对称则要求四元组 <span class="math inline">\((G,F,\beta,\rho)\)</span> 使图 (3) 交换，且对应于对系统施加干预（alias 与 alibi 变换之别）。术语约定：「等变」留给主动对称，「协变」（covariance）指被动对称。</p>
+</section>
+<section id="识别或主要命题" class="level2">
+<h2 class="anchored" data-anchor-id="识别或主要命题">识别或主要命题</h2>
+<p>无编号定理，核心是第 5 节的定义与第 11 节的论证链。（i）被动对称适用于几乎一切学习问题（凡数据表示含研究者选择），其施加可发现标度律、结构或缺失要素。（ii）关键结构论断：若真被动群为 <span class="math inline">\(G\)</span> 而问题表述缺要素 <span class="math inline">\(K\)</span>（如普朗克常数、重力向量），实际成立的对称只是 <span class="math inline">\(G\)</span> 中固定 <span class="math inline">\(K\)</span> 的子群 <span class="math inline">\(H\)</span>；把 <span class="math inline">\(K\)</span> 补入输入并强制全群 <span class="math inline">\(G\)</span> 等变，分布内表现与只施加 <span class="math inline">\(H\)</span> 无差别，却能外推到 <span class="math inline">\(K\)</span> 改变的场景——这是被动对称利于 OOD 泛化的机制。（iii）与因果的联结（第 7 节）：因果图与机制模型必须与被动对称一致；量纲分析可<strong>无数据、无干预</strong>地排除因果箭 <span class="math inline">\(m\to L\)</span>（抛体问题中只剩 <span class="math inline">\(v,\theta\)</span> 导致 <span class="math inline">\(L\)</span>）；但「相关输入是否列全」本身是因果假设，其确认与找混杂的干预式推断同构；主动对称即「干预下的预测」。（iv）dos/don’ts（第 9–10 节）：混合单位特征上 PCA「量纲无效」（MacKay 引语）；核方法与高斯过程须单位协变；标量目标中向量参数只能经欧氏范数组合；超越函数只能作用于无量纲标量（ReLU 的齐次性是例外）；<span class="math inline">\(L_1/L_\infty\)</span> 与平坦极小值正则常不协变；数据/批/层归一化普遍破坏协变，应改为向量自点积、张量谱范数、按单位分组求 <span class="math inline">\(\mu,\sigma\)</span>。</p>
+</section>
+<section id="估计经验" class="level2">
+<h2 class="anchored" data-anchor-id="估计经验">估计/经验</h2>
+<p>两个玩具实验（图 2）。黑体辐射：按 Planck 公式 (4) 生成加噪样本，学 3 层 20 隐单元网络预测强度。仅用 <span class="math inline">\(\lambda,T,c,k\)</span> 的单位协变回归无法拟合（RMSE 6.35）；允许额外引入一个量纲常数（量纲指数取自 <span class="math inline">\([-1,0,1]^4\)</span>，交叉验证选择）后，模型找到 <span class="math inline">\(1.61\times10^{52}\,\mathrm{kg^{-1}m\,s\,K^{-1}}\)</span>——与物理组合 <span class="math inline">\(ck/h^2\)</span> 同单位、同量级，RMSE 降至 0.39，优于无约束 MLP 的 0.64：从数据「重新发现」普朗克常数。弹簧双摆：<span class="math inline">\(O(3)\)</span> 等变模型按 Ricci 演算把输入化为不变标量；<span class="math inline">\(N=500\)</span> 个初始条件训练（标签为 <span class="math inline">\(T=5\)</span> 个时刻的状态），测试 <span class="math inline">\(T=150\)</span>；对比 Known-g / No-g / Learned-g，Learned-g 把一个未知向量作为可学输入，其与真实重力向量的夹角最终为 0.00016 弧度——施加被动对称让模型学出了缺失的隐藏向量且性能几乎不受损。</p>
+</section>
+<section id="开放问题" class="level2">
+<h2 class="anchored" data-anchor-id="开放问题">开放问题</h2>
+<ol type="1">
+<li><strong>自认概念性工作</strong>：只以玩具例子演示，未在大规模任务验证「施加被动对称改善学习」这一猜想。</li>
+<li><strong>完备性与可实现性双重难题</strong>（自认）：精确被动对称要求所有相关量（含基本常数）都进入模型，缺常数时出现可辨识性问题；完备微分同胚、问题重参数化对应的巨大群也难以在现实 ML 中实现，已实现的只是平移、旋转、置换、换单位等子集。</li>
+<li><strong>观察者对称（observer symmetry）留白</strong>（自认）：拍摄条件（相机位姿、曝光、对焦）近似不改变图像语义，或可解释 CNN 卷积结构的成功，但变换不可逆、无群结构，作者明言留待后续而无理论。</li>
+<li><strong>本人识别</strong>：主动对称侧已有严格泛化收益理论（Elesedy &amp; Zaidi 2021 等），而「被动对称 ⟹ OOD 泛化」仍停留在子群 <span class="math inline">\(H\)</span> 论证，无样本复杂度或近似论层面的定量结果。</li>
+<li><strong>本人识别</strong>：量纲分析排除 <span class="math inline">\(m\to L\)</span> 依赖「相关变量已列全」这一经验因果假设，文中承认其与混杂问题同源，却未给出从有限数据检验该假设的方法。</li>
+<li><strong>本人识别</strong>：归一化的协变化方案（张量谱范数、按单位优化基准尺度 <span class="math inline">\(L,T\)</span>）无实验验证，作者自注谱范数昂贵、尺度优化随基本单位数增长而变难，工程可行性悬而未决。</li>
+</ol>
+</section>
+<section id="文献谱系" class="level2">
+<h2 class="anchored" data-anchor-id="文献谱系">文献谱系</h2>
+<p>物理源头：Einstein (1915/1916) 广义协变性是「用被动对称约束定律形式」的历史模板；Noether (1918) 刻画主动对称与守恒律；Weyl (1946) 与 Thorne &amp; Blandford (2017) 的 Geometric Principle 提供开篇引语。几何深度学习（Bronstein et al.&nbsp;2021；Weiler et al.&nbsp;2021 的规范等变 CNN）被指为主要处理主动对称；GNN/消息传递（Bruna et al.&nbsp;2013、Gilmer et al.&nbsp;2017）是被动重标记对称的现成实现，CNN 平移结构（LeCun et al.&nbsp;1989）被重新解读为近似被动。单位协变机器学习是直接技术基础：Villar et al.&nbsp;(2021)（不变标量构造等变函数）、Villar et al.&nbsp;(2022)（量纲机器学习，黑体实验用其方法）、Bakarji et al.&nbsp;(2022)、Xie et al.&nbsp;(2022)；双摆玩具承 Finzi et al.&nbsp;(2021) 与 Yao et al.&nbsp;(2021)。因果侧：Peters et al.&nbsp;(2017)《Elements》是第 7 节框架来源，Rojas-Carulla et al.&nbsp;(2018) 提供定性迁移的呼应。可辨识性桥接：Khemakhem et al.&nbsp;(2020) 与 Buchholz et al.&nbsp;(2022) 的非线性 ICA 潜变量置换/旋转/逐坐标重参数化被点名为待正确处理的被动规范自由；Elesedy &amp; Zaidi (2021)（主动等变的严格泛化收益）反衬被动侧缺理论；归一化批判承 Aalto et al.&nbsp;(2022)。站内对照：2102.11107 是同一「不变性即先验」纲领在表示学习侧的宣言；2207.09944 把「域=干预」变成可优化的风险准则。</p>
+</section>
+<section id="明确不覆盖" class="level2">
+<h2 class="anchored" data-anchor-id="明确不覆盖">明确不覆盖</h2>
+<p>不处理数据增强式的近似对称（只谈精确对称）；不学习因果关系（被动对称只约束因果模型的形式）；主动对称的实证确立不在范围；无大规模基准实验；观察者对称只有提议无理论；不涉及离散/非欧数据的特殊协变结构。</p>
+</section>
+<section id="阅读路径" class="level2">
+<h2 class="anchored" data-anchor-id="阅读路径">阅读路径</h2>
+<p>先读 §1–§2（引言与物理/ML 术语对照表，被动 vs 主动、alias vs alibi 的区分）；§3 图 1 与 §4 抛体例子（量纲分析几乎完全决定物理规律）；§5 式 (2)(3) 是形式化核心；§6 图 2 两个玩具实验（常数与向量分别对应两类「隐藏对象」）；§7 因果联结；§9–§10 dos/don’ts 与归一化改造；§11 子群 <span class="math inline">\(H\)</span> 论断与观察者对称。姊妹篇对照：2102.11107（因果表示学习——把同一纲领延伸到潜变量与表示，本文 ICA 规范自由一节与之直接呼应）；2207.09944（概率域泛化——同以 OOD 泛化为目标、同样诉诸「域=干预」，可视为本文几何论证的统计对照）。</p>
+</section>
+<section id="术语对照" class="level2">
+<h2 class="anchored" data-anchor-id="术语对照">术语对照</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>中文</th>
+<th>English</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>被动对称</td>
+<td>passive symmetry</td>
+</tr>
+<tr class="even">
+<td>主动对称</td>
+<td>active symmetry</td>
+</tr>
+<tr class="odd">
+<td>协变</td>
+<td>covariance</td>
+</tr>
+<tr class="even">
+<td>坐标自由</td>
+<td>coordinate freedom</td>
+</tr>
+<tr class="odd">
+<td>规范自由</td>
+<td>gauge freedom</td>
+</tr>
+<tr class="even">
+<td>单位协变</td>
+<td>units covariance</td>
+</tr>
+<tr class="odd">
+<td>量纲分析</td>
+<td>dimensional analysis</td>
+</tr>
+<tr class="even">
+<td>别名变换 / 位置变换</td>
+<td>alias / alibi transformation</td>
+</tr>
+<tr class="odd">
+<td>Ricci 演算</td>
+<td>Ricci calculus</td>
+</tr>
+<tr class="even">
+<td>一般协变性</td>
+<td>general covariance</td>
+</tr>
+<tr class="odd">
+<td>观察者对称</td>
+<td>observer symmetry</td>
+</tr>
+<tr class="even">
+<td>群作用</td>
+<td>group action</td>
+</tr>
+<tr class="odd">
+<td>不变标量</td>
+<td>invariant scalars</td>
+</tr>
+<tr class="even">
+<td>等变机器学习</td>
+<td>equivariant machine learning</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="来源定位" class="level2">
+<h2 class="anchored" data-anchor-id="来源定位">来源定位</h2>
+<p><code>papers/2301.13724.pdf</code>（20 页）。被动/主动对称形式化（式 2、3）见 §5 p.8；Planck 公式 (4) p.9；图 2 两个实验与 RMSE、夹角数值 p.10（附录 A 双摆方程式 6–12 与 <span class="math inline">\(N=500\)</span> 设定在 p.19–20）；§7 因果联结 p.11；§9 dos/don’ts p.12–13；§10 归一化 p.14；§11 子群 <span class="math inline">\(H\)</span> 论断与观察者对称 p.15。</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "已复制");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "已复制");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
