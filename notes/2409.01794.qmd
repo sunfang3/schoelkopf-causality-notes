@@ -1,0 +1,80 @@
+---
+title: "i-CMAXENT：从边际干预数据估计联合干预分布"
+subtitle: "Sergio Hernan Garrido Mejia et al., arXiv:2409.01794 (2024)"
+description: "把因果最大熵（CMAXENT）扩展为可吸收干预约束的 i-CMAXENT，在因果边际问题设定下从单变量干预数据同时做父结点发现与联合干预分布估计；证明解仍属指数族。"
+date: 2024-09-03
+categories: [因果推断, 因果边际问题, 数据融合]
+paper-id: 2409.01794
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Sergio Hernan Garrido Mejia（MPI IS, Tübingen）、Elke Kirschbaum*（Amazon, Tübingen）、Armin Kekić*（MPI IS）、Bernhard Schölkopf（MPI IS / ELLIS Institute Tübingen）、Atalanti Mastakouri（Amazon, Tübingen）；*共同贡献 |
+| 出处 | arXiv:2409.01794 [stat.ME]，v1 2024-09-03，v2 2026-04-17；CLeaR 2026（PMLR 323:1–23） |
+| 日期 | 2024-09-03 |
+| 页数 | 23 页（正文 12 页 + 文献 + 附录 A–F） |
+
+一句话定位：当多个独立实验各自只干预并观测变量的子集时，本文把干预期望作为约束并入最大条件熵问题，证明解仍在指数族中，从而在边际数据下完成父结点发现与联合干预分布 $p(Y\mid \mathrm{do}(X_1,\dots,X_d))$ 的估计。
+
+## 问题与模型
+
+研究问题：联合干预试验的组合数随处理数指数增长（药物相互作用、肥料组合两例为动机），研究者往往只有观测数据加单变量干预数据，且不同研究不共享全部变量——即因果边际问题（causal marginal problem）。要做的两件事：(i) 从单变量干预估计联合干预分布；(ii) 在边际设定下发现 $Y$ 的真实因果父结点。
+
+模型：潜在原因 $X=\{X_1,\dots,X_D\}$、效应 $Y$；约束由三类可测函数给出——边际函数 $f_k:\mathcal Y\times\mathcal X_{S_k}\to\mathbb R$、条件函数 $g_j$、干预函数 $h_l$（干预集 $S^I_l$、条件集 $S^C_l$，$S^I_l\cap S^C_l=\varnothing$），各配经验平均 $\tilde f_k,\tilde g_j,\tilde h_l$。假设：**假设 5** 弱因果充分性（weak causal sufficiency，$Y$ 与 $X$ 间无隐混杂，$X$ 内部允许）；**假设 6** 正定性 $p(x)>0$；**假设 7** 忠实 f-期望（faithful $f$-expectations）：对任何 Markov 于 $\mathcal G$ 的 $Q$，$\lambda^{Q,f_k}\neq 0\Rightarrow\lambda^{P,f_k}\neq 0$，即 MAXENT 投影空间中的依赖反映原空间的依赖。核心机制：若干预密度 $p(Y\mid \mathrm{do}(X^{S^I_l}),X^{S^C_l})$ 可用图方法非参数识别，则其期望可写成观测分布的泛函，于是干预数据可以作为约束进入优化。
+
+## 识别或主要命题
+
+- **命题 1**（非参数识别，观测数据组合）：二元变量、$p(x)>0$ 时，仅用 $p(X)$ 与 $p(Y\mid X_i)$（$i=1,2$）即可识别 $p(Y\mid \mathrm{do}(X_1,X_2))$——证明是 4 个方程解 4 个未知数的递推消元；**注 2** 指出无需假设 $X_i$ 不导致 $X_j$。用识别引擎（Tikka et al. 2021）验证该分布在 do-演算下不可识别，说明此结果超出了经典可识别性框架。
+- **推论 3/4**：单变量干预数据 $p(Y\mid \mathrm{do}(X_i))$（各自可识别时）同样够用；四变量时混合使用 $p(X)$、$p(Y\mid X_i)$、$p(Y\mid \mathrm{do}(X_i))$（后门准则识别）仍可识别 $p(Y\mid\mathrm{do}(X))$。变量更多时未知数指数增长而方程线性增长——这正是需要最大熵归纳偏置的理由。
+- **定理 8**（i-CMAXENT 的指数族解）：在问题 (1) 上加入干预约束 (4) 后，对偶解 (5) 仍为指数族：$p_\lambda(y\mid x)=\exp\{\sum_k\lambda_k f_k+\sum_j\sum_{x_{S_j}}\lambda_j^{x_{S_j}}g_j+\sum_l\sum_{x^{I_l},x^{C_l}}\lambda_l^{x^{I_l},x^{C_l}}h_l+\beta(x)\}$，即干预约束只是新增一族乘子，解的形式不变。
+- **命题 9**（仅有入边的变量的可识别性与调整集）：若 $X_j$ 在候选集中的唯一子结点至多为 $Y$，则 $p(Y\mid\mathrm{do}(X_j))$ 可识别且 $X\setminus X_j$ 为有效调整集（引 Tian–Pearl 2002 定理 2）。这使使用者只看 $X$ 内部的箭头（不必知道 $X\to Y$ 的边）就能判断哪些干预数据可用。
+- 父结点发现：在假设 7 下由乘子读出因果边，用相对差异估计量 $\theta_i=(\lambda^1_i-\lambda^2_i)/\max\{|\lambda^1_i|,|\lambda^2_i|,\lambda^1_i-\lambda^2_i,1\}$ 构造 ROC。
+
+## 估计/经验
+
+估计即对偶的范数最小化 $\lambda=\arg\min_\lambda\lVert\tilde f_k-\mathbb E_{p_\lambda}[f_k]\rVert$（式 28），JAX 中 BFGS 求解。合成实验为三层结构（隐混杂 $U$、候选原因 $X$、效应 $Y$，图 2(a)–(c)），每结构 200 个随机图、每情形 100 个观测；对照的 KCI 检验获 1,000 个联合样本。亲代发现：i-CMAXENT（约束为 5 个 $p(Y\mid\mathrm{do}(X_i))$）一致优于 CMAXENT（约束为 $p(Y\mid X_i)$），在图 (a)(b) 上接近 KCI；干预信息只覆盖部分变量时性能随覆盖比例上升（图 3(d)–(f)）。联合干预分布：图 2(a) 上 200 个图、1,000 观测、五种约束组合（(i)–(v)），任何约束都改进估计，单变量干预或条件信息即可把残差压到约 5%（图 4）。
+
+## 开放问题
+
+1. **干预目标须已知（自认）**：约束必须写明对谁干预，这是最大熵框架的内在要求；ICP 式"干预发生过但目标未知"的稳健性本文不提供。
+2. **可识别性未解决（自认）**：并非所有联合条件分布都能被该方法识别；作者猜想 GAM 类函数形式约束（如 Kekić et al. 2025 的可加机制）或足以保证识别，未证。
+3. **干预信息与条件信息精度相近（自认/§8）**：联合干预分布任务中二者残差相当，方法优势仅在能直接吸收实验数据，经验增益有限。
+4. **无统计层（我识别）**：相对差异估计量无概率校准（附录 C 自认），ROC 阈值选取无理论；最大熵解的有限样本误差界完全没有。
+5. **维度与值域受限（我识别）**：全部实验为二元变量；指数族要遍历 $x$ 的支撑，$D$ 或基数增大时的可扩展性未讨论，$p(x)=0$ 时加机器精度再归一化的做法（附录 B）是权宜之计。
+6. **更难混杂设定未触及（我识别）**：假设 5 排除了 $X$ 与 $Y$ 之间的隐混杂；且命题 9 的使用需知道 $X$ 内部图结构（谁只有 $Y$ 这一个可能的子结点），部分图知识下如何运作未展开。
+
+## 文献谱系
+
+前作（角色）：Jaynes 1957、Berger et al. 1996、Wainwright et al. 2008——最大熵与指数族经典，定理 8 的模板；Sun et al. 2006、Janzing et al. 2009（arXiv:0910.5561，站内有笔记）、Janzing 2021——因果最大熵谱系；Garrido Mejia et al. 2022（CMAXENT，AISTATS）——直接前身，本文沿用其图结构、相对差异估计量与忠实 f-期望定义。Gresele et al. 2022（arXiv:2202.01300，站内有笔记）与 Sani et al. 2023——因果边际问题的另两支：前者图已知、聚焦反事实定界，本文做干预级推断且可用于亲代发现。联合干预效应识别：Bareinboim–Pearl 2012（z-识别）、Lee et al. 2020（g-识别）、Tikka et al. 2021（搜索引擎，§3 用其验证不可识别）；参数化路线 Saengkyongam–Silva 2020（非线性高斯）、Kekić et al. 2025（arXiv:2506.04945，站内有笔记，可加机制无偏估计）——本文卖点是不需这些分布/函数假设。ICP（Peters et al. 2016）与 JCI（Mooij et al. 2020）明确不能在边际设定运行，构成本文的空间；KCI（Zhang et al. 2011）为"若有联合数据"的基准；附录 F 对照 Zhang–Spirtes 2002/2008、Uhler et al. 2013、Olko et al. 2025 等各种忠实性定义。
+
+## 明确不覆盖
+
+不处理 $X$ 与 $Y$ 间有隐混杂的因果边际问题；不做连续或高基数变量（实验全部二元）；不给最大熵解本身的可识别性理论；不学习 $X$ 内部的因果图（命题 9 需要它作为输入）；无真实数据实验；不处理干预目标未知的数据（与 ICP 的分工）。
+
+## 阅读路径
+
+先读 §1 的药物/肥料动机；§3 很短但关键——命题 1 的"4 方程 4 未知数"与推论 4 后的计数论证解释了为何需要最大熵；§4 式 (1)–(2) 是 MAXENT 背景，可快读；§5 是全文核心，按"假设 5–7 → 式 (3)–(4) → 定理 8 → 命题 9"顺序读；§6–7 注意 KCI 被给了 1,000 个联合样本这一不对等比较；§8 局限务必读；附录 A 是证明，附录 F 是忠实性文献入口。姊妹篇对照：2202.01300（结构因果边际问题——同一问题在反事实层级的 LP 版，合读构成两级阶梯）；0910.5561（因果最大熵源头）；2506.04945（Kekić 可加模型估计器——"无函数假设的最大熵"与"可加假设的精确估计"两条路线之比）。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 因果最大熵 | Causal Maximum Entropy (CMAXENT) |
+| 干预型因果最大熵 | interventional-CMAXENT (i-CMAXENT) |
+| 因果边际问题 | causal marginal problem |
+| 最大条件熵 | maximum conditional entropy |
+| 弱因果充分性 | weak causal sufficiency |
+| 忠实 f-期望 | faithful $f$-expectations |
+| 亲代（父结点）发现 | parental discovery |
+| 干预函数 / 干预约束 | interventional functions / interventional constraints |
+| 调整集 | adjustment set |
+| 后门准则 | backdoor criterion |
+| 相对差异估计量 | relative difference estimator |
+| 核条件独立性检验 | kernel conditional independence (KCI) test |
+
+## 来源定位
+
+`papers/2409.01794.pdf`（23 页）。命题 1 与注 2（§3, p.4）；推论 3–4（§3, pp.4–5）；问题 (1) 与解 (2)（§4, p.5）；假设 5–7（§5, pp.6–7）；定理 8（§5, p.8，式 5）；命题 9（§5, p.8；证明见附录 A 的命题 11, p.19）；实验设计（§6, pp.9–10）；结果图 3–4（§7, pp.11–12）；局限（§8, p.12）；范数最小化（附录 B, pp.20–21）；相对差异估计量（附录 C, p.21）；数据生成（附录 D, p.21）；忠实性诸定义（附录 F, pp.22–23）。

@@ -1,0 +1,84 @@
+---
+title: "AIT：可微因果发现的主动干预定向"
+subtitle: "Nino Scherrer et al., arXiv:2109.02429 (2021)"
+description: "给神经因果发现（SDI、DCDI）补上主动实验设计：从结构信念软邻接阵两阶段采样假设 DAG，对每个候选干预目标做祖先采样，以 F 检验式组间/组内方差比选出「图间分歧最大、图内噪声最小」的干预目标，显著降低干预样本复杂度。"
+date: 2021-09-06
+categories: [因果推断, 主动学习]
+paper-id: 2109.02429
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Nino Scherrer（ETH Zurich）、Olexa Bilaniuk、Anirudh Goyal（Mila, Université de Montréal）、Patrick Schwab（GlaxoSmithKline）、Bernhard Schölkopf（MPI for Intelligent Systems, Tübingen）、Michael C. Mozer（Google Research, Brain Team）、Yoshua Bengio（Mila）、Stefan Bauer（KTH Stockholm）、Nan Rosemary Ke（DeepMind） |
+| 出处 | arXiv:2109.02429 [stat.ML]；站内 PDF 为 v2（2022-03-05）；预印本 |
+| 日期 | 2021-09-06（v1） |
+| 页数 | 29 页（正文+参考文献至 p.11，附录 A–B pp.12–29） |
+
+一句话定位：主动因果发现（active causal discovery）从图论式与贝叶斯式两类经典框架迁入可微/神经框架——因无图后验可用，以「假设图间分歧」替代信息增益作为干预价值的代理，是站内主动干预谱系（1706.10234 → 1910.03962 → 本文 → 2203.02016）中承上启下的一环。
+
+## 问题与模型
+
+研究问题（§1–§2）：神经因果发现（neural causal discovery）以可微参数拟合观测与干预的混合数据（fused data），但现有方法（SDI、DCDI）的干预目标一律随机独立选取；干预昂贵甚至不可行，如何依据当前证据自适应选位以尽快识别有向无环图（directed acyclic graph, DAG）？
+
+模型：基座为神经因果模型 $\mathcal N$——结构参数 $\gamma$（软邻接矩阵 soft-adjacency matrix $A=\sigma(\gamma)$，$\sigma(\gamma_{ij})$ 为「$X_j$ 是 $X_i$ 直接原因」的信念）加功能参数 $\theta$（每变量一个 MLP 表示条件分布 $P_\theta(X_i|X_{\rm pa(i)})$）。主基座 SDI（Structure Discovery from Interventions）交替两个阶段：功能拟合在固定结构信念下按采样图的 dropout 式掩码拟合观测数据；结构拟合冻结 $\theta$、用干预数据为各假设图打适应分并更新 $\gamma$。AIT 本身不假设因果充分性（causal sufficiency），假设随所选基座继承。
+
+## 识别或主要命题
+
+无形式化定理；核心是一个猜想加实证（§3.1）：**在不同假设图上产生分歧的干预携带更多结构信息**。算法 1（Active Intervention Targeting, AIT）：(i) 从 $\gamma$ 采样一组假设图 $\mathcal G$（同一轮所有候选干预共用）；(ii) 对每个候选目标 $I_k$：把干预施加到 $\theta$ 得 $\theta_k$，在每个干预后图 $G_{i,k}$ 上祖先采样（ancestral sampling）得样本 $S_{i,k}$，方差计算将被干预变量置 0 掩蔽；(iii) 计算差异分数 $D_k=\mathrm{VBG}_k/\mathrm{VWG}_k$ 取 $\arg\max$：$\mathrm{VBG}_k=\sum_i\langle\mu_{i,k}-\bar\mu_k,\ \mu_{i,k}-\bar\mu_k\rangle$ 为图间均值散度，$\mathrm{VWG}_k=\sum_i\sum_j\langle S_{i,k}[j]-\mu_{i,k},\ \cdot\rangle$ 为图内样本方差。F 检验式构造的动机：高 VBG 可能只是干预分布本身高方差所致，除以 VWG 才能区分「真分歧」与「采样噪声」。配套的两阶段 DAG 采样（§3.2，算法 2）：(1) 迭代抽根节点——$p^{\rm child}_l(i)=\max A_l[i,:]$、$p^{\rm root}_l=1-p^{\rm child}_l$、温度 softmax（默认 $t=0.1$）归一后抽一节点、删其行列、重复得拓扑序（可视为 Plackett–Luce 排列分布的迭代细化扩展）；(2) 按该序置换软邻接、上三角置零、独立 Bernoulli 抽边——**构造性**保证无环，免去拒绝采样/Gibbs。DCDI 集成（附录 A.7）：分 episode 运行，每 $L=1000$ 梯度步以 AIT 重估大小 $K$ 的干预目标子空间。
+
+## 估计/经验
+
+主实验在 SDI（离散数据）上（§4）：15 节点结构图（chain/collider/tree/bidiag/jungle/full）与 Erdős–Rényi ER-1/2/4（各 10 图平均）。Table 1（SHD，低者为优）：SDI+AIT 在五类结构图与全部 ER 密度上 SHD=0.0（±0.0），仅 full15 为 7；SDI 随机定向对应 0/0/2/3/7/24 与 ER-1 1.4、ER-2 2.1、ER-4 7.2；基线 GES 8.3–17.6、NOTEARS 23.7–35.8、GIES 10.9–18.1、ICP/A-ICP 16.2–31.1（Sachs 19、Asia 4 为 GES）。真实数据：Sachs SHD=6、Asia SHD=0——与随机定向同 SHD 但样本复杂度更低；作者提醒 Sachs 共识真值图本身存疑（引 Mooij et al. 2020），完全识别或不可达。机制分析：(a) 目标选择次数与节点出度、后代数强相关（Fig 7：AIT 下相关系数普遍 0.8–0.99 量级，随机定向则近零）——优先打击下游影响大的节点；(b) 无子节点变量被干预次数大减（对它们的干预只产生冗余观测样本）；(c) SHD「肘点」（elbow point）约在隔离出马尔可夫等价类（Markov equivalence class, MEC）时出现，其后进入给剩余边定向的第二阶段；(d) 错误收敛边的恢复依赖干预次序：随机策略会锁死在不利信念态，AIT 提供逃生口；(e) 噪声鲁棒性（噪声水平 $\eta$ 为翻转变量的概率）：$\eta=0.05$ 时 AIT 除 collider（7）与 full（23）外仍完美识别全部结构图（Table 7），随机定向在 $\eta>0.02$ 即不收敛，而 AIT 对 ER-4 十节点仍收敛（Fig 8）。DCDI（附录 A.7.3，10 节点非线性连续 ER 图）：AIT 指引版在 $K\in\{2,4,6,8\}$ 全部以更低样本复杂度达到相同或更优 SHD（Figs 22–23）。
+
+## 开放问题
+
+1. **干预次数未达最优（§5 自列）**：与最优设计理论（Atkinson & Fedorov 1975；Eberhardt et al. 2012）相比仍有差距，未给出任何干预数目的界。
+2. **样本呈现模式固定（§5 自列）**：干预样本按固定模式（如图评分时固定样本数）供给，更自适应的课程式供给或可进一步省样本。
+3. **图采样限于 DAG（§3.2 自认）**：两阶段采样器不支持部分有向图或含环图，反馈系统的处理缺位。
+4. **与图论式主动方法不兼容（附录 A.1 自述）**：经典图论式方法需预给 MEC/CPDAG 且假设已定向边不再翻转，与可微框架的信念演化矛盾；若起点 CPDAG 错误，最优干预也到不了真图。
+5. **非贝叶斯基座难用信息增益（附录 A.1 自述）**：无图结构后验可用，只能以方差比替代；bootstrap 近似后验支撑不全且计算贵，限制向大图扩展。
+6. **分数是启发式、无理论刻画（我识别）**：$D=\mathrm{VBG}/\mathrm{VWG}$ 何时近似期望信息增益、采样图数与每图样本数对分数的误差传播均未分析；「肘点≈MEC 隔离」只是经验观察。
+7. **只选目标、不选干预取值（我识别）**：主实验为单目标选择，干预值/强度设计不在范围（后续 CBED 2203.02016 正是补此缺口）。
+8. **真实数据评估受限（§4 自认）**：Sachs 真值图与数据假设有争议，真实设定只能看相对表现。
+
+## 文献谱系
+
+前作（在本文中的角色）：Ke et al. (2019, SDI)——主基座，其结构/功能交替拟合与随机干预策略是被改进对象；Brouillard et al. (2020, DCDI)——第二基座（连续数据联合优化），附录 A.7 的移植对象；Zheng et al. (2018, NOTEARS) 及 DAG-GNN 等——可微因果发现谱系背景；Hauser & Bühlmann (2012/2014)——干预马尔可夫等价类与最优主动策略，「肘点≈MEC 隔离」观察的理论参照；Murphy (2001)、Tong & Koller (2001)、Cho et al. (2016)、Agrawal et al. (2019)、Ness et al. (2017)——贝叶斯信息增益式主动方法，因非贝叶斯基座而不可用的对照；Eberhardt 系列、Hyttinen et al. (2013)、Shanmugam et al. (2015)、Kocaoglu et al. (2017)、Squires et al. (2020)、Greenewald et al. (2019)——图论式主动方法，附录 A.1 逐一点名其不兼容原因；Gamella & Heinze-Deml (2020, A-ICP)——Table 1 的主动基线；Schölkopf et al. (2021, Toward Causal Representation Learning)——主动干预作为因果表示学习核心主张的纲领性引用；Annadani et al. (2021, VCN)——同组可微变分因果网络。后续：Tigas et al. (2022, 2203.02016, CBED) 把主动干预从「选目标」推进到「目标+取值」联合贝叶斯最优实验设计；Lippe et al. (2021) 为同期将 SDI 扩展到高维的并发工作。
+
+## 明确不覆盖
+
+不学干预取值/幅度（只选目标，干预为替换条件分布的硬干预）；不处理隐变量/混杂（AIT 自身不设因果充分性，但随 SDI/DCDI 基座继承其假设）；不处理有环结构；不做干预成本/预算建模（Kocaoglu、Lindgren 的成本感知线未纳入）；无可识别性理论（哪些图类能在多少次干预内被识别无刻画）；不涉及纯观测设定。
+
+## 阅读路径
+
+先读 §1 与 Figs 1–2（AIT 在神经因果模型中的位置与算法流水线示意）；§2 预备（SCM、干预、SDI 两阶段训练，Fig 3）；§3 方法核心：§3.1 算法 1 与 VBG/VWG 定义、§3.2 两阶段 DAG 采样（Fig 4 与算法 2，注意与 Plackett–Luce 的连接）、§3.3 集成点；§4 按 Table 1（主结果）→ Fig 5（样本复杂度）→ Fig 6–7（jungle 目标分布与拓扑相关性）→ Fig 8（噪声鲁棒性）顺序读，结论 §5 含自列局限。附录重点：A.1 对两类既有主动方法不可用性的论证（理解本文动机的关键）、A.6.6 噪声详表 Table 7、A.7 DCDI 集成与 $K$ 消融。姊妹篇对照：1706.10234（站内有笔记，图已知时对结构函数的高斯过程贝叶斯主动干预——同属短视主动学习谱系但对象是结构函数而非图）；1910.03962（站内有笔记，贝叶斯优化选干预值——信息增益路线在贝叶斯基座上的对照，正与本文的方差比代理互补）；2203.02016（站内有精读摘要，CBED：DiBS 后验+BOED 同时选目标与取值，本文的直接后续）。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 主动干预定向 | Active Intervention Targeting (AIT) |
+| 神经因果发现 | neural causal discovery |
+| 可微因果发现 | differentiable causal discovery |
+| 混合数据 | fused data（观测+干预） |
+| 结构参数/功能参数 | structural / functional parameters ($\gamma,\theta$) |
+| 软邻接矩阵 | soft-adjacency matrix $\sigma(\gamma)$ |
+| 假设图 | hypothesis DAGs |
+| 祖先采样 | ancestral sampling |
+| 组间/组内方差 | variance between / within graphs (VBG/VWG) |
+| 差异分数 | discrepancy score $D_k$ |
+| 两阶段 DAG 采样 | two-phase DAG sampling |
+| 拓扑序 | topological node ordering |
+| 温度 softmax | temperature-scaled softmax |
+| 马尔可夫等价类 | Markov equivalence class (MEC) |
+| 肘点 | elbow point |
+| 结构汉明距离 | Structural Hamming Distance (SHD) |
+| 错误收敛边 | erroneously converging edges |
+| 干预目标空间 | interventional target space |
+
+## 来源定位
+
+`papers/2109.02429.pdf`（29 页，v2）。关键内容：概览 Figs 1–2（§1, pp.1–2）；AIT 分数与算法 1（§3.1, p.4）；两阶段 DAG 采样与算法 2（§3.2, p.5，附录 A.2 p.13）；SDI 集成（§3.3, p.5）；主结果 Table 1 与 jungle 目标分布 Fig 6（§4, p.7）；相关性 Fig 7、噪声收敛 Fig 8 与结论 §5（p.8）；相关工作两类主动方法的局限论证（附录 A.1, p.12）；噪声详表 Table 7（附录 A.6.6, p.23）；DCDI 集成算法 3/4 与结果 Figs 22–23（附录 A.7, pp.28–29）。

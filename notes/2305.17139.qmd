@@ -1,0 +1,76 @@
+---
+title: "因果空间：因果性的测度论公理化"
+subtitle: "Junhyung Park et al., arXiv:2305.17139 (2023)"
+description: "以 Kolmogorov 概率公理为地基定义因果空间——在概率空间上附加一族因果核，把观测分布与全部干预分布直接作为原始对象，从而严格扩展 SCM 与潜在结果的干预侧面，并自然容纳混淆、环路与连续时间随机过程。"
+date: 2023-05-19
+categories: [因果推断, 因果公理化]
+paper-id: 2305.17139
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Junhyung Park、Simon Buchholz、Bernhard Schölkopf（均 MPI for Intelligent Systems 经验推论部门，Tübingen）、Krikamol Muandet（CISPA Helmholtz 信息安全中心，Saarbrücken） |
+| 出处 | arXiv:2305.17139 [cs.AI]；NeurIPS 2023；站内 PDF 为 v3（2024-06-06） |
+| 日期 | 2023-05-19（v1） |
+| 页数 | 31 页（正文 10 页 + 文献 4 页 + 附录 A–F 17 页） |
+
+一句话定位：把因果性当作「概率论之上的干预理论」，仿照 Kolmogorov 公理化概率的方式，用一族转移概率核（transition probability kernel，即因果核）直接编码干预分布，构造出严格推广结构因果模型（Structural Causal Model, SCM）与潜在结果（potential outcomes, PO）框架干预信息的「因果空间」。
+
+## 问题与模型
+
+研究问题：因果性尚无公认公理化。既有框架（SCM/图、PO、决策论、范畴论）都以变量与结构方程为原语，其定义本身即隐含假设——变量数有限、循环情形需可解性、所有共同原因（无论观测与否）须入模、模型内变量不影响模型外世界——故都不是严格意义的公理化定义。既然概率论有广泛接受的测度论公理（Axioms 2.1），能否直接在其上搭建因果理论？
+
+模型：在乘积可测空间 $(\Omega,\mathcal H)=\otimes_{t\in T}(\mathcal E_t,\mathcal E_t)$ 上取概率空间，$\mathcal H_S$ 为坐标子集 $S\subseteq T$ 生成的子 σ-代数（sub-σ-algebra）。**定义 2.2（因果空间）**：四元组 $(\Omega,\mathcal H,P,\mathcal K)$，因果机制 $\mathcal K=\{K_S:S\in\mathcal P(T)\}$，每个 $K_S$ 为从 $(\Omega,\mathcal H_S)$ 到 $(\Omega,\mathcal H)$ 的转移概率核，满足两条公理：(i) 平凡干预公理 $K_\emptyset(\omega,A)=P(A)$——不干预则分布不变；(ii) 干预决定论（interventional determinism）$K_S(\omega,A\cap B)=\mathbf 1_A(\omega)K_S(\omega,B)$（$A\in\mathcal H_S$）——对 $\mathcal H_S$ 施加测度后 $\mathcal H_S$ 确实具有该测度。**定义 2.3（干预）**：对 $\mathcal H_U$ 施加测度 $Q$ 与内部机制 $L$，得 $P_{\mathrm{do}(U,Q)}(A)=\int Q(\mathrm d\omega)\,K_U(\omega,A)$（式 1）；干预后核由 $L$ 先在 $\mathcal H_U$ 内起效、再经 $K_{S\cup U}$ 传播（式 2）。$Q$ 取单点测度即硬干预（hard intervention），任意 $(Q,L)$ 覆盖软干预。例 2.5（海拔—温度）：固定海拔改变温度的条件分布、固定温度不影响海拔，双向不对称全部由两个核表达。
+
+## 识别或主要命题
+
+**定理 2.6（干预封闭性）**：定义 2.3 产生的 $P_{\mathrm{do}(U,Q)}$ 确为测度、$\mathcal K^{\mathrm{do}}$ 确为合法因果机制——干预后的对象仍是因果空间。§3 构造性比较：任一 SCM（定义 3.1，引 Pearl 定义 6.2）唯一对应一个因果空间（对 $S$ 中变量以固定值 $\omega_j$ 代入结构方程、其余不变）；任一 PO 框架可由 $K_Z(z,B)=\tilde P(Y_z\in B)$ 携带——因果空间严格推广二者的干预信息，且观测与干预分布解耦为原始对象（注记 3.2）。与 Galles–Pearl 三公理对照：有效性（effectiveness）由公理 (ii) 保持；合成性（composition）一般不成立（效应依赖联合分布时，干预 $X_1$ 不同于联合干预 $X_1,X_2\otimes P$）；可逆性（reversibility）一般不成立（例 4.2 为反例）。四个 SCM 难例：**例 4.1**（冰淇淋销量与鲨鱼袭击）两变量即可编码「相关而无因果」（$K_1(x,B)=P(B)$），SCM 一旦停止加变量即隐含「无更多混淆」（呼应 Cartwright 两工厂反例）；**例 4.2**（稻米供给与价格）双向核 $K_1(3,\cdot)=N(4.5,0.5^2)$、$K_2(6,\cdot)=N(4,0.5^2)$ 自然编码环，无须可解性条件；**定义 4.3 + 例 4.4** 布朗运动的时间尊重因果机制（time-respecting causal mechanism）区分干预与条件化（后者产生布朗桥）；**注记 4.5** 连续时间马尔可夫过程中任何 $X_t$ 都不是 $X_{t_0}$ 的父节点（中间总有条件化中介点），故无对应 SCM。附录要点：定义 B.1/B.4 的无/主动/休眠（dormant）与条件因果效应；定义 C.2 硬干预与定理 C.7（时间尊重性在硬干预下保持）；**定理 D.2**——干预 $\mathcal H_U$ 后 $\mathcal H_U$ 成为全局源（source，定义 D.1：核与观测条件测度一致），精确对应随机对照试验的金标准；引理 D.3/推论 D.5 给出 $P_{\mathrm{do}}$ 可由 $P,Q$ 表出的充分条件，涵盖 SCM 的有效调整。
+
+## 估计/经验
+
+无算法与实验；全文由测度论构造、严格证明与反例驱动（四个例子即其「经验」部分）。
+
+## 开放问题
+
+本文自认：(1) 仅公理化干预层，反事实（interventional 与 backtracking counterfactuals）未完成——附录 E 给出扩展草案（定义 E.1 把反事实核 $K_{S,\mathcal F}(\omega,\eta,\cdot)$ 设为三元原始对象、六条公理），正式发展留作「必要的未来工作」；(2) 个体因果/实际因果（actual causality，责任、归责、算法追索）如何嵌入未知；(3) 可解释性无法与既有框架竞争，观测数据辨识所需的假设仍更宜由 SCM/PO 表达；(4) 大量定义与结果因篇幅移入附录，预见还有更多定理待证；(5) 因果抽象理论应经「概率空间同态扩展为因果空间同态」获益。我另识别：(6) 因果核只对坐标型子 σ-代数 $\mathcal H_S$ 定义（注记 2.7 说明一般子 σ-代数上无法把因果与干预本身解耦），但真实系统的「变量」未必是现成坐标，缺一个「何种子 σ-代数可良好坐标化」的判据；(7) 因果机制作为原始对象原则上不可检验——除源、无因果效应、$A\in\mathcal H_U$ 三类平凡情形（定理 D.2 之前的讨论）外，何种观测数据能证伪给定 $K_S$ 全文未触及；(8) 反事实草案（定义 E.1）与 SCM 三步反事实的对应性（何时给出相同预测）无定理，backtracking 版本只有语义描述；(9) 与 GSEM（无限变量）的接口仅停留在脚注。
+
+## 文献谱系
+
+前作（在本文中的角色）：Kolmogorov (1933)——公理化的模板（Axioms 2.1）；Pearl (2009) 与 Peters–Janzing–Schölkopf (2017)——SCM 标准定义（定义 3.1）与循环可解性讨论的来源；Galles & Pearl (1998)——被对照的三公理；Imbens & Rubin、Hernan & Robins——PO 框架的来源；Bongers et al. (2021)——循环 SCM 可解性理论，例 4.2 的对照物；Ortega (2015)、Heymann et al. (2021)、Cabreros & Storey (2019)——三个先行测度论尝试，分别被指出仅可数实现、无环且可数、离散有限变量的不足；Cartwright (1999)——两工厂反例支撑例 4.1；von Kügelgen et al. (2023)——backtracking 反事实的动机来源。后续：arXiv:2406.00388（Buchholz–Park–Schölkopf，站内 papers/2406.00388.pdf）补上积空间、（随机）变换与抽象/嵌入，把该理论从单一空间推向多空间理论；Keurti et al. (2023) 的干预群同态被点名为平行方向。
+
+## 明确不覆盖
+
+只处理类型因果（type causality），不处理实际因果；不含从数据学习因果结构的统计内容；不展开 do-演算与图判定算法；不参与「PO vs 图模型」之争（脚注 6）；范畴论与决策论路径只在相关工作中略述。
+
+## 阅读路径
+
+先读 §1 与图 1（统计与因果发现同为逆问题的定位）；§2 精读定义 2.2–2.3、注记 2.4 与例 2.5——两条公理的语义全在这三处；§3 读 SCM 构造与注记 3.2（三公理对照）；§4 按混淆→环路→随机过程顺序读四个例子，例 4.4 配图 5；§5 为局限总述。附录按需取用：B 因果效应层级、C 干预复合与硬干预、D 源与 RCT 对应、E 反事实草案。姊妹篇对照：后续 2406.00388 在此基础上定义积、抽象与包含，「源」与「因果效应」在那里获得沿变换的保持性刻画；站内 2102.11107（CRL 纲领）可看作本文所补理论地基面向的机器学习议程。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 因果空间 | causal space |
+| 因果核 | causal kernel |
+| 转移概率核 | transition probability kernel |
+| 因果机制 | causal mechanism |
+| 平凡干预公理 | trivial intervention axiom |
+| 干预决定论 | interventional determinism |
+| 硬干预 | hard intervention |
+| 主动/休眠因果效应 | active / dormant causal effect |
+| 条件因果效应 | conditional causal effect |
+| 平凡核 | trivial causal kernel |
+| 源（σ-代数） | source |
+| 时间尊重因果机制 | time-respecting causal mechanism |
+| 类型因果 | type causality |
+| 实际因果/个体因果 | actual causality |
+| 干预式反事实 | interventional counterfactual |
+| 回溯式反事实 | backtracking counterfactual |
+| 合成性/有效性/可逆性 | composition / effectiveness / reversibility |
+
+## 来源定位
+
+`papers/2305.17139.pdf`（31 页）。关键内容：Axioms 2.1、定义 2.2/2.3 与注记 2.4（p.3–4）；例 2.5 与定理 2.6（p.5）；SCM 构造、注记 3.2 与 PO 构造（p.5–7）；例 4.1–4.4、定义 4.3、注记 4.5（p.7–10）；§5 结论与局限（p.10）；附录 B 定义 B.1/B.4（p.18–19）、附录 C 定义 C.2/定理 C.3/定理 C.7（p.20–22）、附录 D 定义 D.1/定理 D.2/引理 D.3/推论 D.5（p.22–23）、附录 E 定义 E.1（p.24–25）。

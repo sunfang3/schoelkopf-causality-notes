@@ -1,0 +1,72 @@
+---
+title: "因果与反因果学习下的神经影像特征解释"
+subtitle: "Sebastian Weichwald et al., arXiv:1512.04808 (2015)"
+description: "四页会议短文：编码/解码之分不足以确定相关特征的含义，必须再分因果与反因果学习方向；除因果编码模型外，三类模型的相关特征均只有歧义解释，编码与解码联用可部分恢复因果结构。"
+date: 2015-12-15
+categories: [因果推断, 神经影像]
+paper-id: 1512.04808
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Sebastian Weichwald、Bernhard Schölkopf、Moritz Grosse-Wentrup（MPI for Intelligent Systems, Tübingen）、Tonio Ball（Bernstein Center Freiburg / 弗莱堡大学） |
+| 出处 | arXiv:1512.04808v1 [stat.ML]；正式版 PRNI 2014（IEEE Pattern Recognition in Neuroimaging 工作会）, 1–4, doi:10.1109/PRNI.2014.6858551 |
+| 日期 | 2015-12-15（会议版 2014 年） |
+| 页数 | 4 页 |
+
+一句话定位：给神经影像的「编码模型 vs 解码模型」二分法补上第二个维度——学习的是因果还是反因果关系——并用赖欣巴赫原理加四个反例 DAG 论证：不补这个维度，「哪些特征相关」这句话本身无法解释。
+
+## 问题与模型
+
+研究问题：模式识别判定的「相关特征」究竟支持哪些因果陈述？出发点是神经影像的普适因果结构：刺激（stimulus, $S$）→ 脑状态（brain state, $X=\{X_1,\dots,X_d\}$）→ 反应（response, $R$）。据此区分两类实验：刺激范式（stimulus-based，$Y\equiv S$，$S\to X$，刺激呈现可随机化）与反应范式（response-based，$Y\equiv R$，$X\to R$，反应不可干预）。编码模型 $p(X|Y)$ 与解码模型 $p(Y|X)$ 的区分只反映建模方向、不含因果信息；与两类范式交叉得四类模型：A 因果编码（causal encoding）$p(X|S)$、B 反因果解码（anti-causal decoding）$p(S|X)$、C 反因果编码 $p(X|R)$、D 因果解码 $p(R|X)$。特征相关性的操作化：编码中 $X_i$ 相关 $\iff X_i\not\perp Y$（单变量检验，如类条件均值差异）；解码中 $X_i$ 相关 $\iff X_i\not\perp Y\,|\,X\setminus\{X_i\}$（条件独立，实践对应递归特征消除 recursive feature elimination 或特征置换）。理论分析假设所有相关特征均可识别。
+
+## 识别或主要命题
+
+无编号定理；论证 = 赖欣巴赫原理（Reichenbach's principle，依赖蕴含 $S\to X$、$S\leftarrow X$ 或 $S\leftarrow H\to X$ 三者之一）加反例 DAG。四条结论：A 类（§III-A）：随机化排除后两种情形，故相关特征全为 $S$ 的真效应（genuine effect）、无关特征全非效应——四类中唯一的双向刻画。B 类（§III-B）：$S\to X_1\to X_2$ 中 $X_2$ 条件独立于 $S$ 却是 $S$ 的效应（漏检）；$S\to X_1\leftarrow X_2$ 中 $X_2$ 解码相关却非效应（误纳）——相关特征只是「潜在效应」（potential effect）。C 类（§III-C）：$X_2\leftarrow X_1\to R$ 中 $X_2$ 与 $R$ 相关却非原因——相关者仅是「潜在原因」（potential cause），但无关特征确非原因。D 类（§III-D）：$X_2\to X_1\to R$ 漏检；图 1 的隐混杂（hidden common cause）$X_1\leftarrow H\to X_2$、$H\to R$ 使 $X_1,X_2$ 均解码相关而均非 $R$ 的原因。§IV 在忠实性（faithfulness）与因果充分性（causal sufficiency）假设下给两个联用示例：刺激范式中 $S\not\perp X_1$、$S\perp X_2$、$S\not\perp X_2|X_1$ 蕴含唯一结构 $S\to X_1\leftarrow X_2$（潜在原因推断规则，出自 Pearl）；反应范式中 $X_1\not\perp R$、$X_2\not\perp R$、$X_2\perp R|X_1$ 蕴含 $X_2\leftarrow X_1\to R$ 或 $X_2\to X_1\to R$，两种结构中均有 $X_1\to R$，故 $X_1$ 是 $R$ 的直接原因、$X_2$ 角色待定。
+
+## 估计/经验
+
+无算法、无实验、无数据。经验内容仅是文字层面把类条件均值检验（编码侧）与递归特征消除（解码侧）接到相关性定义上；全部结论以「可识别全部相关特征」的理想化为前提。
+
+## 开放问题
+
+1. **完整推断规则系统被明确搁置**（§V 自认）：「基于条件独立检验的因果推断规则的穷尽描述超出本文范围」——只示范了两个双特征例子；系统化（八条规则 S1–S8/R1–R8 加 EEG 实验）要到期刊版 1511.04780 才完成。
+2. **「可识别全部相关特征」是未检验的理想化**：递归特征消除、置换检验与条件独立性定义并不等价，文中亦承认「可能有其他识别解码相关特征的方式，从而导致不同结论」（§III 开头）；有限样本下特征选择误差如何污染四条结论完全未讨论。
+3. **假设边界未勘定**：忠实性与因果充分性只在 §IV 示例中引入；隐混杂仅以图 1 反例身份出现，不忠实分布、范式内时间分辨结构（§1 的 stimulus[$t_0$]→brain[$t_1$]→response[$t_2$] 仅一句带过）、反馈与闭环（引用 Gomez-Rodriguez et al. 的感觉运动闭环 [6]）均无处理。
+4. **零经验验证且非线性解码搁置**：没有任何数据检验四类论断在真实分析流程中的可达性；引言自认线性解码模型可转译为编码模型以避免误读（Haufe et al. [3]），非线性情形「困难得多」，本文不碰。
+5. **普适因果链与随机化预设**：框架假设刺激可完美随机化、$S\to X\to R$ 恒成立；对自然刺激、被试自选刺激（随机化失效）或反应反向影响后续刺激的范式，四类模型的归属会否改变，文中未置一词。
+
+## 文献谱系
+
+前作：Schölkopf et al. (2012) 的因果/反因果学习（causal and anticausal learning）[5] 是四类模型划分的来源，本文把该区分从学习性能问题搬到模型解释问题；Pearl (2000) [7] 与 Spirtes et al. (2000) [13] 提供因果图语言、忠实性概念与潜在原因推断规则；Reichenbach (1956) [11] 的共同原因原理是 §III 全部论证的引擎；Holland (1986) [12] 支撑随机化论证。神经影像侧：Naselaris et al. (2011) [1]（「只有编码模型给出完备功能描述」的主张）与 Todd et al. (2013) [2]（MVPA 混淆）是被修正或精确化的对象，Haufe et al. (2014) [3]（线性权重再解释）标记了非线性解码的困难，De Martino et al. (2008) [10]（递归特征消除）被用作解码相关性的实践对应；Grosse-Wentrup et al. (2011) [14] 的 γ 振荡研究是潜在原因规则的实例。后续：期刊版 1511.04780（NeuroImage 110:48–59, 2015）补齐规则系统、脑状态语境刻画与 18 人 EEG 实验，本文即其会议前身。
+
+## 明确不覆盖
+
+不给穷尽的因果推断规则系统（明确留给后续）；不做任何实验或模拟；不处理时间分辨范式、反馈环与同期效应；不讨论估计误差与有限样本性质；不提出新的编码/解码算法，只约束既有模型的解释。
+
+## 阅读路径
+
+全文四页，顺序读即可：§II-C/D（两类范式与四类模型）是接口，先厘清 $p(X|S)$、$p(S|X)$、$p(X|R)$、$p(R|X)$ 四符号；§III-A–D 逐个把反例 DAG（$S\to X_1\to X_2$、$S\to X_1\leftarrow X_2$、$X_2\leftarrow X_1\to R$、$X_2\to X_1\to R$、图 1 隐混杂）自己画一遍；§IV 两个联用示例配合 §V 总结收束。姊妹篇：1511.04780（期刊版：八条规则、脑状态语境与 EEG 实验，正好用来检验本文的增量——本文只有论点骨架）；1206.6471（因果/反因果学习分类的源头，看这一区分如何从半监督学习的动机中长出）。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 编码模型 / 解码模型 | encoding model / decoding model |
+| 因果学习 / 反因果学习 | causal learning / anti-causal learning |
+| 刺激范式 / 反应范式 | stimulus-based / response-based experiment |
+| 相关特征 | relevant features |
+| 赖欣巴赫原理（共同原因原理） | Reichenbach's principle |
+| 潜在原因 / 潜在效应 | potential cause / potential effect |
+| 真效应 | genuine effect |
+| 忠实性 | faithfulness |
+| 因果充分性 | causal sufficiency |
+| 递归特征消除 | recursive feature elimination |
+| 隐混杂（隐藏共同原因） | hidden common cause |
+
+## 来源定位
+
+`papers/1512.04808.pdf`（4 页）。关键内容：符号与编码/解码定义（§II-A/B，p.1–2）；两类范式与四类模型（§II-C/D，p.2）；相关性定义（§III 开头，p.2）；四条结论 A–D 及反例（§III-A–D，p.2–3）；隐混杂反例（图 1，p.3）；联用推断两例（§IV-A/B，p.3–4）；结论与局限（§V，p.4）。

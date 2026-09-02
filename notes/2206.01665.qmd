@@ -1,0 +1,77 @@
+---
+title: "BaCaDI：干预目标未知时的多环境贝叶斯因果发现"
+subtitle: "Alexander Hägele et al., arXiv:2206.01665 (2022)"
+description: "把因果图、机制参数与各环境的干预目标放进同一个可微生成模型，用 SVGD 粒子推断求联合后验；在每环境仅 10 个样本的低样本机制下全面超过 bootstrap 的 UT-IGSP、JCI-PC 与 DCDI。"
+date: 2022-06-03
+categories: [因果推断, 贝叶斯因果发现, 干预]
+paper-id: 2206.01665
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Alexander Hägele、Jonas Rothfuss、Lars Lorch、Vignesh Ram Somnath（ETH Zürich；Somnath 兼 IBM Research Zürich）；Bernhard Schölkopf（MPI for Intelligent Systems, Tübingen）；Andreas Krause（ETH Zürich） |
+| 出处 | arXiv:2206.01665 [cs.LG]；AISTATS 2023 (PMLR 206)；v2 2023-02-23 |
+| 日期 | 2022-06-03（v1 提交） |
+| 页数 | 26 页（正文 10 页，附录 A–F 含证明与额外实验） |
+
+一句话定位：对「多环境、干预目标未知且每环境样本极少」的数据做全贝叶斯联合推断：同时求因果图 $G$、机制参数 $\Theta$、干预目标 $I^{\mathrm{tar}}$ 与干预参数 $\Theta_I$ 的联合后验；方法完全可微，用斯坦变分梯度下降（Stein Variational Gradient Descent, SVGD）求解。
+
+## 问题与模型
+
+研究问题：单细胞基因表达等场景能在药物、基因敲除等多种干预下采到数据，但干预目标常未知且每环境样本极少；已知干预的方法（GIES、IGSP）不再适用，可处理未知干预的方法（UT-IGSP、JCI-PC、DCDI）只给点估计、不传播认知不确定性（epistemic uncertainty），小样本下脆弱。
+
+模型（§3–§5）：因果贝叶斯网络（causal Bayesian network, CBN）$(G,\Theta)$，假设因果充分性；干预 $I_k=(I_k^{\mathrm{tar}},\Theta_{I_k})$ 替换目标变量的条件分布（实验用完美/硬干预，论证对软干预同样成立）。联合推断仅在干预相对图稀疏（$|I_k|\ll d$）时适定——作者将其挂钩稀疏机制转移（Sparse Mechanism Shift, SMS）假设（Schölkopf et al. 2021）。目标后验为式 (4)：$p(G,\Theta,I\mid D)\propto p(G)p(\Theta\mid G)p(D^0\mid\Theta,G)\prod_{k=1}^M p(I_k^{\mathrm{tar}})p(\Theta_{I_k}\mid I_k^{\mathrm{tar}})p(D_k\mid\Theta,G,I_k)$。EM 式交替推断会切断不确定性传播，故须联合推断；且须在「预测发生了干预」的条件下评估干预似然本身，否则模型解释不了数据时会滥报干预。
+
+## 识别或主要命题
+
+**Proposition 1**（式 6）：在扩展生成模型（连续潜变量 $Z$ 生成 $G$、$\Gamma_k$ 生成 $I_k^{\mathrm{tar}}$，式 5 与 Fig. 1）下，对 $(G,\Theta,I)$ 的后验期望等于对 $(Z,\Theta,\Gamma,\Theta_I)$ 后验的期望，权重 $\Psi=p(\Theta\mid G)p(\Theta_I\mid I^{\mathrm{tar}})p(D\mid G,I,\Theta)$——联合后验由此可打分、可求梯度。**Proposition 2**（式 13）：退火 $\alpha\to\infty$、$\beta\to\infty$ 时，该期望收敛到对离散 DAG 与离散干预目标的期望，其中 $G_\infty(Z)_{i,j}=\mathbf 1[u_i^\top v_j>0]$、$I_\infty^{\mathrm{tar}}(\Gamma)_{k,i}=\mathbf 1[\gamma_{k,i}>0]$；配合 SVGD 的大样本粒子极限，得到对 $p(G,\Theta,I^{\mathrm{tar}},\Theta_I\mid D)$ 的渐近一致近似。
+
+识别性不自行证明：大样本下借用 LiNGAM/ANM/DCDI 等函数形式的结果，作者自陈贡献在推断技术而非参数模型。具体参数化：$g_{ij}\mid u_i,v_j\sim\mathrm{Bern}(\sigma_\alpha(u_i^\top v_j))$（式 7，承 DiBS）配无环先验 $p_\beta(Z)\propto\exp(-\beta\,\mathbb E_{p(G\mid Z)}[h(G)])$（式 8），$h(G)=\mathrm{tr}[(I+G/d)^d-d]\ge 0$ 当且仅当无环取零（Yu et al. 2019）；$\Gamma$ 先验（式 10）含高斯稳定项、Beta 锐化项（$\zeta_1=1/d,\zeta_2=(d-1)/d$，编码「每环境期望只干预一个变量」）与 $\ell_1$ 稀疏项；干预似然（式 11）用 Gumbel-Softmax 采样的掩码在观测条件分布与干预分布间逐变量切换，似然族可任取（线性高斯或单隐层神经网络加高斯噪声）。
+
+## 估计/经验
+
+设置（§7.1）：ER-2/SF-2 图 $d=20$、$n_0=100$ 观测 + 每环境 $n_k=10$ 个干预样本，合成域 $M=d=20$ 个单变量干预（共 300 样本）；基线为 20 次 bootstrap 的 UT-IGSP、JCI-PC、DCDI-G（与 20 个 SVGD 粒子对等）；指标为期望 SID（E-SID）、边 AUPRC、干预目标 INTV-AUPRC 与留出干预负对数似然 I-NLL。结果（Fig. 3–4）：线性和非线性高斯 CBN 上 BaCaDI 的 E-SID、AUPRC、I-NLL 全面最优，干预检测上 UT-IGSP 接近；Table 2 的 E-SHD：非线性 ER-2 上 BaCaDI 18.73，UT-IGSP 35.09、JCI-PC 38.93、DCDI-G 64.91。SERGIO 模拟基因表达（SF-2、$d=20$、$M=10$ 单基因敲除、共 200 样本、模型明显错设）：BaCaDI 仍最准，JCI-PC 近乎随机；干预先验按敲除知识设 $\sigma_I^2=0.01$、$\mu\sim\mathcal N(0,1)$。附录 E.2：未知干预的性能接近已知干预的上界、优于纯观测；附录 E.3：$d=50$ 线性高斯仍具竞争力。代价：Table 3 运行时 SERGIO 上 BaCaDI 需 108–115 分钟（UT-IGSP 约 45），总计算约 40,000 CPU 小时。
+
+## 开放问题
+
+1. **后验不可解（自认）**：图超过约 5 个节点后验即强不可解，后验近似质量难以刻画或量化。
+2. **弱干预不可检（自认）**：后验由似然驱动，只有造成足够强分布偏移的干预才能在有限数据下被识别，轻微干预检不出。
+3. **计算代价（自认）**：SVGD 推断对更大图代价过高，$d=50$ 已是极限附近。
+4. **测量噪声（自认）**：真实单细胞测序噪声未处理。
+5. **基准与产出（自认）**：应超越合成基准、在 SERGIO 等现实基准上评估（引 Reisach et al. 2021 尺度伪影批评）；干预目标预测（如药物脱靶效应）可作独立产出。
+6. **识别性外部化、无有限样本理论（我识别）**：后验正确性的保证完全依赖大样本与函数形式假设；似然错设（如 SERGIO 稳态数据对 CBN 先验）下后验的解释缺少收缩性分析。
+7. **干预先验的错设敏感性与软干预未验证（我识别）**：$\zeta_1=1/d$ 编码「每环境约一个目标」，多目标组合干预下未做消融；软干预声称兼容但无实验；环境标签假定已知。
+
+## 文献谱系
+
+前作（角色）：Lorch et al. 2021（DiBS，站内 2105.11839）——$Z=(U,V)$ 嵌入图分布与内积参数化的直接来源，本文将其从单一观测数据集推广到多环境未知干预；Yu et al. 2019——无环函数 $h(G)$；Liu & Wang 2016（SVGD）与 Jang et al. 2016 / Maddison et al. 2017（Gumbel-Softmax）——可微粒子推断的技术基石；Mooij et al. 2016（JCI）——多环境联合因果推断框架及 JCI-PC 基线；Squires et al. 2020（UT-IGSP）——未知干预下最强约束基线；Brouillard et al. 2020（DCDI）——可微点估计基线；Eaton & Murphy 2007——此前唯一的全贝叶斯尝试（离散、动态规划、不可扩展）；Schölkopf et al. 2012 / 2016——不变性传统，Schölkopf et al. 2021——SMS 假设（稀疏干预先验的依据）；Friedman et al. 1999——粒子按未归一化后验加权的贝叶斯模型平均。后续：与 CBED（站内 2203.02016）共同构成「DiBS 后验 × 干预设计/未知干预」两个延伸方向。
+
+## 明确不覆盖
+
+不自行证明识别性条件；不处理隐混杂（因果充分性假设成立）；不假设干预目标已知（那是 GIES/IGSP 设定）；实验只做硬干预，软干预仅论证兼容；不做主动实验设计；不处理测量噪声与更大规模图；不输出因果表示，只输出图与机制参数后验。
+
+## 阅读路径
+
+先读 §1 与 Fig. 1（扩展生成模型全貌）；§4 讲清「为何必须联合推断」；§5 是核心：式 (5) 生成模型、Prop. 1（式 6）、式 (7)–(10) 三个先验、式 (11) 掩码似然；§6 的 Prop. 2 与退火决定「连续松弛如何收回离散」；实验按 Fig. 3（合成）→ Fig. 4（SERGIO）→ 附录 E.2（观测/已知/未知干预消融）读，附录 F 为 SVGD 速成。姊妹篇对照：2105.11839 DiBS（单数据集前作，本文的推断骨架）；2203.02016 CBED（同脉：把 DiBS 后验用于选干预目标与取值）；2205.12934 AVICI（对照路线：摊销网络而非粒子法，且要求干预已知）；2206.02013 MSS（不用干预信息、只靠环境间机制变化的多环境因果发现）。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 因果贝叶斯网络 | causal Bayesian network (CBN) |
+| 认知不确定性 | epistemic uncertainty |
+| 干预目标 | intervention target |
+| 完美/软干预 | perfect (hard) / imperfect (soft) intervention |
+| 无环先验 | acyclicity prior |
+| 锐化先验 | sharpness prior |
+| 斯坦变分梯度下降 | Stein Variational Gradient Descent (SVGD) |
+| 粒子变分推断 | particle variational inference |
+| 期望结构干预距离 | expected SID (E-SID) |
+| 模型平均 | Bayesian model averaging |
+
+## 来源定位
+
+`papers/2206.01665.pdf`（26 页）。关键内容：联合后验式 (4)（§4, p.2）；扩展生成模型式 (5) 与 Fig. 1（§5, p.3）；Proposition 1 式 (6)（§5, p.3，证明在附录 A.1）；图与干预目标先验式 (7)–(10)（§5, pp.3–4）；掩码似然式 (11)（§5, p.4）；Proposition 2 式 (13) 与退火（§6, p.5，证明在附录 A.2）；合成实验 Fig. 3（§7.2, p.7）；SERGIO 实验 Fig. 4（§7.3, p.8）；E-SHD 与运行时 Table 2–3（附录 E.4–E.5）；观测/已知/未知干预消融 Fig. 8（附录 E.2）。

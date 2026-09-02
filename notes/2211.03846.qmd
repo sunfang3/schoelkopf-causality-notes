@@ -1,0 +1,76 @@
+---
+title: "FedCDI：从分布式干预数据联邦发现因果结构"
+subtitle: "Amin Abyaneh et al., arXiv:2211.03846 (2022)"
+description: "首个利用干预数据的联邦因果发现框架：客户端只上传边存在的「信念矩阵」而非样本，服务器按干预变量在当前图中的下游位置做干预感知聚合。在纵向异质干预数据下稳定优于朴素平均，精度可与集中式神经因果发现持平。"
+date: 2022-11-07
+categories: [因果推断, 联邦学习]
+paper-id: 2211.03846
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Amin Abyaneh（McGill University）、Nino Scherrer（ETH Zürich）、Patrick Schwab（GSK）、Stefan Bauer（TU Munich & Helmholtz AI）、Bernhard Schölkopf（MPI for Intelligent Systems, Tübingen）、Arash Mehrjou（GSK / MPI / ETH） |
+| 出处 | arXiv:2211.03846 [cs.LG]；v1 2022-11-07，v4 2024-02-11 |
+| 日期 | 2022-11-07 |
+| 页数 | 16 页（正文 §1–§8 约 8 页 + 附录 A–B） |
+
+一句话定位：把「干预提升可识别性」这一结论移植到隐私受限的分布式场景——客户端用 ENCO 之类的神经因果发现方法从本地观测+干预数据学出结构信念，服务器按「谁在哪儿干预过」加权聚合，恢复全局 DAG 而不交换任何样本。
+
+## 问题与模型
+
+研究问题：既有联邦因果发现（federated causal discovery, FCD）只用观测数据（只能识别 Markov 等价类）、且多限于线性机制或同质数据；医疗等场景数据因隐私与监管分散在各机构。如何在禁止交换原始样本的前提下汇聚分散的干预证据，让持有相关干预的客户端在相应边上有更大话语权？
+
+设定：因果图模型 $(G,P)$，$G=(X,E)$ 为 $N$ 节点 DAG，只恢复 $G$ 而非 $P$。假设 3.1 因果充分性；3.2 完美干预 $p^I(X_i\mid Pa(X_i))=p^I(X_i)$；3.3 干预随机且被干预变量已知；3.4 服务器知道各客户端干预变量集 $X_I^k$；对机制线性与噪声分布无限制。观测数据 $D_O$ 横向切分（同特征不同样本），干预数据 $D_I$ 允许纵向切分（各客户端只持部分变量的干预样本）。定义 4.1 信念矩阵（belief matrix）$\psi\in\mathbb R^{N\times N}$：$\psi_{ij}$ 为边 $X_i\to X_j$ 存在概率的 Bernoulli 参数，经 0.5 阈值二值化得邻接阵。本地阶段以 ENCO 为默认本地因果发现方法（LCDM）：除分布拟合与图拟合损失（式 1）外，把聚合信念作先验注入——$(\gamma,\theta)$ 由 $\text{Ber}(\psi)$ 初始化并加 Lagrangian 项 $\tilde L=L+\lambda_{prior}L_\psi$，$L_\psi$ 为 $\zeta_{ij}$ 对 $\psi_{ij}$ 的二元对数损失（式 2）。
+
+## 识别或主要命题
+
+全文唯一形式化命题是**命题 4.2**：设客户端 $C_k$ 持有对 $X_s\in X_I^k$ 的干预，则当边 $X_i\to X_j$ 位于 $X_s$ 的下游路径上时，$\psi^k_{ij}$ 的可靠性 $r^k_{ij}\in[0,1]$ 更高。证明用因果因子化（式 4–5）与截断因子化（truncated factorization）$P(X_{\setminus X_s}\mid do(X_s=x))=\prod_{i\neq s}P(X_i\mid Pa(X_i))$：干预只改变 $X_s$ 及其后代的分布，故对下游边的证据更「干净」。实现为质量流启发式：在当前聚合信念 $\psi$ 构成的图上向 $X_s$ 注入质量 $m^k_s$（正比于该变量本地干预样本数），沿边流动时乘以 $\psi_{qp}$（不分流、汇合取最大），流经 $X_i\to X_j$ 的质量即 $r^k_{ij}$；再 softmax 归一 $\hat r^k_{ij}=e^{\beta r^k_{ij}}/\sum_{k'}e^{\beta r^{k'}_{ij}}$，聚合 $\psi^*_{ij}=\sum_k\hat r^k_{ij}\psi^k_{ij}$（式 6，$\beta$ 网格搜索）。对照的朴素聚合（式 3）仅按数据量加权平均，只适合同质干预情形。例 4.2.1 算例：$r^1_{56}=0.432$ 对 $r^2_{56}=0.540$，$\beta=2$ 时权重 0.446/0.554。
+
+## 估计/经验
+
+算法 1 迭代「本地发现—聚合」若干轮后二值化。数据：ER-$n$ 随机图（$d=20$，$n\in\{1,2,4,6\}$）与真实图 Sachs、Alarm、Asia（bnlearn），按 Ke et al. (2019) 式两层随机神经网络生成 10 类离散数据；常规实验 $|D_O|=10000$、$|D_I|=2000$（基线表增大到 25k/5k），SHD 评估、20 个种子。结果：(i) 横向切分下两个协作客户端与集中式精度持平、显著优于孤立客户端（图 2）；(ii) 纵向切分（5 客户端各持 20 个特征中 4 个的干预样本）下近邻聚合稳定优于朴素平均（图 3），强势客户端也从弱势客户端获益（图 6–7）；(iii) 新客户端带来新数据持续提升（图 4），固定 $D_I$ 增客户端仍能维持知识，直到本地样本少到 LCDM 无法收敛（图 5）；(iv) 表 1：FedCDI（4 客户端）在 ER-1/2/4/6 上 SHD 为 2.3/3.3/4.6/5.7，Sachs 0.8、Alarm 8.0、Asia 1.7——优于集中式 GIES/IGSP/DCDI 与联邦观测方法 FedDAG（ER-1 为 10.3）、NOTEARS-ADMM（7.7），与最强集中式 ENCO 相当甚至更好（Alarm 上 8.0 对 13.8）。附录 A：换用 SDI 作 LCDM 仍见联邦增益，边熵随轮数下降指示共识形成。
+
+## 开放问题
+
+本文自认：1) 真实数据缺干预样本（如 fMRI Hippocampus 纯观测），只能用真实图结构加合成数据评估；2) 本地数据低于某阈值后结果急剧变差，阈值依赖 LCDM 与数据生成机制，「未来工作可给出确定该阈值的方法」；3) 本地并行可省时，但 LCDM 开销大时联邦化反增总计算量；4) 多轮聚合后的邻接阵未必是 DAG，目前靠事后剪枝，未来应在聚合中内嵌无环约束。我另识别：5) 命题 4.2 只给单调性，质量流实现是启发式——质量乘以「当前聚合信念」形成跨轮反馈回路，且 $\beta\to\infty$ 时聚合退化为独裁，softmax 聚合的一致性条件与 $\beta$ 选择均无理论；6) 隐私只是架构性主张：假设 3.4 要求服务器知晓各客户端干预了哪些变量（本身即敏感信息），信念矩阵多轮上传也可能泄露本地结构，全文无差分隐私或威胁模型分析；7) 假设单一全局 $(G,P)$，机制异质/分布偏移时两种聚合的理论依据都失效，文中仅讨论「干预数据异质」一种异质性；8) Alarm 上 2 客户端（19.8，对 FedDAG 11.2）暴露纵向切分在稠密图、少客户端时可能劣于观测型联邦基线，该失效边界未被刻画。
+
+## 文献谱系
+
+前作（在本文中的角色）：NOTEARS（Zheng et al. 2018）——把 DAG 搜索连续化的范式起点；SDI（Ke et al. 2019，Schölkopf 合作）与 DCDI（Brouillard et al. 2020）——利用干预数据的神经因果发现，SDI 兼作数据生成机制与可替换 LCDM；ENCO（Lippe et al. 2021）——默认 LCDM，其 $\gamma,\theta$ 参数化被信念先验改造；GIES（Hauser & Bühlmann 2012）、IGSP（Wang et al. 2017）——干预式发现的经典基线；Hauser & Bühlmann (2015)——干预 Markov 等价类可识别性背景；Pearl (2009)——截断因子化，命题 4.2 的证明工具；FedDAG（Gao et al. 2021）、NOTEARS-ADMM（Ng & Zhang 2022）、DARLS/PERI——既有联邦（观测式）因果发现，本文指其局限并作基线；Tigas et al. (2022)（Schölkopf/Bauer 合作）——干预实验设计，支撑「干预缓解可识别性」。
+
+## 明确不覆盖
+
+不处理隐变量（违反因果充分性）；只考虑完美、随机、已知的硬干预（无软干预、未知干预目标）；只恢复图 $G$ 不恢复分布 $P$；不覆盖客户端机制异质/分布偏移的理论；无差分隐私或形式化安全保证；不处理时序数据与动态图；无真实干预数据实验；除信念外不提供不确定性量化。
+
+## 阅读路径
+
+先读 §3（假设 3.1–3.4 与问题陈述，注意 $D_O$ 横向、$D_I$ 纵向切分的不对称设定）；再读 §4.1（定义 4.1 与式 1–2 的先验注入）；§4.2 朴素聚合（式 3）很短，随后 §4.3 是全文核心——命题 4.2、质量流可靠性评分、式 6 的 softmax 聚合与例 4.2.1 算例务必手推一遍；实验按图 2–3 → 图 4–5 → 表 1 顺序读，注意 Alarm 上客户端数的影响。姊妹篇对照：2105.11839（DiBS——同以「交换图上的概率分布」保隐私：DiBS 交换粒子近似的图后验、FedCDI 交换 Bernoulli 信念并额外利用干预位置信息，合看可见贝叶斯与频率派两条路线）；同组「干预 × 因果发现」主线可再对照 SDI/ENCO 与 Tigas et al. (2022)。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 联邦因果发现 | federated causal discovery (FCD) |
+| 联邦学习 | federated learning |
+| 信念矩阵 | belief matrix |
+| 本地因果发现方法 | local causal discovery method (LCDM) |
+| 因果充分性 | causal sufficiency |
+| 完美干预 | perfect intervention |
+| 截断因子化 | truncated factorization |
+| 横向/纵向切分 | horizontal / vertical split |
+| 干预感知聚合 | intervention-aware aggregation |
+| 近邻（信念）聚合 | proximity-based aggregation |
+| 可靠性评分 | reliability score |
+| 结构汉明距离 | structural Hamming distance (SHD) |
+| 无环性 | acyclicity |
+| 结构因果模型/因果图模型 | causal graphical model (CGM) |
+| 连续优化式因果发现 | continuous-optimization-based causal discovery |
+| Erdős–Rényi 图 | Erdős–Rényi (ER) graph |
+| 平均边熵 | average edge entropy |
+
+## 来源定位
+
+`papers/2211.03846.pdf`（16 页）。关键内容：假设 3.1–3.4 与问题陈述（§3, p.3）；定义 4.1、式 (1)–(2)（§4.1, p.4）；朴素聚合式 (3)（§4.2, p.5）；命题 4.2 及截断因子化证明、质量流与聚合式 (6)、例 4.2.1（§4.3, pp.5–6）；实验图 2–7（§5, pp.6–8）；基线对照表 1（§5.5, p.8）；局限（§6, p.8）；附录 A（SDI 替换、边熵、结构图实验）与 B（数据细节, pp.11–16）。

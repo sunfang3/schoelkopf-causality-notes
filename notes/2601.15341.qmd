@@ -1,0 +1,75 @@
+---
+title: "潜在因果扩散：单细胞扰动建模与扰动响应的因果线性化"
+subtitle: "Lars Lorch et al., arXiv:2601.15341 (2026)"
+description: "把单细胞基因表达建模为测量噪声下可观测的平稳扩散过程（LCD），扰动作用于共享隐态；CLIPR 从学到的漂移中闭式提取基因间直接因果效应，线性漂移下可证可识别。在两个 Perturb-seq 组合扰动基准与全基因组筛选上超过 SALT/PEPER/CPA/GEARS，并区分直接因果与差异表达。"
+date: 2026-01-20
+categories: [因果推断, 单细胞扰动建模]
+paper-id: 2601.15341
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Lars Lorch（ETH Zürich CS）、Jiaqi Zhang（MIT LIDS / Broad 研究所）、Charlotte Bunne（EPFL / ISREC）、Andreas Krause（ETH Zürich）、Bernhard Schölkopf（MPI for Intelligent Systems Tübingen / ELLIS / ETH）、Caroline Uhler（MIT / Broad，通讯） |
+| 出处 | arXiv:2601.15341v1 [q-bio.MN]（PNAS 排版） |
+| 日期 | 2026-01-20 |
+| 页数 | 35 页（正文含 Methods p.1–16；SI 附录 p.21–35） |
+
+一句话定位：方法文章，提出潜在因果扩散（latent causal diffusion, LCD）生成模型——把单细胞基因表达视为平稳随机微分方程在测量噪声下的观测——并用 CLIPR（causal linearization via perturbation responses，基于扰动响应的因果线性化）从学到的非线性漂移中闭式提取基因间直接因果效应。
+
+## 问题与模型
+
+研究问题：扰动筛选的计算建模中，现有深度方法常跑不赢简单加性基线、混淆测量噪声与生物信号、且对因果结构保持沉默；差异表达（differential expression, DE）只捕获经调控网络累积的总效应。能否构造既预测未见扰动组合的完整单细胞分布、又显式学习基因调控动力学的因果生成模型？
+
+模型（式 (1)–(2)）：$d$ 个基因的无噪状态 $x(t)\in\mathbb{R}^d$ 服从 SDE $dx_g=[f(x)]_g\,dt+\sigma\,dW_g$，漂移 $f$（因果调控机制）由跨基因共享隐状态的神经网络参数化；平稳性假设使 $f$ 可直接从状态分布 $p(x)$ 推断而无需时间序列；扰动 $q$ 表示为对共享隐态的偏移（嵌入 $e_q$，组合取 $e_{q_a}+e_{q_b}$，对照为零向量），作用于机制而非表达本身；测量用零膨胀泊松（zero-inflated Poisson, ZIP）似然 $p(y_g\mid x_g;\pi_g)$，显式分离生物随机性与技术噪声。推断两步（Methods）：(1) 经验贝叶斯（empirical Bayes）以隐式先验 $x=g(\epsilon,\phi)$ 与带温度的 log-sum-exp 证据下界（式 (9)–(11)）推断各条件的 $\pi$ 与 $p_q(x)$；(2) 多尺度去噪得分匹配（$\sigma=\sqrt{2}$，$\alpha\in[0.01,10]$，式 (12)）联合拟合 $f$ 与 $e_q$，生成用退火 Euler–Maruyama（式 (13)）。
+
+## 识别或主要命题
+
+CLIPR 考虑线性化漂移 $\tilde f_q(x)=Ax+b+c_q$（$\Re(\lambda_{\max}(A))<0$，平稳均值 $\mu_q=-A^{-1}(b+c_q)$，式 (3)–(4)），定义初始扰动响应 $v_{f_q}:=f_q(0)$（式 (5)）与极限扰动响应 $l_{f_q}:=x^*$ 使 $f_q(x^*)=0$（式 (6)，沿无噪声流积分近似，恰对应 DE）。Theorem 1（p.4）：以 $V=[v_{f_{q_i}}]$、$L=[l_{f_{q_i}}]$，$\hat A=-VL^+$（Moore–Penrose 伪逆，式 (7)）以最小二乘误差复现全部扰动响应且 Frobenius 范数最小；若真实漂移线性且 $L$ 行满秩（$b$ generic 时 $k\ge d$ 个线性无关偏移 $c_q$ 即充分），则 $\hat A=A$——足够多样的扰动识别全部直接因果效应（呼应干预提升可识别性的既有结果）；证明核心是 $AL=-V$（式 (17)）。Corollary 2（p.5）：$\hat b=-\hat A l_{f_0}$、$\hat c_q=\hat A l_{f_q}-\hat A l_{f_0}$，偏移由 $\hat A$ 隐含，扰动无需已知靶点（可推广到药物扰动）；实践用 Tikhonov 版本 $\hat A_\lambda=-VL^\top(LL^\top+\lambda I)^{-1}$（式 (8)）。SI 的 Theorem 3/Corollary 4（p.21）处理变量替换换算。核心含义：DE（即 $L$）与直接因果效应（$A$）被 $A=-VL^+$ 分解——DE 是直接因果经时间累积的总效应。
+
+## 估计/经验
+
+三组实验。(i) 组合预测（Fig. 2）：Norman et al.（K562 CRISPRa，96,804 细胞，98 单 + 110 双基因扰动）与 Wessels et al.（THP-1 Cas13 敲低，23,722 细胞，5 单 + 104 双）；均建模 1000 高变异基因（训练含对照、全部单扰动与部分双扰动），十折留出双组合；主指标为 top 20 DE 基因的 MMD。LCD 在约 80% 以上测试扰动上优于加性基线 SALT/PEPER 与深度方法 CPA、GEARS，仅 PEPER 在单扰动较多的 Norman 数据上可比。按遗传交互（genetic interaction, GI）分层，增益集中于新形态（neomorphic）、协同、抑制型；加性/上位/冗余型上 SALT 打平——LCD 在非线性机制上加和而非在表达谱上加和。(ii) 模拟线性系统（Fig. 3）：100/300/1000 基因、幂律与 Erdős–Rényi 结构、每设定 10 个随机系统；AUROC 随扰动数单调上升，$d$ 个扰动时达 0.74–0.84（幂律）/0.93–0.98（Erdős–Rényi），估计偏向非稀疏（最小 $\ell_2$ 范数）。(iii) 全基因组 Perturb-seq（Replogle et al.，K562 CRISPRi，209,462 细胞，1000 基因全部单扰动；Fig. 4）：对 $\hat A_\lambda$ 层次聚类得到富集于 GO 术语与经典通路的功能模块（Fisher $P<0.01$，BH 校正）；top 50 最强预测因果边（多为核糖体蛋白基因）使下游显著 DE 概率提高 4.78 倍（lift）、无 DE 概率降低 2.53 倍（conviction）；对从未扰动的基因（41 个上游基因五折留出），最强预测效应仍使 DE 概率提高 2.71 倍；先验推断约 9 小时、漂移训练约 1 小时。
+
+## 开放问题
+
+本文自认：(1) 快照数据根本不可识别（多条时间轨迹可产生相同快照，Weinreb et al. 2018），多扰动条件仅缓解；(2) GI 为加性或只需均值预测时，SALT/PEPER 表现相当且更省算力；(3) 扰动模型依赖训练中学到的嵌入（同 CPA），只能预测已观测扰动的组合；(4) CLIPR 只是对非线性漂移的线性近似，解释具体边的有无需谨慎，且估计偏向非稀疏；(5) 得分匹配把漂移拟合为梯度场，隐含稳态零旋度（$\partial[f_q]_a/\partial x_b=\partial[f_q]_b/\partial x_a$），不能建模非零旋度动力学（如三抑制子负反馈环）；(6) 未来工作：合并两步推断、扩展到药物扰动与其他模态、批次/细胞类型条件化、实验设计导航。笔者补充：(7) 可识别性只覆盖线性漂移：非线性系统上 CLIPR 线性近似与真实因果结构的距离无定量刻画，模拟验证也仅在线性系统；(8) 组合数据集（Norman 98 单扰动 < 1000 基因）不满足 $k\ge d$，实践靠 Tikhonov 正则，正则化偏差未量化；(9) "何时值得用 LCD"无可操作判据：缺预先检验 GI 非加性或分布异质性的统计检验，方法选择靠事后分层；(10) K562 验证依赖"a 直接调控 b ⇒ 扰动 a 使 b 显著 DE"的单向蕴含，而 top 20 基因与聚类也部分依赖同一 DE 信号，存在弱循环验证风险。
+
+## 文献谱系
+
+前作（在本文中的角色）：Lorch, Krause & Schölkopf (2024, arXiv:2310.17405)——平稳扩散因果建模的直接前身，提供漂移–平稳分布联系、得分匹配目标与扰动多样性论证；Weinreb et al. (2018)——快照不可识别性极限；Norman et al. (2019)、Wessels et al. (2023) 与 Replogle et al. (2022)——三个 Perturb-seq 数据集与 GI 六分类框架；Gaudelet et al. (2024)——SALT/PEPER 加性基线；Ahlmann-Eltze et al. (2025)——"深度方法跑不赢线性基线"的批评，动机之一；CPA（Lotfollahi et al. 2023）与 GEARS（Roohani et al. 2024）——深度基线，前者也是嵌入式扰动模型局限的来源；Bunne et al. (2023, 神经最优传输)——MMD 度量来源；Yang–Katcoff–Uhler (2018) 与 Zhang et al. (2023)——干预下可识别性，Theorem 1 的理论定位；Mooij et al. (2016)——直接因果定义；Song & Ermon (2019)——多尺度去噪得分匹配。后续方向即开放问题(6)。
+
+## 明确不覆盖
+
+不使用时间序列数据（只从快照推断）；不做药物扰动与其他模态的实际实验；不处理批次与细胞类型整合；不给非线性系统的可识别性定理；不做实验设计的算法实现。
+
+## 阅读路径
+
+先读 Figure 1（数据–状态空间–SDE 与 CLIPR 三面板）与 Introduction；Results 依序读组合预测（Fig. 2）、模拟系统（Fig. 3）、全基因组筛选（Fig. 4）；再读 Methods 的 Inference 与 CLIPR（p.11–14）；证明在 SI p.21–22，Table S1/S3 备查。姊妹篇对照：2310.17405（Lorch et al.，平稳扩散因果建模——本文的直接前身，站内有笔记，可对照其无测量噪声、无共享隐态的设定）；2402.09236（Rajendran et al.，可解释概念学习——干预可识别性的另一语境，与 Theorem 1 的"足够多样扰动"互读）。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 潜在因果扩散 | latent causal diffusion (LCD) |
+| 扰动响应因果线性化 | causal linearization via perturbation responses (CLIPR) |
+| 初始/极限扰动响应 | initial / limit perturbation response ($v_{f_q}$ / $l_{f_q}$) |
+| 零膨胀泊松 | zero-inflated Poisson (ZIP) |
+| 经验贝叶斯 | empirical Bayes |
+| 隐式先验 | implicit prior |
+| 去噪得分匹配 | denoising score matching |
+| 遗传交互 | genetic interaction (GI) |
+| 新形态/上位/冗余交互 | neomorphic / epistatic / redundant GI |
+| 差异表达 | differential expression (DE) |
+| 最大均值差异 | maximum mean discrepancy (MMD) |
+| Moore–Penrose 伪逆 | Moore–Penrose pseudoinverse |
+| Tikhonov 正则 | Tikhonov regularization |
+| 提升度 / 确信度 | lift / conviction |
+| 零旋度 | zero curl / gradient field |
+| Perturb-seq | Perturb-seq（单细胞CRISPR筛选） |
+
+## 来源定位
+
+`papers/2601.15341.pdf`（35 页）。关键内容：LCD 模型与 ZIP 似然（式 (1)–(2)，p.2–3）；线性化与扰动响应定义（式 (3)–(6)，p.4）；Theorem 1 与可识别性条件（p.4）；$\hat A=-VL^+$ 与 Tikhonov 版本（式 (7)–(8)，p.4）；Corollary 2（p.5）；组合预测与 GI 分层（Fig. 2，p.6）；模拟系统（Fig. 3，p.7）；全基因组筛选与 lift/conviction（Fig. 4，p.8–9）；两步推断与得分匹配（Methods，式 (9)–(13)，p.11–13）；CLIPR 数值近似与变量替换（Methods p.14，式 (15)–(16)）；Theorem 1 证明与 Theorem 3/Corollary 4/Lemma 5（SI，p.21–23）；数据统计 Table S1（SI p.33）；GI 分类 Table S2–S3（SI p.34–35）。

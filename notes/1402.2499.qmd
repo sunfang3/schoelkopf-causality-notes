@@ -1,0 +1,79 @@
+---
+title: "为信息几何因果推断辩护"
+subtitle: "Dominik Janzing et al., arXiv:1402.2499 (2014)"
+description: "给 IGCI 判因准则两个直观重释——「非典型点」的 Markov 不等式视角与「函数计数等于似然比」的网格视角，并在无噪双变量玩具模型中证明反因果方向的无监督预测误差严格更小。"
+date: 2014-02-11
+categories: [因果推断, 信息几何]
+paper-id: 1402.2499
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Dominik Janzing、Bastian Steudel、Naji Shajarisales、Bernhard Schölkopf（均 Max Planck Institute for Intelligent Systems, Tübingen） |
+| 出处 | arXiv:1402.2499v1 [stat.ML]（后收录于 ACML 2014） |
+| 日期 | 2014-02-11（仅 v1） |
+| 页数 | 13 页（正文 11 页 + 参考文献 2 页） |
+
+一句话定位：解释性论文——把抽象的 IGCI 独立性假设翻译成可直观把握的两种语言，并与「半监督学习只在反因果方向可行」的假说接通。
+
+## 问题与模型
+
+研究问题：信息几何因果推断（Information-Geometric Causal Inference, IGCI）以「输入分布与因果机制独立」区分双变量因果方向，但其原始表述（协方差为零、信息空间正交）抽象难懂；本文问：这一假设有无更直观的正当性？它与学习理论中的方向不对称性有何关系？
+
+模型：无噪双变量 $Y=f(X)$，$f$ 为 $[0,1]$ 上单调递增的微分同胚（diffeomorphism），$p_X,p_Y$ 严格正。**Postulate 1**（密度与对数斜率不相关，式 (1)）：因果方向下 $\int_0^1 p(x)\log f'(x)dx \approx \int_0^1 \log f'(x)dx$，即把 $p_X$ 与 $\log f'$ 视作 $[0,1]$ 上均匀测度下的两个随机变量时协方差为零。由 $\int\log f' \le \log\int f' = 0$ 得复杂度
+$$C_{X\to Y} := \int_0^1 p(x)\log f'(x)\,dx \le 0 \tag{3}$$
+而变量替换给出 $\int_0^1 p(x)\log f'(x)dx = -\int_0^1 p(y)\log (f^{-1})'(y)dy$（式 (4)），故反向对应量 $C_{Y\to X}=\int_0^1 p(y)\log(f^{-1})'(y)dy \ge 0$（式 (2)），于是 $C_{X\to Y}\le C_{Y\to X}$（式 (5)，仅 $f\equiv\mathrm{id}$ 取等）。经验判据（**Definition 1**，式 (6)）：按 $x$ 排序比较 $\sum_j\log\frac{|y_{j+1}-y_j|}{|x_{j+1}-x_j|}$ 与按 $y$ 排序的反向量，小者判为因果方向。信息论形式（式 (7)–(8)）：Postulate 1 等价于相对熵可加性 $D(p_X\|\overleftarrow{p}_X) = D(p_X\|u_X) + D(u_X\|\overleftarrow{p}_X)$（$\overleftarrow{p}_X=f'$ 为 $u_Y$ 在 $f^{-1}$ 下的像），在信息几何中即 $p_X\to u_X$ 与 $u_X\to\overleftarrow{p}_X$ 两向量正交（Amari–Nagaoka 意义下）；均匀参考测度 $u$ 可换成同均值方差的高斯以适配无界域。
+
+## 识别或主要命题
+
+本文不含可识别性定理，两个「重释」各有一个带编号的结果：
+
+- **第一重释（§2，非典型点）**：**Theorem 1**（p.4）——设 $U(X),U(Y)$ 为测度空间上的概率分布，可测 $f:\mathcal X\to\mathcal Y$ 的像测度关于 $U(Y)$ 有严格正密度 $q_f$，则 $U_X\{x: -\log q_f(f(x))\ge c\}\le e^{-c}$（对 $1/q_f$ 用 Markov 不等式，证明五行）。**Corollary 1**：超立方体微分同胚下 $\log|\det f'(x)|\ge c$ 的点集体积至多 $e^{-c}$——Jacobian 显著超过平均值（平均值恒为 1）的点是「非典型」的。由式 (12)，若 $\sum_j\log|f'(x_j)|$ 显著为正，则观测点对 $f$ 而言非典型，应怀疑点与 $f$ 并非独立选取——这正是 IGCI 拒绝反因果假设的机制：大斜率对应小体积，反之不然（斜率偏小可以占大多数点），此不对称是 Markov 不等式的单向性。
+- **第二重释（§3，函数计数）**：在网格 $\{0,\dots,k\}\times\{0,\dots,\ell\}$ 上，过角点的单调函数个数 $N(a,b)=\binom{a+b-1}{b}$，故 $|F_{(0,k),(0,\ell)}|/|G_{(0,\ell),(0,k)}|=k/\ell$（式 (15)）；把观测点切成 $n-1$ 个子网格相乘（式 (16)），得两个生成模型（式 (13)(14)，因果侧均匀取 $f$ 再均匀取 $x$）的似然比 (17)，其细网格极限 (18) 恰为 IGCI 判据 (6) 的左端——**IGCI 等价于在两个生成模型间做极大似然判向**。文中进一步把等价类计数与 Vapnik 转导推断及 Universum 推断（ Weston et al. 2006）联系起来：Universum 点提供离散化，插值训练点的函数等价类的大小决定判向。
+
+## 估计/经验
+
+**无实验**：全文三张图（Figure 1–3）均为示意图；对加性噪声的稳健性只引先前 IGCI 文献的经验报告（按两种排序分别计算式 (6) 两侧）。§4 的「预测器」$\hat g(y)=\int_0^y p(y')dy'$（式 (23)，把 $p_Y$ 映回均匀分布）只在玩具模型内演示（Figure 3），作者明言「不打算与现实方法竞争」。
+
+## 开放问题
+
+1. **噪声情形未解决**（§1 自认）：向非确定关系的推广「只有初步结果」，无噪玩具模型之外「依赖是什么样的尚不清楚」；§4 末尾承认推广到有噪情形「才可能对应用有用」。
+2. **连续域的计数论证缺失**（§3 自认）：函数计数必须先离散化，如何在连续域做同样分析「并不显然」；(18) 的极限只对固定网格序列验证。
+3. **近似与启发式**：Postulate 1 本身是近似假设，文中未给出何时被违反的条件；§4 的置换论证（式 (21)）脚注自认精确陈述需要 $\log\overrightarrow{p}_f$ 的下界与 $p_Y$ 的上界，「超出本文范围」；(20) 中的自由参数 $\mu$ 无选择准则。
+4. **假设过强处**：单调递增微分同胚、无共因且恰有一方向为真、参考测度均匀（或高斯）的选择有任意性；多变量只有 Corollary 1 的 Jacobian 直观，无数值判据。后续文献（Janzing 团队关于混杂与选择效应的工作）表明当输入分布与机制因共同隐因而相关时 IGCI 会系统性出错，本文未触及该失效模式。
+5. **经验验证空白**：两个重释没有在真实 cause-effect 数据上检验预测力；与 SSL 假说的连接停留在玩具模型层面（无限无标签样本极限），无任何半监督实验。
+
+## 文献谱系
+
+前作：Daniusis et al. (2010) 与 Janzing et al. (2012, AIJ) 是 IGCI 的原始出处，本文要解释的对象；Janzing & Schölkopf (2010，站内 0804.3678 期刊版) 的算法马尔可夫条件与 Lemeire & Janzing (2012) 用 Kolmogorov 复杂性表述机制独立——因不可计算而经验上不可判定，这是本文寻求可操作重释的直接动机；Schölkopf et al. (2012，站内 1112.2738) 的「SSL 只在反因果方向有意义」假说是 §4 的证明对象；Spirtes et al. 与 Pearl 是条件独立方法的对照；Zhang & Hyvärinen (2009)、Hoyer et al. (2009)、Peters et al. (2010/2011) 是噪声模型家族的并行路线，引以说明「用条件独立之外的信息」这一大家族；Amari & Nagaoka (1993) 提供正交性语言；Vapnik (2006) 与 Weston et al. (2006)、Sinz et al. (2008) 的 Universum 推断是函数计数视角的理论对应物；Cover & Thomas 的「相对熵在双射下不变」支撑式 (24)。后续：IGCI 进入 cause-effect 基准方法族，本文的「输入—机制独立」论证脉络后来汇入独立因果机制（ICM）原则的系统叙述，非典型点视角也被用于讨论混杂与选择偏差下判向的失效。
+
+## 明确不覆盖
+
+不做有噪/非确定关系的理论与算法（自限于无噪情形）；不处理多变量网络与隐共因（假设无共因、恰一方向为真）；不做任何数据实验；不与非 IGCI 方法做性能比较；不讨论 $f$ 非单调或不可逆情形。
+
+## 阅读路径
+
+先读 §1 到式 (8) 为止（Postulate 1、复杂度不等式、正交性表述，这是全部后文的对象），再读 §2 的 Theorem 1 与 Corollary 1（第一重释，证明极短），然后 §3 从式 (13) 到 (18)（第二重释的核心链条），Universum 段可略读；§4 只需细读式 (22)–(25) 及其结论句。姊妹篇对照：Schölkopf et al.（1112.2738，SSL 方向假说的完整论证，本文式 (25) 是其玩具版证明）；Janzing & Schölkopf（0804.3678，机制独立的算法信息论根源，本文的出发点）；Kpotufe et al.（1312.5770，同为熵/信息论判据的统计侧分析）。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 信息几何因果推断 | Information-Geometric Causal Inference (IGCI) |
+| 微分同胚 | diffeomorphism |
+| 非典型点 | untypical points |
+| 密度与对数斜率不相关 | uncorrelatedness between density and log slope |
+| 参考测度 | reference measure |
+| 相对熵 | relative entropy (KL divergence) |
+| 正交性（信息几何） | orthogonality in information geometry |
+| 单调函数 | monotonic function |
+| Universum 推断 | inference with the Universum |
+| 转导推断 | transductive inference |
+| 无监督/半监督回归 | unsupervised / semi-supervised regression |
+
+## 来源定位
+
+`papers/1402.2499.pdf`。关键内容：Postulate 1 与复杂度不等式 式 (1)–(5)（p.2–3）；IGCI 判据 Definition 1 式 (6) 与相对熵表述 式 (7)–(8)（p.3–4）；Theorem 1 与 Corollary 1（p.4–5）；非典型点与 IGCI 的关系 式 (12)（p.5）；生成模型与计数 式 (13)–(17)（p.6–7）、细网格极限 式 (18)（p.7）；Universum 联系（p.7–8）；无监督预测器 式 (23) 与误差不等式 式 (24)–(25)（p.10–11）。

@@ -1,0 +1,86 @@
+---
+title: "信息几何因果推断 IGCI：确定性关系下的方向判别"
+subtitle: "Daniusis et al., arXiv:1203.3475 (2012)"
+description: "在无噪声可逆关系 Y=f(X) 下把『原因分布与机制独立』形式化为相对熵的正交分解，仅凭密度峰与斜率的相关符号判别因果方向，是确定性/低噪声情形因果推断的奠基方法。"
+date: 2012-03-15
+categories: [因果推断, 信息几何]
+paper-id: 1203.3475
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Povilas Daniusis（Vilnius University / MPI for Biological Cybernetics）、Dominik Janzing、Joris Mooij、Jakob Zscheischler、Kun Zhang、Bernhard Schölkopf（MPI for Biological Cybernetics, Tübingen）、Bastian Steudel（MPI for Mathematics in the Sciences, Leipzig） |
+| 出处 | arXiv:1203.3475（UAI 2010 论文的 arXiv 版） |
+| 日期 | 2012-03-15 |
+| 页数 | 8 页 |
+
+一句话定位：提出信息几何因果推断（Information Geometric Causal Inference, IGCI），证明当 $Y=f(X)$ 完全确定性且 $f$ 可逆时，仍可利用"$p_X$ 与 $f$ 独立"这一不对称性判别因果方向，计算量线性于样本数。
+
+## 问题与模型
+
+研究问题：加性噪声模型（additive noise model, ANM）$Y=f(X)+E,\ E\perp X$ 与后非线性模型（post-nonlinear model, PNL）依赖噪声独立性判方向，在确定性关系 $Y=f(X)$（$f$ 可逆）下失效——此时 $X\to Y$ 与 $Y\to X$ 可互相精确表示。核心假设是 Postulate 1（Indep. of input and function）：若 $X\to Y$，则 $P(X)$ 与 $f$ 对应自然界相互独立的机制；其形式化为 Postulate 2：设 $\mathcal E_X,\mathcal E_Y$ 为参考指数族，$u,v$ 为 $p_X,p_Y$ 在其上的投影，$u_f$ 为 $u$ 经 $f$ 的像，则 $X\to Y$ 时
+$$D(p_Y\|\mathcal E_Y)=D(p_X\|\mathcal E_X)+D(u_f\|\mathcal E_Y).$$
+在一维均匀参考下等价于条件 (2)：$\int_0^1\log f'(x)p(x)\,dx=\int_0^1\log f'(x)\,dx$，即把 $\log f'$ 与 $p$ 视为 $[0,1]$ 上均匀测度的随机变量时协方差为零——"输入密度的峰不与机制的陡峭区相关"。反向则必然 $\mathrm{Cov}(\log g',p_Y)=D(g'\|v)+D(v\|g')\ge 0$（$g=f^{-1}$）：效应的峰必须落在逆函数的大斜率区。
+
+## 识别或主要命题
+
+- 引理 1（信息空间正交性）：$\int q\log(r/s)=\int r\log(r/s)\iff D(q\|r)+D(r\|s)=D(q\|s)$，把条件 (2) 翻译为 Pythagoras 式分解 (5)–(6)，是全文技术枢纽。
+- 推断规则：$C_{X\to Y}:=D(p_X\|\mathcal E_X)-D(p_Y\|\mathcal E_Y)$，负则判 $X\to Y$（IGCI）。均匀参考下 $C^U_{X\to Y}=\int_0^1\log|f'(x)|\,p(x)\,dx$（式 10）；高斯参考下经标准化预处理后只差熵项（式 8–9）。
+- 定理 1（低噪声稳健性）：若 $Y=f(X)$ 且 $S(p_Y)<S(p_X)$，则对满足非高斯性比较 (16) 且 $\sigma<(e^{2S(p_X)-2S(p_Y)}-1)/J(Y)$（$J$ 为 Fisher 信息）的噪声 $E$，有 $S(p_Y+\sqrt{\sigma}E)<S(p_X)$——熵序在小噪声下保持，方向判断仍正确。证明依赖引理 2（噪声致熵增上界，由 De Bruijn 恒等式与 Fisher 信息卷积不等式导出）。
+- 统一性：3.3 节证明 Janzing et al. (2009) 的线性迹方法（$\Delta=\log\tau(A\Sigma_XA^T)-\log\tau(AA^T)-\log\tau(\Sigma_X)$，式 11）是各向同性高斯参考下的特例，且该情形下 Postulate 2 获得旋转不变先验下的集中度量的概率论佐证。
+
+## 估计与经验
+
+估计器（3.5 节）：数据先归一化到 $[0,1]$（均匀参考）或标准化（高斯参考），多维先白化；熵用 Kraskov 估计器（式 12），或斜率乘积估计 $\frac{1}{m-1}\sum\log|(y_{i+1}-y_i)/(x_{i+1}-x_i)|$（式 13）。实验：(i) 模拟（表 1–2，五种输入 $\times$ 五种机制 $x^{1/3},x^{1/2},x^2,x^3,s_5$，$m=1000$，每设置 100 次）：确定性情形下 $s_5$ 类波动函数几乎全对，而导数单调函数与均值偏移输入配对时（峰与大导数区重合）必然判错（0%）；$\lambda=0.03$ 小噪声下性能相仿；$Y=X+\epsilon\sin(\omega X)$（$\epsilon=0.005,\omega=40$）约 90% 正确。(ii) CauseEffectPairs 51 对（表 3）：IGCI 均匀参考 100% 出决策、78% 正确（高斯参考 76%），AN(GP) 20%/100%，PNL 82%/95%——IGCI 以决策率换精度且快几个量级。(iii) 莱茵河 22 站 1990–2008 年 15 分钟水位（时移对齐后 231 对）：均匀参考 82%（189 对正确）、高斯参考 84%（193 对），近站（低噪）与远站（高噪）均稳健。
+
+## 开放问题
+
+1. 作者自陈：大噪声情形方法可能完全失败，其行为"超出本文范围，留作未来工作"，只有真实数据经验结果，无理论刻画。
+2. 作者自陈：如何为推断出的方向给出置信度是明确的未来工作——IGCI 输出只有符号，无显著性。
+3. 两个估计器 (12) 与 (13) 的差异"尚未完全理解"（脚注 7）；(13) 在有噪时随 $m\to\infty$ 发散，须取正反两向之差补偿，收敛性质未分析。
+4. 参考测度族的选择实质上决定了"独立"的含义（讨论节明言此点），均匀与高斯参考的判据相差 $\log\sigma_X-\log\sigma_Y$、可有不同符号，而文中没有给出选择原则，只说"两者经验上都好"。
+5. Postulate 2 本身除线性情形（借 Janzing et al. 2009 的集中度量论证）外没有生成式模型层面的严格证成；条件 (2) 是关于均匀测度的特定（无权重）协方差为零，比算法独立性（Kolmogorov 复杂度）弱得多，何时近似成立无理论。
+6. 定理 1 只保证熵序保持，需非高斯性条件 (16) 与 Fisher 信息界；且当 $D(u_f\|\mathcal E_Y)=0$（函数"太简单"）或峰与陡峭区重合时识别性丧失——表 2 中 0% 的格子正是必然错误。后续基准工作（Mooij et al. 2016 因果对基准）表明 IGCI 的表现对重标定与预处理敏感，不同变体差异明显。
+
+## 文献谱系
+
+- Lemeire & Dirkx (2006)、Janzing & Schölkopf (2008, arXiv:0804.3678)：算法独立性/算法马尔可夫条件，Postulate 1 的思想来源（本站有其笔记）。
+- Hoyer et al. (2009) ANM、Zhang & Hyvärinen (2009) PNL：基于噪声独立性的前置方法，本文的动机反衬与实验对照（表 3）。
+- Janzing et al. (2009, arXiv:0909.4386)：线性高斯的迹方法，在 3.3 节被吸收为各向同性高斯参考特例。
+- Amari (2001)：信息几何正交性（mixture 几何下的 Pythagoras 分解），引理 1 的概念框架。
+- Kraskov et al. (2003)：熵估计器 (12) 的来源。
+- Mooij & Janzing (2010)：NIPS 2008 CauseEffectPairs 挑战，实验数据来源。
+- Spirtes et al. (1993)、Pearl (2000)：条件独立方法及其 Markov 等价类局限，引言中的出发点。
+- 后续：IGCI 成为 Tübingen 因果对基准上与 ANM、PNL 并列的经典基线，其"独立机制几何化"思路被后续基于模型复杂度的因果推断一线延续。
+
+## 明确不覆盖
+
+不处理 $f$ 不可逆或多于两个变量的情形；不处理隐混杂、选择偏差；不给出噪声水平的一般理论（只覆盖低噪声）；不涉及置信度与显著性检验；离散情形只给了一段概述性草图（3.4 节）。
+
+## 阅读路径
+
+先读第 1 节例 1 与图 1 建立直觉，再读 2.1（引理 1）与 2.3（Postulate 2 及 IGCI 规则），跳到 3.1 的式 (10) 与 3.5 的估计器即可实现；第 4 节定理 1 是唯一稳健性结果，值得细读；实验看表 2（失败模式）与表 3（因果对对比）。姊妹篇对照：arXiv:0804.3678（算法马尔可夫条件，Postulate 1 的严格化）、arXiv:0909.4386（迹方法，被本文 3.3 节吸收）；本站另可参 1202.3775（KCI）与 1202.3757（函数模型可识别性）构成的约束/函数双路线图景。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 信息几何因果推断 | Information Geometric Causal Inference (IGCI) |
+| 输入与机制的独立性 | independence of input and function |
+| 相对熵（KL 散度） | relative entropy / Kullback-Leibler divergence |
+| 指数族参考测度 | exponential family of reference measures |
+| 信息空间正交性 | orthogonality in information space |
+| 可微同胚 | diffeomorphism |
+| Fisher 信息 | Fisher information |
+| De Bruijn 恒等式 | De Bruijn identity |
+| 非高斯性 | non-Gaussianity |
+| 集中度量现象 | concentration of measure phenomenon |
+| 加性噪声模型 | additive noise model (ANM) |
+| 后非线性模型 | post-nonlinear model (PNL) |
+
+## 来源定位
+
+来源：`papers/1203.3475.pdf`。关键结果原文编号：Postulate 1（第 1 节）、引理 1 与条件 (2)（2.1 节）、Postulate 2 与式 (7)、IGCI 规则（2.3 节）、式 (10)（3.1 节）、式 (11)（3.3 节）、估计器 (12)–(13)（3.5 节）、引理 2 与定理 1（第 4 节）；实验为表 1–2（模拟）、表 3（CauseEffectPairs）、图 3（莱茵河 231 对）。

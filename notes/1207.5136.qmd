@@ -1,0 +1,88 @@
+---
+title: "带独立噪声的时间序列模型 TiMINo 与因果图识别"
+subtitle: "Peters et al., arXiv:1207.5136 (2012)"
+description: "把 iid 数据上的函数因果模型推广为带独立噪声的时间序列模型 TiMINo，证明摘要因果图在两类互不蕴含的条件下可由联合分布识别，并给出模型不符时宁可弃权的实用算法 TiMINo causality。"
+date: 2012-07-21
+categories: [因果推断, 时间序列]
+paper-id: 1207.5136
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Jonas Peters（ETH Zurich / MPI for Intelligent Systems, Tübingen）、Dominik Janzing、Bernhard Schölkopf（MPI for Intelligent Systems, Tübingen） |
+| 出处 | arXiv:1207.5136 |
+| 日期 | 2012-07-21（v1） |
+| 页数 | 11 页 |
+
+一句话定位：定义带独立噪声的时间序列模型（Time Series Models with Independent Noise, TiMINo），定理 1 证明其摘要图可识别——可含非线性与瞬时效应、无需忠实性（条件 i）或利用时间结构（条件 ii）；算法 1（TiMINo causality）以「拟合 + 残差独立性检验，否则输出『我不知道』」胜过 Granger 类方法。
+
+## 问题与模型
+
+问题：给定多元时间序列样本 $(X_1,\ldots,X_T)$，恢复真实的因果摘要时间图（summary time graph；全时间图 full time graph 把每个 $X_t^i$ 作为节点，摘要图把每条序列收缩为一点）。设最大滞后 $p$、平稳、噪声同方差。
+
+既有方法三重缺陷（第 3.4 节）：(1) 瞬时效应——Granger 因果在 $X_t\to Y_t$ 时两个方向都「有助于预测」，ANLTSM（Chu & Glymour 2008）与 TS-LiNGAM（Hyvärinen et al. 2008）只允许线性瞬时效应；(2) 隐混杂路径无法由条件阻断；(3) 模型假设被违反时无警示地给出错误结论。
+
+定义 1（TiMINo）：$X_t^i = f_i\big((PA_i^p)_{t-p},\ldots,(PA_i^1)_{t-1},(PA_i^0)_t,\,N_t^i\big)$（式 (1)），噪声 $\{N_t^i\}$ 联合独立、对每个 $i$ 在 $t$ 上同分布，全时间图无环；方程须来自可识别函数模型类（identifiable functional model class, IFMOC）——含因果最小性（causal minimality）与使二元情形可识别的函数类（线性非高斯、ANM、后非线性、离散 ANM）。
+
+## 识别定理与算法
+
+定理 1（可识别性）：若 $X_t$ 服从 TiMINo 且 (i) 方程来自 IFMOC，或 (ii) 每条序列都有时间结构（父集含自身滞后）、联合分布对全时间图忠实、摘要图无环，则全时间图可由联合分布恢复，摘要图可识别；两条件互不蕴含。条件 (ii) 表明时间结构既使问题变难（放弃 iid）也变易：iid 下线性-高斯不可识别，有时间结构则可（TS-LiNGAM 仍失败）。引理 1（附录）：TiMINo 满足马尔可夫性（每个变量给定父集与非后代独立），证明仅在 $t\in\mathbb N$ 给出，作者相信 $t\in\mathbb Z$ 类似。
+
+算法 1（无反馈情形）：迭代地在候选集 $S$ 中为每个 $k$ 用其余序列（各 $\pm p$ 阶滞后及当期）拟合 TiMINo，用 HSIC 检验残差独立性（对每条序列做至多 $\pm p$ 阶、至少 $\pm 4$ 阶时移后按 iid 数据检验），选独立性最好的 $k^*$ 作为汇点（sink）从 $S$ 移除、令其父集为其余变量，直至剩一个序列，最后剪除多余父集；任何一步都无残差独立则输出「我不知道——模型拟合差」。复杂度 $O(d^2)$。拟合器三种：线性 VAR、可加模型、GP 回归（TiMINo-linear/gam/GP），前两者用 AIC 定阶。残差检验也可用交叉相关的线性版本，但实验 1、5 表明交叉相关不够。
+
+第 5.2 节部分因果发现（partial causal discovery）：无 $k$ 达到残差独立时，枚举剔除子集 $S_0$ 后对剩余序列重拟合，输出部分图与被剔除集；复杂度 $2^{|S|}$，仅对小 $S$ 可行，理论性质「尚待研究」。第 5.3 节自陈三点弱点：(i) 精细调参的函数仍可能在错误方向拟合出独立残差；(ii) 检验的零假设是独立而「发现因果」本应是备择假设——小样本无法拒绝独立时会把错误方向当结论，Bonferroni 校正加剧此效应；(iii) 大样本下模型与真实过程的任何微小偏差都导致拒绝独立、弃权率上升。
+
+## 实验
+
+模拟（每组 100 个数据集，$\alpha=0.05$，含瞬时效应）：实验 1（隐混杂 $Z_t$，$a\in[0,0.95]$，长度 1000，噪声 $0.4\cdot N(0,1)^3$）：所有 $a$ 下 G-causality 与 TS-LiNGAM 均错判 $X\to Y$，TiMINo 对所有 $a$ 不作决定；噪声取高斯时所有方法失败。实验 2（线性高斯含瞬时效应，长度 2000）：TiMINo-linear 83% 正确 / 7% 错 / 10% 弃权，线性 Granger 13%/87%/0%，TS-LiNGAM 19%/81%/0%（表 1）。实验 3（非线性，长度 500）：TiMINo-gam 95%、TiMINo-GP 94% 正确（错 1%、弃权 4–5%），线性 Granger 69%、非线性 Granger 0%（实现仅成对分析，必加 $X\to Z$）、TS-LiNGAM 12%；TiMINo-linear 模型不符即 100% 弃权（表 2）。实验 4（非可加交互 $\exp(-(X_{t-1}+X_{t-2})^2)$）：仅 TiMINo-GP 在长序列下可靠，线性 Granger 与 TS-LiNGAM 超过 90% 错，非线性 Granger 大多正确（图 2）——坏模型假设不必然导致错误结论。实验 5：$Y_t$ 含 $X_{t-1}^2$ 时交叉相关漏检、HSIC 正确识别 $X\to Y$。实验 6（部分发现，长度 600，$X$ 隐去）：82% 正确恢复部分图、18% 错，对照方法全错（图 3）。
+
+真实数据（TiMINo-GP 因样本不足恒弃权）：煤气炉（$n=296$，燃气率 $\to$ CO$_2$）各法皆对，忽略时间信息的 iid ANM 在正确方向 $p=4.8\%$、错误方向 $p=9.1\%$，会选错；Old Faithful 间歇泉（$n=194$，喷发时长 $\to$ 下次间隔）TiMINo 对，非线性 Granger 反向判 $Y\to X$；室内外温度（$n=16382$，室外 $\to$ 室内为预期）TiMINo 因疑有时间混杂（供暖）弃权，TS-LiNGAM 反向；鲍鱼年龄-直径（无时间结构，随机取 1000 个样本）TiMINo 对、TS-LiNGAM 反向；黄油与切达奶酪周价（$n=522$，隐混杂为牛奶价）TiMINo 弃权，TS-LiNGAM 与 Granger 错判 $X\to Y$。相位斜率指数（Nolte et al. 2008）仅在实验 6 表现好。
+
+## 开放问题
+
+1. 自陈四项未来工作（第 7 节）：异方差模型与预处理（去趋势、去周期）以降低弃权率；残差自相关检验尚未纳入；非瞬时反馈的拟合需快于穷举的算法；更大规模真实数据评估。
+2. 部分因果发现无理论保证（作者明言「尚待研究」），子集枚举指数级，隐变量稍多即不可行。
+3. 用 iid 的 HSIC 检验时移后的相依序列只是启发式：$\pm\max(p,4)$ 之外的依赖会被漏检；弱点 (ii) 的零假设方向颠倒与 Bonferroni 校正的交互无系统分析，高维序列无「最小样本量」准则。
+4. 定理 1 覆盖非瞬时反馈的可识别性，算法 1 却只处理无反馈情形；含环 TiMINo 的拟合要穷举结构，理论与实践之间留着整块空缺。
+5. 平稳、同方差的假设排除大量真实序列（温度数据弃权即为例证）；时间聚合与子采样的影响未触及，后续工作（Gong et al. 2015）表明子采样可反转 Granger 方向。
+6. 引理 1 仅对 $t\in\mathbb N$ 证明；弃权机制无统计校准——「模型拟合差」依赖单个 $\alpha=0.05$ 检验，无误差率控制理论。
+
+## 文献谱系
+
+- Granger (1969)、Bell et al. (1996)（GAM 非线性 G-causality）、Chu & Glymour (2008)（ANLTSM，经 FCI 的松弛条件独立检验）、Hyvärinen et al. (2008)（TS-LiNGAM）：既有时间序列因果方法，第 3 节逐一列其瞬时效应/混杂/坏假设缺陷并作实验对照。
+- Shimizu et al. (2006) LiNGAM、Hoyer et al. (2009) ANM、Zhang & Hyvärinen (2009) 后非线性、Peters et al. (2011a) 离散 ANM：iid 函数模型可识别性谱系，定义 1 方程类的来源；Peters et al. (2011b) IFMOC（站内 1202.3757）是多变量可识别性机器，定理 1 条件 (i) 及其证明的直接工具。
+- Mooij et al. (2009)：iid ANM 的依赖最小化回归与「逐个找汇点」程序，算法 1 是其向时间序列的改造；Gretton et al. (2008) HSIC 是残差独立性检验的引擎，与站内 1202.3775 的 KCI 同属核检验家族。
+- Florens & Mouchart (1982)、Eichler (2011)：G-causality 的条件独立解释；Janzing & Steudel (2010) 论证「错误方向的独立残差拟合需精细调参」，是弱点 (i) 的挡箭牌；Nolte et al. (2008) 相位斜率指数是附加对照基线。
+- 后续：Peters, Janzing & Schölkopf《Elements of Causal Inference》（2017）将该框架收入其体系；时间聚合/子采样与异方差缺口由 Gong et al. (2015) 等接续。
+
+## 明确不覆盖
+
+不含瞬时反馈的算法（模型与定理允许非瞬时反馈，拟合未解决）；主算法不处理隐变量；不处理非平稳/趋势数据、异方差噪声与干预实验；不给方向判定的置信度（只有「决定/弃权」二元输出）；不讨论 $p$ 与模型类的理论选择。
+
+## 阅读路径
+
+先读第 3.4 节（既有方法三重缺陷），再读第 4 节定义 1 与定理 1（两条件各读其后解释段），第 5 节按算法 1 → 5.2 → 5.3 顺序（5.3 是作者自陈局限），第 6 节先看表 1–2 再读 6.2 真实数据；附录引理 1 可选。姊妹篇：1202.3757（IFMOC，定理 1 条件 (i) 的所指）、1202.3775（KCI/HSIC 核检验家族）、0911.0280（离散 ANM，方程类之一）；同组纲领论文 1206.6471 的「机制独立」原理是 TiMINo 假设的哲学背景。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 带独立噪声的时间序列模型 | Time Series Models with Independent Noise (TiMINo) |
+| 摘要时间图 | summary time graph |
+| 全时间图 | full time graph |
+| 瞬时效应 | instantaneous effect |
+| Granger 因果 | Granger causality |
+| 可识别函数模型类 | identifiable functional model class (IFMOC) |
+| 因果最小性 | causal minimality |
+| 汇点 | sink |
+| 部分因果发现 | partial causal discovery |
+| 交叉相关 | cross-correlation |
+| ANLTSM（可加非线性时间序列模型） | additive nonlinear time series models |
+| 相位斜率指数 | phase slope index |
+
+## 来源定位
+
+来源：`papers/1207.5136.pdf`。关键编号：定义 1 与式 (1)（第 4 节）、定理 1（第 4 节）、算法 1（第 5.1 节）、弱点 (i)–(iii)（第 5.3 节）、表 1（实验 2）、表 2（实验 3）、图 1（实验 1）、图 2（实验 4）、图 3（实验 6）、引理 1 与定理 1 证明（第 8 节附录）、真实数据实验 7–11（第 6.2 节）。

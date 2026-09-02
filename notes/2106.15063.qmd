@@ -1,0 +1,80 @@
+---
+title: "unpopular：半同胞回归在 TESS 测光的软件化"
+subtitle: "Soichiro Hattori et al., arXiv:2106.15063 (2021)"
+description: "把因果像素模型（CPM）从 Kepler 凌星检测移植为 TESS 全帧图像变源测光的开源工具：逐像素岭回归用远距像素预测并剥离共享系统趋势，同时以可选多项式成分保住超新星、潮汐瓦解事件、恒星自转等长期天体物理信号。"
+date: 2021-06-29
+categories: [因果推断, 时域天文]
+paper-id: 2106.15063
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Soichiro Hattori（Columbia University）、Daniel Foreman-Mackey（Flatiron 研究所）、David W. Hogg（Flatiron / MPI für Astronomie / NYU）、Benjamin T. Montet（UNSW）、Ruth Angus（AMNH / Flatiron）、T. A. Pritchard（NYU）、Jason L. Curtis（Columbia / AMNH）、Bernhard Schölkopf（MPI for Intelligent Systems, Tübingen） |
+| 出处 | arXiv:2106.15063 [astro-ph.IM]，AASTeX 排版的期刊投稿稿；站内 PDF 为 v2（2022-04-05）；代码 MIT 开源（github.com/soichiro-hattori/unpopular） |
+| 日期 | 2021-06-29（v1） |
+| 页数 | 35 页（正文+讨论至 p.31，附录 A 推导 pp.31–33，参考文献 pp.33–35） |
+
+一句话定位：半同胞回归（half-sibling regression，站内 1505.03036）与因果像素模型（Causal Pixel Model, CPM，站内 1508.01853）在 TESS 全帧图像（full frame image, FFI）上的「变源转向 + 软件化」——包名 unpopular 的双关即移除「流行」（popular，跨像素共享）趋势。
+
+## 问题与模型
+
+研究问题（§1）：TESS 大部分像素以 30 分钟节奏的 FFI 交付（约 2000 万目标可做 1% 精度相对测光），其中混入指向抖动与地月散射光（源于 13.7 天偏心轨道，每次数据下传前后最强）等系统效应（systematic effects），须去趋势（de-trending）后才能做时域分析；既有流水线（eleanor、lightkurve、SPOC/PDC）多为凌星搜索优化，倾向把长期天体物理变化连同系统噪声一并移除。如何高效、数据驱动地去趋势并保住扇区尺度（约 27 天）的变源信号？
+
+模型（§2）：因果结构来自半同胞回归——同一 CCD 上被不同恒星照亮、相距超过若干倍 PSF 的两像素是「半同胞」：共享父节点（TESS 系统效应），天体物理父节点不同（相距光年的恒星不可能同步变化），故远距像素光曲线可预测目标像素的系统部分、且不含其天体物理信号。数学形式（§2.1）：单像素光曲线 $y=X\cdot w+e$（式 1），设计矩阵 $X=[X_{\rm sys}\ X_{\rm poly}\ \mathbf{1}]$（式 2）含 $L$ 条预测像素光曲线、$P$ 次多项式基与截距。相对原 CPM 的改动：原 CPM 为保凌星加自回归成分以剔除恒星内禀变率，本文目标反转为保留非凌星变源，故去掉自回归、改加可选多项式捕获长期趋势。
+
+## 识别或主要命题
+
+无定理（方法/软件论文）。数学核心是闭式解（§2.1–2.2，推导在附录 A）：OLS 解 $\hat w=(X^\top X)^{-1}X^\top y$（式 4）在 $L$ 较大时必过拟合——作者强调过拟合不需要回归元含目标信号的信息也会发生；于是用岭回归，目标 $S_{\rm ridge}(w)=\|y^*-X^*\cdot w\|_2^2+\|\Gamma\cdot w\|_2^2$（式 13），解 $\hat w_{\rm ridge}=(X^{*\top}X^*+\Lambda)^{-1}X^{*\top}y^*$（式 16），$\Lambda$ 为分块对角阵 $[\Lambda_L,\Lambda_P,0]$（式 17）：系统项统一罚 $\lambda_L$、多项式项罚 $\lambda_P$、截距不罚；回归元与回归子均除以中位数再减 1 归一化。第二道防线是 train-and-test 框架（§2.3）：光曲线切 $k$ 个连续段，每段系数由其余段拟合——原 CPM 取 $k\approx4350$ 以保微弱凌星（单核约 7 小时），本文取 $k\approx100$–200 换效率。模型可分解 $\hat m=\hat m_{\rm sys}+\hat m_{\rm poly}+\hat m_{\rm offset}$（式 5–9），按源类型决定减去哪些成分（保超新星则只减 $\hat m_{\rm sys}$）。
+
+## 估计/经验
+
+工作流（§3）：下载 FFI 切块（建议 100×100，约 250 MB）→ 剔除质量标记帧、归一化、可选初始背景扣除 → 指定孔径、在 11×11 排除区外按中位亮度最接近原则选 $L$ 个预测像素（$L\in64$–256 结果相近，默认 256；余弦相似度或随机选亦可）→ 设定 $\lambda_L,\lambda_P,k$。验证案例（参数核自原文）：(i) Ia 型超新星 ASASSN-18tb（Sector 1，3×3 孔径、三次多项式、$L=256$、$\lambda_L=\lambda_P=0.01$、$k=126$，笔记本约 5 秒）：去趋势光曲线与 Vallely et al. (2019) 的 ISIS 图像减法结果一致；调参研究（§3.5）：6 小时 CDPP 在 $\lambda_L=10^{-2}$ 最小（约 904 ppm），$\lambda_P$ 在数个量级内不敏感，$k\approx100$–200 为 CDPP–运行时间折中（$k=1267$ 时 870 ppm 但需 4.3 s）。(ii) 潮汐瓦解事件 ASASSN-19bt（扇区 7–13，逐扇区去趋势后线性偏移拼接，$k=150$）：扇区 7–9 与 Holoien et al. (2019) 的 ISIS 光曲线可比，扇区 10–13 光曲线系首次发布。(iii) 凌星恒星 TOI-172：1 小时 CDPP 356 ppm 对 eleanor 367 ppm（作者明言不应视为胜出），凌星深度可比；含强信号源建议先掩蔽再重跑。(iv) 快旋转 M 矮星 TIC 395130640（$\lambda_L=1$）：Lomb-Scargle 峰值 $P=0.413$ 天与 Newton et al. (2018) 一致，半振幅 0.0107 对 SPOC 的 0.0128（归因于 PDC 额外校正），且能去趋势 SPOC 弃置的强散射光时段。该包 beta 版已被用于 Coma Ber、δ Lyr 与 Theia 456 的自转周期测量。
+
+## 开放问题
+
+1. **无自动调参（§5 自列）**：$L$、回归元选取法、多项式开关与次数、$\lambda_L,\lambda_P,k$ 全靠启发式与目视检查，盲巡天不可行；作者呼吁发展按源类型优化的「光曲线优度」度量，并视之为所有带调节参数的灵活数据驱动方法的共同瓶颈。
+2. **多项式成分非物理动机（§5 自列）**：低次多项式捕不住正弦变率（TIC 395130640 即模型错设，只能加大 $\lambda_L$ 缓解），高次又会拟合系统效应；频率网格正弦（Angus et al. 2016；Hedges et al. 2020）或高斯过程（EVEREST 2.0）可替代但计算更贵。
+3. **绝对定标与拼接留白（§3.4/§4.1 自列）**：去趋势后的基线流量只是粗估，恢复真实基线需相对测光；跨扇区拼接只拟合线性偏移，非线性偏移与拼接优化被明确踢出范围。
+4. **适用边界与未测情形（§3.1/§4.2 自列）**：不适合饱和目标（建议 halo photometry）；回归元含强信号时的反向注入理论上可能，实践中因回归元众多而缓解，但未做系统测试；散射光「扫过」视场的方向性提示时间滞后回归元，留待后续。
+5. **半同胞假设的空间非平稳性（我识别）**：余弦相似度选取的回归元局部聚簇（Fig 6），说明存在区域性系统效应，此时「远距像素共享同一系统父节点」只是近似；文中未给诊断或规避局部系统效应的选取准则。
+6. **CDPP 用作调参目标的错位（我识别）**：作者自承 CDPP 是凌星指标、按其调参可能移除变源信号，但 §3.5 的调参展示恰恰以 CDPP 为准——面向变源的优度度量仍空缺。
+7. **产品化与推广（§5 自列）**：逐像素独立、可并行化，全 FFI 去趋势可作高级科学产品（暂未实现）；推广到 PLATO 与 Rubin LSST 仅为展望。
+
+## 文献谱系
+
+前作（在本文中的角色）：Schölkopf et al. (2016, 站内 1505.03036)——半同胞回归的数学框架来源；Wang et al. (2016, 站内 1508.01853)——CPM 在 Kepler 的首个实现，提供岭回归与 train-and-test 框架；Wang et al. (2017, 站内 1710.02428)——CPM 差分成像，同一方法的另一用途；Kovács et al. (2005, TFA)——「远距像素共享系统趋势」思想的源头；Kepler PDC（Smith/Stumpe 2012/2014）与 Foreman-Mackey et al. (2015)——同为回归元法但工作在孔径测光层的对照；EVEREST 2.0（Luger et al. 2018）——正则化+GP 同时拟合的对照，本文以多项式换 GP 求效率；Vanderburg & Johnson (2014, SFF)——按源位置回归的另一支；Deming et al. (2015, PLD)——孔径内回归元对照。下游与同门：Samland et al. (2021)、Gebhard et al. (2020)——半同胞/自监督去噪用于高对比度成像的平行支线；eleanor、lightkurve——被比较/被借力的 TESS 工具；Vallely et al. (2019)、Holoien et al. (2019)、Rodriguez et al. (2019)、Newton et al. (2018)——验证用的对照光曲线与已发表周期；Singh/Bouma/Andrews et al. (2021)——已实际使用该包的星团与星流应用。
+
+## 明确不覆盖
+
+不做绝对流量定标；不做饱和目标测光；不做孔径自动选取与拼接优化；不使用 2 分钟节奏数据特有的质量标记映射（eleanor 路线）；无任何理论保证（识别条件、残差分布均不讨论）；不做全 FFI 规模的产品化运行。
+
+## 阅读路径
+
+先读 §1 引言的 FFI 系统效应段与 Fig 2；§2 是核心——Fig 3 半同胞示意图、式 (1)(2)(13)(16)(17)、§2.3 train-and-test；§3 按工作流顺序（3.1 下载 → 3.2 预处理 → 3.3 模型设定 → 3.4 去趋势）；§3.5 调参研究（Figs 8–10）；§4 四个验证案例可按兴趣选读（变源读 4.1/4.3，凌星读 4.2）；附录 A 为 OLS/岭推导，可略。姊妹篇对照：1505.03036（半同胞回归理论）、1508.01853（CPM 原始实现）、1710.02428（CPM 差分成像）——站内均有笔记，本文是该三部曲在 TESS FFI 上的续篇，对照可看清「同一因果结构、不同科学目标如何改模型」。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 去趋势 | de-trending |
+| 全帧图像 | full frame image (FFI) |
+| 因果像素模型 | Causal Pixel Model (CPM) |
+| 系统效应 | systematic effects |
+| 散射光 | scattered light |
+| 岭回归 | ridge regression |
+| 训练-测试框架 | train-and-test framework |
+| 预测像素/回归元 | predictor pixels / regressors |
+| 简单孔径测光 | simple aperture photometry (SAP) |
+| 组合差分测光精度 | combined differential photometric precision (CDPP) |
+| 图像减法 | image subtraction (ISIS) |
+| 潮汐瓦解事件 | tidal disruption event (TDE) |
+| 动量卸载 | momentum dump |
+| 持续观测区 | Continuous-Viewing Zone (CVZ) |
+| 光晕测光 | halo photometry |
+
+## 来源定位
+
+`papers/2106.15063.pdf`（35 页，v2）。关键内容：半同胞示意图 Fig 3（§2, p.6）；OLS 式 (1)–(4)（§2.1, p.9）；岭回归式 (10)–(17)（§2.2, pp.10–12）；train-and-test Fig 4（§2.3, p.13）；工作流 §3（pp.13–18）；$\lambda$ 网格 CDPP Fig 8（p.21）、$k$ 折中 Figs 9–10（pp.22–23）；ASASSN-19bt Fig 11（§4.1, p.24）；TOI-172 对比 Fig 12（§4.2, p.25）；TIC 395130640 Fig 13（§4.3, p.27）；局限与结论 §5（pp.29–31）；OLS/岭推导式 (A1)–(A17)（附录 A, pp.31–33）。

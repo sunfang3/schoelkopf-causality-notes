@@ -1,0 +1,73 @@
+---
+title: "常识因果的奥德赛：从基础基准到前沿推理"
+subtitle: "Shaobo Cui et al., arXiv:2406.19307 (2024)"
+description: "第一篇系统综述「常识因果（commonsense causality）」的工作：按常识类型与不确定性水平给出双轴分类法，编目 37 个基准、三类数据获取方法与定性/定量两类推理方法，并提出五个未来方向。综合 200 余篇文献，为 LLM 时代的因果能力评测提供地图。"
+date: 2024-06-27
+categories: [因果推断, 常识推理与基准]
+paper-id: 2406.19307
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Shaobo Cui（EPFL）、Zhijing Jin（MPI for Intelligent Systems & ETH Zürich）、Bernhard Schölkopf（MPI & ETH Zürich）、Boi Faltings（EPFL） |
+| 出处 | arXiv:2406.19307 [cs.CL]（v1 2024-06-27，v2 2024-08-29） |
+| 日期 | 2024-06-27 |
+| 页数 | 42 页（正文约 9 页 + 文献 + 附录 A–L） |
+
+一句话定位：因果推断与常识知识两个领域各有成熟综述，其交集——日常语言与世界中的常识因果（「下雨导致堵车」「被告行为是否造成原告损失」）——此前没有系统梳理；本文以 200 余篇文献为材料，给出双层分类法、37 个基准的编目、三类获取方法与两类推理方法的统一图景。
+
+## 问题与模型
+
+研究问题：常识因果在法律责任认定、医疗诊断等场景有直接应用，LLM 兴起使其成为模型评测的核心维度，但该领域缺一张统一地图。本文无概率模型，其「模型」是组织文献的双轴分类：（一）按常识类型分物理（PhysC）、社会（SocC）、生物（BioC）、时间（TempC）因果；（二）按不确定性水平分**第一性因果**（first-principle causality，基于已证定律、完全观测，如质量与引力）与**经验因果**（empirical causality，含**事实不确定性**——信息不足使因果有效性存疑（雨使路滑，但路面与雨强未观测），与**因果不确定性**——因果关联本身非必然（多数烟民患肺癌但有人吸烟很多却未患）；附录 E 另分时间不确定性）。正文按此组织：§3 因果获取（causality acquisition）与 §4 因果推理。
+
+## 识别或主要命题
+
+综述无定理；核心整理成果按主题如下。**基准编目（表 1，37 个）**：按第一性/经验 × 文本格式（词/短语/子句/句）× 图谱格式交叉分类，标注规模、因果条数、反事实覆盖与常识类型——如 COPA 2,000 句中 1,000 条因果、e-CARE 21,324 句、CausalBank 314M 子句、ATOMIC 877K 句、ASER 64M 句（494K 因果）、CausalNet/CauseNet 各 11M 词、δ-CAUSAL 11,245 句、CRAFT 58,000 视频、CausalQuest 13,500 句。**获取方法三分类（§3）**：抽取式（3.1——线索式/规则式语言学模式匹配（表 2 连接词表）与机器/深度学习）；生成式（3.2——Event2Mind、CauseWorks、CausalBank/GuidedCE、DISCO）；人工标注（3.3——PropBank/FrameNet/PDTB/RST/AMT 通用方案与 BioCause/TimeML/RED/CaTeRs/CxG 因果专用方案）；表 3 从准确性/成本/覆盖/可解释性比较三者（人工标注质量最高但失于成本与规模）。**定性推理（§4.1）**：把因果判断化作 0/1 分类以绕开不确定性——NLP 模型作为因果知识库经历统计方法、深度学习、预训练语言模型、LLM 提示四阶段；神经-符号方法分因果推断规则（ROCK、COLA 以平均处理效应 $P(E_i\to E_j)=p(E_i\prec E_j)-p(\neg E_i\prec E_j)$ 评估）、时间约束（CCM 化为整数线性规划）、逻辑规则三支。**定量测量（§4.2）**：以两条概率约束 $P(E|C)>P(E)$ 且 $P(E|C)>P(E|\neg C)$（式 1）为基础，表 4 梳理四种因果强度度量——Good (1961) $\log\frac{1-P(E|\neg C)}{1-P(E|C)}$、Suppes (1973) $P(E|C)-P(E)$、Eells (1991) $P(E|C)-P(E|\neg C)$、Pearl (2009) $P(E|C)$；基于词共现者有 CEQ（式 2，CausalNet 词级强度平均）与 CESAR（式 3，BERT 因果嵌入加权聚合）。综述指出概率约束可排除「不规则性」与「不相关性」，但难处理不对称性与伪规律（Hitchcock 1997）。
+
+## 估计/经验
+
+综述无自有实验；经验内容为文献综合（对 ACL/EMNLP/NAACL/AAAI/NeurIPS/ICLR/ICML/IJCAI 以「causality/acquisition/causal reasoning/commonsense」关键词检索并辅以 GitHub 仓库与哲学文献）。文中所有数字（基准规模、度量公式）均出自表 1 与表 4 所列原始文献，上文已随文标注。
+
+## 开放问题
+
+自认的未来方向五条（§5）：(1) 语境依赖的常识因果——据 Dupré (1984) 语境一致性因果 $\sum_{B}P(E|C,B)P(B)>\sum_B P(E|\neg C,B)P(B)$（式 4），需估计背景集 $P(B)$，或以正则化选部分语境 $\max\sum_{B'}P(E|C,B')P(B')-\lambda|B'|$（式 5）；(2) 复杂结构（混杂、碰撞、因果链、环）——构造相应基准并发展理论框架（例以结构方程 $C_{ij}=f(X_i,Y_j)$ 识别混杂）；(3) 时间动态——最优干预时机与效应的即时/中期/长期模式；(4) 概率化视角——贝叶斯网络与动态模型 $P(E_t|C_{t-\delta})$；(5) 多模态——跨模态因果对齐（文本「亚马逊毁林」对齐视频「运木卡车」）。自认局限（Limitations 节）：8 页正文只能聚焦基准、获取与两类推理；只收已发表文献难免遗漏；跨学科但方法学偏 NLP；部分数据集未提供使用许可，对某些理论的过度简化在所难免。我从论证中识别：(6) 未对「常识因果」与「形式因果推断」给出操作分界——COPA 类二选一任务究竟是因果知识检索还是因果推断取决于口头化程度，分类法未吸收 Zečević 式「因果鹦鹉」（amortized inference）批评这一维度；(7) 37 个基准缺统一横向评测，基准间标签口径（因果/相关/解释）不一致的问题未被讨论，编目难以直接指导基准选择；(8) 表 4 只列公式，未讨论 $P(E|C)$ 在语料中的估计误差如何传播到度量排序，式 (1) 约束在有限样本下不可检验；(9) 方向 (2) 要求可控生成带混杂/环结构的自然语言数据，但 §3.2 的 LLM 生成方法能否保证结构保真未被评估——这是该方向成立的前提。
+
+## 文献谱系
+
+前作（在本文中的角色）：COPA（Roemmele et al. 2011）及 XCOPA、IfQA——常识因果评测的奠基基准，分类法的主要对象；ATOMIC、ASER、ConceptNet、CausalNet、CauseNet——图谱格式常识因果知识的代表；e-CARE 与 δ-CAUSAL（Cui et al. 2024，一作同组）——可解释与可废止性推理新基准，δ-CAUSAL 同时是 CESAR 度量的出处；Good/Suppes/Eells/Pearl——定量一节的度量公式谱系；Dupré (1984)——未来方向 (1) 的理论出发点；Hitchcock (1997)——概率约束方法两大遗留挑战的出处；ROCK/COLA 与 CCM——神经-符号推理三支的代表；CausalQuest（Ceraolo et al. 2024 = arXiv:2405.20318，同组）——自然因果提问收集，编入表 1；CLadder（Jin et al. 2023b，站内 2312.04350）——把因果推断步骤并入思维链的示例；Wei et al. (2022) 思维链——LLM 提示阶段的技术背景。本文在 Schölkopf「因果 × LLM/NLP」议程中的位置：把图宾根因果机器学习传统（SCM、do-演算、混杂/碰撞作为附录 K 预备知识输出给 NLP 社区）与 NLP 常识推理基准传统对接。
+
+## 明确不覆盖
+
+不覆盖非因果的常识与逻辑推理（ProofWriter 类、Social Chemistry 101 类被明确排除）；不处理纯数值/表格数据上的因果推断（Fisher/Rubin/Pearl 传统仅作附录 K 预备知识）；不含自有实验或模型评测；未发表工作不收；编目以英语基准为主。
+
+## 阅读路径
+
+先读图 1（分类与各节映射）与图 2（全景分类树，一页看清骨架），再读 §2 双轴分类与表 1；按兴趣选 §3（做数据）或 §4（做推理），其中 §4.2 表 4 与图 4 的度量比较是全文信息密度最高的整理；§5 五个未来方向与紧随其后的 Limitations 集中自认局限。附录 K（d-分离、do-演算、SCM、混杂/碰撞）适合 NLP 读者补课，附录 L 是初学者手册，附录 G 是表 1 明细版。姊妹篇对照：站内 2312.04350（CLadder——符号引擎生成真值的形式因果推断评测，与本综述的「常识因果」恰成两极，对读可看清「知识型 vs 形式型」因果评测的分野）；站内 2405.20318（CausalQuest——同组收集自然因果提问，可视为「获取」一节向前推进的实例）。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 常识因果 | commonsense causality |
+| 第一性因果 | first-principle causality |
+| 经验因果 | empirical causality |
+| 事实不确定性 | factual uncertainty |
+| 因果不确定性 | causal uncertainty |
+| 物理/社会/生物/时间常识因果 | PhysC / SocC / BioC / TempC |
+| 因果获取 | causality acquisition |
+| 抽取式/生成式方法 | extractive / generative methods |
+| 人工标注 | manual annotation |
+| 定性因果推理 | qualitative causal reasoning |
+| 定量因果测量 | quantitative causal measurement |
+| 因果强度 | causal strength |
+| 语境一致性因果 | contextual-unanimity causality |
+| 平均处理效应 | average treatment effect (ATE) |
+| 神经-符号方法 | neuro-symbolic methods |
+| 可废止性 | defeasibility |
+
+## 来源定位
+
+`papers/2406.19307.pdf`：图 1 分类图第 1 页；图 2 全景分类树第 2 页；表 1 基准编目在 §2 末第 3–4 页；§2.1–2.2 类型与不确定性分类第 4–5 页；表 2 连接词表在 §3.1 第 5 页；表 3 获取方法比较在 §3.4 第 6 页；ATE 公式与神经-符号三支在 §4.1 第 6–7 页；表 4 度量公式与图 4 比较在 §4.2 第 7 页；CEQ/CESAR 式 (2)(3) 第 7–8 页；式 (4)(5) 语境因果与五个未来方向在 §5 第 8–9 页；结论与 Limitations 第 9 页；附录 E 不确定性细节、G 基准明细、K 因果推断预备知识、L 初学者手册在第 23 页起。

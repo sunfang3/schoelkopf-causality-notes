@@ -1,0 +1,24 @@
+project:
+  type: website
+  output-dir: _site
+
+website:
+  title: "Schölkopf 因果论文阅读站"
+  navbar:
+    left:
+      - href: index.qmd
+        text: 首页
+      - href: schoelkopf-causality-arxiv-2008-2026.qmd
+        text: 全景（按年）
+      - href: glossary.qmd
+        text: 术语表
+      - href: notes.qmd
+        text: 逐篇笔记
+
+format:
+  html:
+    theme: cosmo
+    lang: zh-CN
+
+execute:
+  freeze: auto

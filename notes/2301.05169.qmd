@@ -1,0 +1,83 @@
+---
+title: "因果三元组：干预中心的因果表示学习基准"
+subtitle: "Yuejiang Liu et al., arXiv:2301.05169 (2023)"
+description: "提出视觉复杂度更高的因果表示学习基准 Causal Triplet，以「可执行反事实」与「干预下游任务 + 分布外鲁棒性」两大要求检验独立因果机制与稀疏机制移位原理，发现正确的物体级因果结构收益巨大而无监督方法难以自行发现。"
+date: 2023-01-12
+categories: [因果推断, 因果表示学习]
+paper-id: 2301.05169
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Yuejiang Liu（EPFL，工作完成于 Amazon 实习）、Alexandre Alahi（EPFL）、Chris Russell、Max Horn、Dominik Zietlow、Francesco Locatello（Amazon Tübingen）、Bernhard Schölkopf（Amazon Tübingen / MPI-IS） |
+| 出处 | arXiv:2301.05169 [cs.LG]；CLeaR 2023 |
+| 日期 | 2023-01-12（v2 2023-04-03） |
+| 页数 | 21 页（正文 13 页 + 参考文献 5 页 + 附录 3 页） |
+
+一句话定位：指出既有从干预配对观测学习因果表示的方法隐含「完美反事实」（配对共享噪声实现）假设、在现实中不成立，据此提出 Causal Triplet 基准，以可执行反事实（actionable counterfactuals）与强调分布外（OOD）鲁棒性的干预建模任务，检验独立因果机制（ICM）与稀疏机制移位（SMS）原理在接近现实视觉场景中的成色。
+
+## 问题与模型
+
+生成过程 $x=g(z)$：隐因子分全局场景变量 $z_s$ 与物体级变量 $z_n^k$（$n$ 为物体、$k$ 为因子）；干预过程 $\tilde z=h(z,a)$，动作 $a$ 为类别变量，只稀疏影响一个或少数物体级因子 $z_a$；动作与隐因子经未观测混杂 $c$ 相关（图 1）。与既有工作不同，下游任务是反因果的干预建模 $P(a\mid x,\tilde x)$，假设动作机制 $P(\tilde z_a\mid z_a,a)$ 在 $P_{\mathrm{tr}}(a,z)\neq P_{\mathrm{te}}(a,z)$ 的移位下不变（ICM 原理）。两大设计要求：其一，配对观测共享全部未干预因子的噪声实现实为「完美反事实」，自然界稀有（引 Holland 1986），具身智能体（embodied agent）只能对可物理操纵的物体变量实现反事实，而相机视角、自遮挡、全局场景属性仍随时间变化——称「可执行反事实」；其二，因果表示学习应超越识别因子、显式支撑涉及干预与推理的下游任务。两种移位：组合性偏移（compositional shift，物体类相同但物体-动作组合训练/测试不相交）与系统性偏移（systematic shift，物体类不相交）。数据：ProcTHOR 光真仿真（10k 室内环境、7 类动作、24 类物体、100k 图像对，672² 裁至 224²）与 Epic-Kitchens-100 真实数据（2632 对，滤除检测置信度低于 0.4 与动作前后无可见变化的样本），60/20/20 划分训练/ID/OOD。模型三模块：图像编码器 $f$、动作编码器 $\pi(e_z,\tilde e_z)$、分类头 $\phi$；两个正则：独立性正则（式 1，对抗训练 $\min_{f,\pi,\phi}\max_\psi L_a-\lambda_i L_o$ 最小化动作嵌入与物体类的互信息）与稀疏正则（式 2，$L_s=\sum_{k\in\Omega\setminus\Omega_a}\|e_z^k-\tilde e_z^k\|$，惩罚未干预区块的表示变化）。
+
+## 识别或主要命题
+
+无定理，命题性内容是「现有可识别性结论的前提失效」：Locatello et al. (2020a)、von Kügelgen et al. (2021)、Klindt et al. (2021)、Brehmer et al. (2022) 的识别保证依赖配对观测间仅稀疏因子变化、其余因子噪声实现共享；可执行反事实设定中全局场景属性照常变化，该前提不满足，故本文改以 oracle 结构对照估计「若表示正确会得到什么」。ICM 的作用被具体化：因子化 $P(z,c)=P(c)P(z_s\mid c)\prod_n P(z_n^1,\dots,z_n^K\mid c)$ 中只有个别条件项被动作干预（SMS），而 $P(\tilde z_a\mid z_a,a)$ 不随 $P(a\mid c)$、$P(z\mid c)$ 改变（ICM）——这解释了为何只依赖 $P(a\mid z_a,\tilde z_a)$ 的动作表示应能泛化、吸收全部因子的表示会因动作类与未干预因子的伪相关（spurious correlation）而失稳。
+
+## 估计/经验
+
+单物体仿真（表 2，10 次运行的均值±标准差）：组合移位下 vanilla ResNet-18 ID 0.96 / OOD 0.36；独立性正则（ICM）0.95/0.41（OOD 相对提升约 14%）；稀疏正则（SMS，$\lambda_s\approx0.1$）0.96/0.47（相对提升约 30%）；系统性移位 0.48→0.50/0.54。事后分析：在冻结动作嵌入上训练物体分类头可达约 87% 准确率，证实捷径学习（由动作识物体/由物体识动作）。多物体仿真（表 3）：分布式 ResNet 0.83/0.30；用仿真引擎真值实例分割的 oracle 物体级掩码最高 0.90/0.42（ID/OOD 相对提升至多约 8.5%/40%，且背景掩码值越低越优，图 10）；无监督隐式 Slot Attention（$N=15$ 槽，冻结编码器）经槽匹配（slot-match）达 0.66/0.21，比全局平均池化（slot-avg 0.49/0.15）高逾 34%，但重建模糊、整体远逊微调 ResNet（图 12）。真实数据（表 4，10 个随机种子）：GroupViT 的 token-max 组匹配 0.52/0.27，比 ResNet-18 基线 0.42/0.17 在 ID/OOD 上相对高约 24%/59%，token-max 多数种子优于 token-mean（图 13）。结论：拥有正确的因果/物体结构可获得大的 OOD 收益，但近期无监督因果表示学习方法在该场景难以自行发现结构。
+
+## 开放问题
+
+自认局限：
+1. 仿真数据的物体状态是二值变量，现实为连续。
+2. 真实数据集规模有限，只够迁移学习、不够从头表示学习。
+3. 独立性正则需先验知道伪相关属性且有标注，稀疏正则需要变量级干预标注，现实中难满足。
+4. 学到的物体中心表示质量仍差（重建模糊、冻结编码器性能受限），发现潜在结构是明确的开放挑战。
+
+本人识别的缺口：
+5. 对可执行反事实设定没有任何替代性可识别性理论：只经验性地显示旧前提失效与新设定困难，未给出何种额外假设（部分噪声共享、多视图、动作多样性）足以恢复识别。
+6. OOD 评估只有类别不相交一种轴，未量化移位幅度与 ICM 收益的关系；oracle（0.90/0.42）与学得表示（0.66/0.21）的差距未分解为分割质量、掩码方式、匹配策略各自的贡献。
+7. 动作模型理想化：单一类别动作、确定性转移 $h$、单步配对，无随机动作、无动作序列与多物体同时变化；Epic-Kitchens 样本经「视觉清晰」过滤后本身已偏向理想情形。
+8. 槽匹配/组匹配的收益依赖跨图像可对齐性，相机大幅运动场景（具身视角的本性）中如何匹配未解决。
+
+## 文献谱系
+
+Schölkopf et al. (2021, Towards Causal Representation Learning) 是纲领性前作，其 ICM/SMS 原理即本文两大正则的理论依据；ICM 源头是 Schölkopf et al. (2012, 因果/反因果学习) 与 Parascandolo et al. (2018)。被本文「证伪前提」的可识别性线：Locatello et al. (2020a)（弱监督解缠）、von Kügelgen et al. (2021)（增广即干预，站内 2106.04619）、Klindt et al. (2021)、Brehmer et al. (2022)、Lachapelle et al. (2022) 与 Lippe et al. (2022a,b,c)（机制稀疏正则与 CITRIS 系列——稀疏正则的方法学来源）、Zimmermann et al. (2021)、Ahuja et al. (2022)。表示学习一侧：Locatello et al. (2019) 的解缠不可能性定理被引为「需要归纳偏置」的根据，Traüble et al. (2021) 说明相关数据破坏解缠；物体中心学习线（Locatello et al. (2020b) Slot Attention、Chang et al. (2022) 隐式细化；Seitzer et al. (2022)、Singh et al. (2022) 被引为复杂场景物体中心学习困难的证据）。实证研究范式承自 Dittadi et al. (2020, 2022)（解缠表示的迁移与物体中心学习的泛化/鲁棒性）。基础设施：Deitke et al. (2022b) ProcTHOR 与 Damen et al. (2022) Epic-Kitchens-100；基线 He et al. (2016) ResNet、Radford et al. (2021) CLIP、Xu et al. (2022) GroupViT；Holland (1986) 支撑「完美反事实稀有」的论断；基准对照对象是 Ahmed et al. (2021) CausalWorld 等（表 1）。
+
+## 明确不覆盖
+
+不提供可识别性理论（既不证明也不否定可执行反事实下的识别条件）；不研究动作序列、多步干预与动力学；不以场景重建为目标（重建仅为诊断）；不学习动作本身或做主动干预规划（动作只是监督标签）；不做因果发现意义上的图结构学习（结构以正则或 oracle 形式注入）；真实数据不从头训练表示；不评估非视觉模态。
+
+## 阅读路径
+
+先读 §1 的两大设计要求与表 1（与 Causal3DIdent/Causal Pinball/CausalWorld 的基准对比，一眼看出本文的位置）；§3.1 与图 1（因果图：$a$ 只作用于 $z_a$、$c$ 造成相关）是形式化核心；§3.2 数据与两种移位的定义；§4.1.1 表 2 与式 (1)(2)（两个正则）及图 6–8（正则强度的作用与表示可视化）；§4.2.1 表 3 与图 9–12（oracle 与学得物体中心表示的对照，最重要的证据）；§4.2.2 表 4 与图 13（真实数据）；§5 结论与两条自认约束；附录 A 为数据细节。姊妹篇对照：2106.04619（增广即干预——在「完美反事实」配对下给出内容/风格解缠的可识别性定理，本文恰以该设定在现实中不成立为出发点，二者构成理论端与基准端）与 2110.06562（共同命运物体学习——物体级模块化因果场景的生成端，本文是识别与下游任务端）。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 因果三元组 | Causal Triplet |
+| 可执行反事实 | actionable counterfactuals |
+| 完美反事实 | perfect counterfactual |
+| 稀疏机制移位 | sparse mechanism shifts (SMS) |
+| 干预中心的因果表示学习 | intervention-centric causal representation learning |
+| 组合性偏移 / 系统性偏移 | compositional / systematic shift |
+| 分布外鲁棒性 | out-of-distribution (OOD) robustness |
+| 物体中心表示 | object-centric representation |
+| 区块解耦表示 | block-disentangled representation |
+| 独立性正则 / 稀疏正则 | independence / sparsity regularizer |
+| 槽注意力 / 槽匹配 | Slot Attention / slot matching |
+| 组 token 匹配 | group token matching (token-max/mean) |
+| 具身智能体 | embodied agent |
+| 伪相关 | spurious correlation |
+| 捷径学习 | shortcut learning |
+| oracle（真值结构） | oracle (ground-truth structure) |
+
+## 来源定位
+
+`papers/2301.05169.pdf`（21 页）。关键内容：基准对比 Table 1（p.2）；两大设计要求（§1，p.2）；因果图 Fig 1 与任务设定（§3.1，p.3–4）；「可执行反事实」论证（p.4–5）；数据与移位定义、划分 Fig 4（§3.2，p.5–6）；独立性正则式 (1)（p.7）；稀疏正则式 (2)（p.8）；单物体结果 Table 2（p.7）；正则效果 Fig 6–8（p.8–9）；oracle 实验图 9–10 与 Table 3（p.10–12）；学得槽表示 Fig 11–12（p.11–12）；真实数据 Table 4 与 Fig 13（p.12–13）；结论与自认约束（§5，p.13）；数据细节附录 A（p.19）。

@@ -1,0 +1,91 @@
+---
+title: "谱独立性判据的理论基础：信息几何、可识别性与降采样稳健性"
+subtitle: "Michel Besserve et al., arXiv:2110.15595 (2021)"
+description: "为 2015 年谱独立准则（SIC）补足理论：相对高斯白噪声参考集的正交分解诠释、FIR 生成模型下首个因果方向可识别性定理、对降采样的稳健性界，以及经群不变性/白化把 SIC 推广到幂律生物信号。"
+date: 2021-10-29
+categories: [因果推断, 时间序列]
+paper-id: 2110.15595
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Michel Besserve（MPI for Intelligent Systems 与 MPI for Biological Cybernetics, Tübingen）、Naji Shajarisales（MPI IS；Carnegie Mellon University）、Dominik Janzing（Amazon Research Tübingen，加入 Amazon 前完成本工作）、Bernhard Schölkopf（MPI IS） |
+| 出处 | arXiv:2110.15595v1 [stat.ME]；后刊于第 1 届 CLeaR 会议（PMLR v177, 2022） |
+| 日期 | 2021-10-29（仅 v1） |
+| 页数 | 32 页（正文与参考文献 16 页 + 附录 16 页） |
+
+一句话定位：SIC（站内 1503.01299）假设原因序列的功率谱密度与机制滤波器频率响应模方作为频率的函数不相关，其理论依据此前基本空白——本文给出 SIC 的信息几何诠释（相对高斯白噪声参考集的「不正则性正交分解」）、首个因果方向可识别性定理、对降采样的稳健性定理，并借群不变性视角揭示 SIC 的隐含假设与白化推广，是 SIC 路线的理论基础篇。
+
+## 问题与模型
+
+研究问题：SIC 的方法与假设同主流时序因果发现（Granger 因果需因果充分性与离散时刻观测）截然对立，其使用在何种生成模型下有正当性？何时可识别因果方向？对降采样（Granger 的已知弱点，Geweke 1982；Gong et al. 2015）是否稳健？何时失效、如何推广？
+
+模型：原因 $X$ 为零均值宽平稳实值序列，自协方差 $C_{xx}\in\ell^1(\mathbb Z)$，功率谱密度（PSD）$S_{xx}$ 处处严格为正；机制为 BIBO 稳定线性时不变滤波器，**Assumption 1（可逆因果模型）**要求其逆亦 BIBO 稳定，$Y=h_{X\to Y}*X$，从而式 (2)：$S_{yy}(\nu)=|\hat h_{X\to Y}(\nu)|^2S_{xx}(\nu)$，且双向频率响应连续、互为倒数——此时前向与后向滤波都是合理的结构因果模型，需要更细的判据。**Postulate 1（谱独立准则，SIC）**（式 3）：$\langle S_{xx}|\hat h_{X\to Y}|^2\rangle=\langle S_{xx}\rangle\langle|\hat h_{X\to Y}|^2\rangle$（$\langle\cdot\rangle$ 为单位频段 $[-1/2,1/2]$ 上的平均），等价于式 (4)：$\langle S_{yy}\rangle=\langle S_{xx}\rangle\langle S_{yy}/S_{xx}\rangle$——输出功率等于频率平均放大率作用于输入功率，即机制未「适配」具体输入谱；其违背可写为 $S_{xx}$ 与 $|\hat h|^2$（视作均匀频率上的随机变量）的协方差（附录 B.1 式 20）。尺度不变的谱依赖比（Spectral Dependency Ratio, SDR，式 5–6）：$\rho_{X\to Y}=\langle S_{yy}\rangle/(\langle S_{xx}\rangle\langle|\hat h|^2\rangle)=P(Y)/(P(X)\|h\|_2^2)$——滤波器对真实原因的功率放大相对其对白噪声放大（$\|h\|_2^2$）之比；**Algorithm 1** 取 SDR 较大的方向为因果方向。
+
+## 识别或主要命题
+
+**信息几何诠释（§4）**：高斯过程的相对熵率（relative entropy rate）有闭式（**Proposition 1**，式 8）；参考集取高斯白噪声流形 $\bar E$（常数 PSD），$X$ 到 $\bar E$ 的信息投影是同功率白噪声（Lemma 2）。**Theorem 1**（$X$ 为高斯过程）：$\bar D(P_Y\|\bar E)=\bar D(P_X\|\bar E)+\bar D(P_Y^{\to}\|U_Y)+\tfrac12\bigl(1-\langle S_{xx}\rangle\langle S_{yy}/S_{xx}\rangle/\langle S_{yy}\rangle\bigr)^2$（式 9），其中 $P_Y^{\to}$ 为白噪声 $U_X$ 经同一滤波器的分布；第三项恰在 SIC 成立时为零。**Corollary 1**：SIC 等价于不正则性的正交分解 $\bar D(P_Y\|\bar E)=\bar D(P_X\|\bar E)+\bar D(P_Y^{\to}\|\bar E)$（式 10）——与 IGCI 和迹条件共享「不正则性可加性」结构（引 Janzing et al. 2012 桥接二者）。
+
+**可识别性（§5）**：生成模型设机制为长度 $m$ 的 FIR，系数向量服从球对称分布 $B=RU$。**Theorem 2（FIR 滤波器的测度集中）**：固定 $S_{xx}$，以概率 $\ge1-2\exp(-m^3\varepsilon^2)$ 有 $|\rho_{X\to Y}-1|\le 8\varepsilon\max_\nu S_{xx}(\nu)/\langle S_{xx}\rangle$——指数中的 $m^3$ 大幅改进 2015 年原文的 $m$。**Proposition 2（前向–后向不等式）**（转引自 2015）：若 $\forall\nu:|\hat h(\nu)|^2\le(2-\alpha)\|h\|_2^2$，则 $\rho_{X\to Y}\rho_{Y\to X}\le[1+\alpha\,CV(|\hat h|^2)^2]^{-1}<1$（式 11，$CV$ 为变异系数），故两方向 SDR 不能同时接近 1。**Lemma 1**：系数 iid、零均值、单位方差、有限三阶矩时 $\rho_{X\to Y}\rho_{Y\to X}$ 依概率趋于 0（证明用 Janzing, Shajarisales & Besserve 2017 的傅里叶和中心极限定理）。**Theorem 3（首个 SIC 可识别性结果）**：$m\to\infty$ 时 $P(\rho_{X\to Y}<\rho_{Y\to X})\to1$。
+
+**降采样稳健性（§6）**：经理想抗混叠低通后按整数因子 $D$ 抽取，**Theorem 4**：$|\rho_{\tilde X\to\tilde Y}-1|\le\varepsilon\bigl(K+(1+\varepsilon K)\cdot 2/(1-2\varepsilon)\bigr)$，以概率 $(1-\exp(-\kappa(m-1)\varepsilon^2))^2$ 成立，$K=\max_{|\nu|<1/2D}S_{xx}(\nu)/\int_0^{1/2D}S_{xx}$ 为抽取频带内谱峰度；前向–后向不等式仍成立，但 $D$ 增大时频率响应被拉伸、$CV(|\hat h|^2)\to0$ 使界退化——只要 $S_{xx}$ 在 $[0,1/(2D)]$ 上方差足够即可保持可识别性。
+
+**群不变性推广（§7 与附录 C）**：以功率为对比函数（contrast）、频率平移群为通用群，**Proposition 4** 证明 $G$-通用性（genericity，式 21–22）等价于 SIC——白噪声参考集隐含「沿频率轴平移不变的谱不携带信息」；若经验平均谱不具此不变性（如幂律生物信号），可用可逆白化滤波 $w$ 构造新群 $w^{-1}\circ G\circ w$ 与新对比函数 $C_w$。
+
+## 估计/经验
+
+大鼠海马区场电位（LFP）实验（§7.2）：沿用 Shajarisales et al.（2015）的数据，CA3→CA1 单突触连接为真值方向；Welch 法估计 PSD，以全数据集（CA3 与 CA1）经验平均 PSD 之逆作白化滤波。白化前因果方向 SDR 分布弥散（图 4c）、白化后集中于 1 且反因果方向被压到 1 以下（图 4d），与式 (23) 的「平均意义上通用性成立」一致；各电极对的平均推断正确率由 69.0% 提升至 82.8%（配对符号秩检验 $p<10^{-25}$；图 8）。
+
+## 开放问题
+
+1. **向噪声、非线性、隐混杂与多变量（多维）系统扩展**（§8 讨论明言）：是把该方法确立为标准时序分析工具的「关键下一步」——现框架限于确定性、线性、双变量、无混杂。
+2. **正则集的选取依领域而定且需先验**（§7 自述）：白噪声参考集对幂律类信号「失明」于相关信息，必须先白化；白化滤波依赖对数据集平均谱的估计，其误设对判向的影响未分析。
+3. **可识别性结果限于玩具生成模型**（本人识别）：球对称/iid 系数的 FIR 与高斯输入在真实物理机制中是否成立未讨论；Theorem 3 是 $m\to\infty$ 的渐近命题，有限 $m$ 无定量错误率界。
+4. **无显著性检验**（承自 1503.01299，本文未解决）：Algorithm 1 仍是比较两个点估计，未给出 p 值或置信区间。
+5. **降采样界在 $D$ 大时退化**（§6 自认）：抽取因子增大时 $CV\to0$ 使前向–后向不等式失效，「$S_{xx}$ 方差足够」的定量阈值未给出。
+6. **未观测共因仍无处理**（本人识别）：与 SIC 原文一样假设无混杂，谱相关的另一来源（共同驱动）无诊断手段；对 Mastakouri et al.（2021）类混杂稳健方法只作方法论对照，未给出组合方案。
+
+## 文献谱系
+
+前作：Shajarisales, Janzing, Schölkopf & Besserve（2015，站内 1503.01299）的 SIC 是本文的全部出发点——Theorem 2 改进其 Theorem 1 的浓度指数、Proposition 2 转引其前向–后向不等式、LFP 数据与 82.8% 的对照基线均来自它；Janzing et al.（2012，IGCI 的 AIJ 版）建立 IGCI 与迹条件联系的信息几何路线，本文 Theorem 1 的证明「按其步骤」进行；Janzing, Hoyer & Schölkopf（2010，站内 0909.4386，迹方法）与 Daniusis et al.（2010，站内 1203.3475，IGCI）是 SIC 所归入的 ICM 判据族；Besserve et al.（2018，群不变性）提供 §7 的整个框架（通用群、对比函数、通用性方程），Proposition 4 把 SIC 纳入其中；Janzing, Shajarisales & Besserve（2017）的傅里叶和中心极限定理是 Lemma 1 的关键工具。对照物：Granger（1969）及 Geweke（1982）、Gong et al.（2015）标示降采样敏感性的反面；Mastakouri, Schölkopf & Janzing（2021，站内 2005.08543，隐混杂时序因果特征选择）代表约束类时序方法；Janzing & Schölkopf（2010）与 Lemeire & Janzing（2012）供算法信息论表述；Schölkopf et al.（2012）供学习理论表述。后续：Besserve et al.（2021）把 SDR 用于卷积生成模型的机制独立性与外推评估；Ramirez-Villegas et al.（2021, Nature）把 SIC 用于神经场电位分析——本文为这些应用补足了理论注脚。
+
+## 明确不覆盖
+
+不处理噪声、非线性机制、隐混杂与多变量网络；不做干预效应估计或预测，只判方向；不解决 SDR 的显著性检验与有限样本推断；降采样分析限于理想抗混叠 + 整数因子抽取（不含 jittering、缺失观测等更一般的重采样）；白化之外的参考集选择准则不给出系统方法。
+
+## 阅读路径
+
+先读 §1–§3（模型、Assumption 1、SIC 与 SDR 的重述，若已读 1503.01299 可快速通过）；核心是 §4（Theorem 1 与 Corollary 1，四页，信息几何部分配图 1 理解「不正则性正交分解」）与 §5（Theorem 2–3 与 Lemma 1，配图 2 的两步可识别性示意）；§6 只需读 Theorem 4 及其后两段定性讨论；§7 先读正文的白化论证，附录 C 的 Proposition 4 与式 (21)–(23) 值得细读——它是「SIC 何时失效」的真正答案；§7.2 的 LFP 实验两页即完。证明部分：附录 A.2（Lemma 2 + Theorem 1）与 A.5（Theorem 2，用 Haar 旋转矩阵的迹集中 Lemma 5–6）最核心，A.4（Lemma 1）技术性最强可后读。姊妹篇对照：1503.01299（SIC 原文——方法、算法与全部实验的来源，本文是其理论篇，建议先读彼再读此）；0909.4386（迹方法——式 10 正交分解的有限维前身）；1203.3475（IGCI——共享不正则性可加性结构的另一 ICM 判据）；2005.08543（隐混杂时序方法——Granger 阵营的方法论对照）。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 谱独立准则 | Spectral Independence Criterion (SIC) |
+| 谱依赖比 | Spectral Dependency Ratio (SDR) |
+| 可逆因果模型 | invertible causal model |
+| 相对熵率 | relative entropy rate |
+| 信息几何投影 | information geometric projection |
+| 正则分布集 | set of regular distributions |
+| 不正则性的正交分解 | orthogonality of irregularities |
+| 测度集中 | concentration of measure |
+| 球对称分布 | spherically symmetric distribution |
+| 前向–后向不等式 | forward-backward inequality |
+| 变异系数 | coefficient of variation (CV) |
+| 抽取/降采样 | decimation / downsampling |
+| 理想抗混叠滤波器 | ideal anti-aliasing filter |
+| 群不变性 | group invariance |
+| 通用群 | generic group |
+| 对比函数 | contrast |
+| 期望通用对比 | Expected Generic Contrast (EGC) |
+| 通用性方程 | genericity equation |
+| 白化变换 | whitening transformation |
+| 傅里叶和中心极限定理 | central limit like theorem for Fourier sums |
+| 局部场电位 | local field potential (LFP) |
+
+## 来源定位
+
+`papers/2110.15595.pdf`（32 页）。关键内容：Assumption 1 与式 (2)（p.4）；Postulate 1 式 (3)–(4) 与 SDR 式 (5)–(6)（p.5）；Proposition 1 式 (8)（p.7）；Theorem 1 式 (9) 与 Corollary 1 式 (10)（p.7–8）；Theorem 2（p.8）；Proposition 2 式 (11)（p.8–9）；Algorithm 1（p.9）；Lemma 1 与 Theorem 3（p.9–10）；Theorem 4 及降采样讨论（p.11）；群不变性与白化 §7（p.11–12）；LFP 实验 §7.2 与图 4（p.12–13）；讨论 §8（p.13）；附录：Lemma 2 式 (12)（p.17）、Theorem 1 证明（p.18）、Corollary 1 证明（p.19）、Lemma 1 证明（p.19–20）、Lemma 3–6 与 Theorem 2 证明（p.20–23）、Proposition 2 证明与 Lemma 7–8（p.24–25）、Theorem 4 证明（p.25–27）、协方差诠释式 (20) 与直观例子（p.28–29）、群不变性与 Proposition 4 式 (21)–(23)（p.29–31）、图 8（p.32）。

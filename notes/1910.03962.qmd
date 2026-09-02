@@ -1,0 +1,76 @@
+---
+title: "贝叶斯优化驱动的主动因果结构学习"
+subtitle: "Julius von Kügelgen et al., arXiv:1910.03962 (2019)"
+description: "连续变量、非线性加性噪声设定下的主动因果发现：以高斯过程网络上的贝叶斯后验与期望信息增益为准则选择干预实验，用贝叶斯优化求解不可数干预值集合上的最优实验；9 页工作论文，无正式定理。"
+date: 2019-10-09
+categories: [因果推断, 主动学习]
+paper-id: 1910.03962
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Julius von Kügelgen（MPI for Intelligent Systems, Tübingen；University of Cambridge）、Paul K. Rubenstein（MPI IS；Cambridge）、Bernhard Schölkopf（MPI IS；Amazon）、Adrian Weller（Cambridge；The Alan Turing Institute） |
+| 出处 | arXiv:1910.03962 [stat.ML]；v1 2019-10-09；工作论文，NeurIPS 2019 workshop「Do the right thing」海报 |
+| 日期 | 2019-10-09 |
+| 页数 | 9 页（正文 6 页 + 参考文献 + 附录 A–B） |
+
+一句话定位：让智能体「像科学家一样做实验」——每轮用当前图后验的期望信息增益（expected information gain, EIG）挑选最值得做的干预 $\mathrm{do}(X_j=x)$，其中连续的干预值 $x$ 由贝叶斯优化（Bayesian optimisation, BO）在蒙特卡洛估计的 EIG 目标上搜索。
+
+## 问题与模型
+
+环境为 $d$ 个实值变量 $X=\{X_1,\dots,X_d\}$ 上的结构因果模型（SCM），真图 $G^*$ 为有向无环图（DAG），机制满足**加性噪声模型（additive noise model, ANM）**（式 1）：$X_i=f_i(\mathrm{Pa}_i^{G^*})+\varepsilon_i$，噪声相互独立——即无环性、**因果充分性（causal sufficiency）**与加性噪声三重假设。每步 $t$ 智能体选择干预 $a_t:=\mathrm{do}(X_j=x)$ 并从干预分布 $P(X_{-j}|\mathrm{do}(X_j=x))$ 观测一个样本（有限样本设定：每次实验只给一个或少数样本）。贝叶斯模型：图先验 $P(G)$ 乘参数先验 $P(\theta_G|G)$，函数 $f_i\sim\mathcal{GP}(0,k_{\mathrm{SE}})$、观测噪声高斯，使边际似然（式 2）与后验（式 3）有闭式（附录 B：log 边际似然式 19、预测后验式 20、图内模型式 21）；$t$ 步后验即 $t{+}1$ 步先验。同时保持图与参数两层不确定性，也是为了权衡「多父简单函数」与「少父复杂函数」两种解释。
+
+## 识别或主要命题
+
+短篇工作论文，无编号定理/命题。概念性依据是**截断分解（truncated factorisation）**（式 4）：$P(X_{-j}|G,\mathrm{do}(X_j=x))=\prod_{i\ne j}P(X_i|\mathrm{Pa}_i^G)$——马尔可夫等价类内不同图的父集不同，故干预分布不同（Table 1：双变量下 $p(y|\mathrm{do}(x))$ 在 $X\to Y$ 下是 $p(y|x)$、在 $Y\to X$ 下是 $p(y)$），主动干预原则上可越过等价类唯一恢复因果图（脚注 1：需无穷数据、无隐混杂、允许多变量同时干预）。核心命题是**最优实验目标及其求解**：在贝叶斯实验设计框架（式 5–6）下取效用为图后验的信息增益 $U=\sum_G P(G|\cdot)\log P(G|\cdot)$（式 7），最优实验（式 8，推导见附录 A 式 12–15）
+$$(j^*,x^*)=\arg\max_{j,x}\sum_G P(G)\int P(x_{-j}|G,\mathrm{do}(X_j=x))\log P(G|x_{-j},\mathrm{do}(X_j=x))\,dx_{-j}.$$
+两大计算挑战的处理：(i) 结果积分用蒙特卡洛估计（式 9）——对每个图 $G$ 从其隐含干预分布采 $M$ 个样本，图后验由 GP 边际似然（按图分解、闭式）算出；(ii) $x$ 的不可数集合用 GP-UCB（式 11）$a_t(x)=\mu_t(x)+\beta\sigma_t(x)$ 做 BO，对每个候选目标变量 $j$ 各跑一次，共 $d$ 次。
+
+## 估计/经验
+
+全文唯一实证是示例性的 **Figure 2**（p.4）：双变量真模型 $X\sim N(0,1)$、$Y:=2\tanh(X)+\varepsilon$、$\varepsilon\sim N(0,0.1)$；用 15 个样本（5 观测 + 对 $X$、$Y$ 各 5 次干预）拟合两个候选图的 GP 后验，干预值**随机**抽取（并未使用所提的 BO 方案），10 次干预后图后验以 $>99\%$ 置信收敛到正确的 $X\to Y$。没有 BO 对比随机/网格选点的实验，也没有任何基准数据集或与既有主动方法的比较。§6 的定位：变量少、实验昂贵而计算便宜，如为实验科学家（连续、饱和型非线性、周期长）做设计决策支持。
+
+## 开放问题
+
+1. **自列**：DAG 数量超指数增长（Robinson 1973），本文明确只处理小 $d$ 枚举；建议图空间或拓扑序上的 MCMC（Friedman & Koller 2003）或 minimal I-map MCMC（Agrawal et al. 2018）作扩展。
+2. **自列**：GP 超参数在线更新困难——type-2 最大似然每步改变模型、使迭代模型比较失稳，全贝叶斯超先验又毁掉闭式边际似然；折中方案（用初始观测数据拟合后固定）本身有偏，未分析。
+3. **自列**：根节点边际限简单高斯，与「系统复杂度取决于输入与机制二者」（Janzing et al. 2012，站内 1203.3475）相悖；建议狄利克雷过程高斯混合 + 变分推断（Blei & Jordan 2006），未实现。图先验（参考图结构距离、已知等价类、稀疏先验）也只给设想。
+4. **自列**：与约束法（PC 类）及 RESIT（残差独立检验）的组合是未来方向。
+5. **理论缺口**：无任何保证——贪心的一步 EIG 序列策略没有 regret、次优性或后验一致性分析；式 (9) 的 MC 估计有偏且 $M$ 的选取、方差控制未讨论；GP-UCB 的无遗憾理论假设精确（或已知噪声）观测，而这里采集函数评估的是含 MC 噪声的目标，适用性未论证。
+6. **经验验证空白**：核心卖点（BO 选干预值）没有被检验——Fig 2 用的是随机干预值，全文没有「BO vs 随机选择」的收敛速度或样本效率对比，论证停留在构造层面。
+7. **假设过强处**：完美干预、目标与干预值已知、无隐混杂、单变量干预、每次实验单样本；软干预、未知目标、批量设计，以及 ANM 有限样本可识别性如何传导为后验集中率，均未触及。
+
+## 文献谱系
+
+前作：Murphy 2001 与 Tong & Koller 2001——信息论主动选干预的先声，限离散变量与 Dirichlet-多项式共轭模型，是被本文直接对照并超越的对象；Cooper & Yoo 1999、Tian & Pearl 2001、Eaton & Murphy 2007——被动干预数据或干预目标不明的贝叶斯线；Cho et al. 2016、Ness et al. 2017、Agrawal et al. 2019（ABCD 策略）——连续变量的近期扩展，但限线性高斯与有限个干预值；Eberhardt 2006/2008、Hauser & Bühlmann 2014、He & Geng 2008、Ghassami et al. 2017——图层级最优干预理论，但处分布层（无穷数据）且不绑定具体模型，本文以有限样本、单样本实验与之划界；Friedman & Nachman 2000——GP 网络模型来源；Hoyer et al. 2009 与 Peters et al. 2014（RESIT，站内 1309.6779/1412.3775）——ANM 观测式识别需大样本做残差检验，本文的贝叶斯评分正面定位在小样本主动实验；Lindley 1956、Chaloner & Verdinelli 1995——贝叶斯实验设计框架；Srinivas et al. 2010——GP-UCB；Rubenstein et al. 2017（站内 1706.10234）——结构已知时函数的主动学习，本文在其上叠加「结构未知」的不确定性，是方法学上的直接姊妹篇；Lake et al. 2017、Gopnik 1996——「儿童即科学家」的动机。后续：同一作者群沿此线发展出面向更多变量的可扩展贝叶斯主动因果发现。
+
+## 明确不覆盖
+
+不处理隐混杂（因果充分性假设）；不做观测数据的大样本因果发现（PC、RESIT 只提议组合）；不处理软干预、干预目标未知、多变量同时干预与批量设计；不给高维可扩展推断（小 $d$ 枚举）；不处理时序或有环结构；不给 regret/一致性理论保证；无真实数据应用与基线比较。
+
+## 阅读路径
+
+先读 §2 设定与式 (1)，紧接 p.3 顶部的 Table 1——「干预区分等价类」的最小例子；§3–§4 是全文核心：式 (5)–(8)（p.3）给出 EIG 目标、式 (9) 与 Fig 2 示例（p.4）、GP-UCB 式 (11)（p.4–5）；§6「Discussion and open problems」（p.5–6）几乎是一份现成的后续工作清单，逐条读；附录 A 推导极短，附录 B 是 GP 速成（定义 1、式 16–21）。姊妹篇对照：站内 1706.10234（同作者群在因果图已知时对结构函数做 GP 主动干预选择——本文把「图未知」叠加其上，两篇合读即「先学结构再学函数 vs 同时学」的完整图景）；1309.6779 与 1412.3775（ANM 观测式识别及其大样本要求，反衬本文小样本主动路线的动机）；1203.3475（IGCI：复杂度在输入与机制间的分配，§6 讨论根节点边际的出发点）。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 主动因果发现 / 主动结构学习 | active causal discovery / active structure learning |
+| 期望信息增益 | expected information gain |
+| 贝叶斯实验设计 | Bayesian experimental design |
+| 贝叶斯优化 | Bayesian optimisation |
+| 上置信界采集函数 | upper confidence bound acquisition (GP-UCB) |
+| 截断分解 | truncated factorisation |
+| 高斯过程网络 | Gaussian process networks |
+| 加性噪声模型 | additive noise model (ANM) |
+| 因果充分性 | causal sufficiency |
+| 马尔可夫等价类 | Markov equivalence class |
+| 图先验 / 边际似然 | graph prior / marginal likelihood (evidence) |
+
+## 来源定位
+
+`papers/1910.03962.pdf`（9 页，v1）。ANM 式 (1)（p.2）；证据式 (2)–后验式 (3) 与截断分解式 (4)（p.2–3）；Table 1（p.3 顶部）；效用式 (7) 与最优实验式 (8)（p.3）；MC 估计式 (9) 与 Figure 2 示例（p.4）；GP-UCB 式 (11) 与 §5 相关工作（p.4–5）；§6 讨论与开放问题（p.5–6）；附录 A 推导式 (12)–(15) 与附录 B（GP 定义 1、式 16–21）（p.9）。

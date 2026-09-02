@@ -1,0 +1,78 @@
+---
+title: "机制转移评分：稀疏机制转移假设下的异构环境因果发现"
+subtitle: "Ronan Perry et al., arXiv:2206.02013 (2022)"
+description: "把稀疏机制转移假设形式化为可识别性来源：逐对比较环境、统计图所含条件分布的变化数（机制转移评分，MSS），证明真 DAG 在足够多稀疏变化环境下以高概率唯一最小化该评分，并给出与既有方法共享的学习速率。"
+date: 2022-06-04
+categories: [因果推断, 多环境因果发现, 稀疏机制转移]
+paper-id: 2206.02013
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Ronan Perry（MPI IS, Tübingen；University of Washington）；Julius von Kügelgen（MPI IS; University of Cambridge）；Bernhard Schölkopf（MPI IS, Tübingen）——后两位为共同末位作者 |
+| 出处 | arXiv:2206.02013 [cs.LG]；NeurIPS 2022；v2 2022-10-15 |
+| 日期 | 2022-06-04（v1 提交） |
+| 页数 | 26 页（正文 10 页，附录 A–D 含证明与额外实验） |
+
+一句话定位：把 Schölkopf 提出的稀疏机制转移（Sparse Mechanism Shift, SMS）假设首次系统形式化为因果发现的可识别性来源——提出机制转移评分（Mechanism Shift Score, MSS），以「图所含条件分布跨环境改变的计数」给候选 DAG 打分，证明在足够多的稀疏变化环境下真因果图以高概率唯一最小化该评分。
+
+## 问题与模型
+
+研究问题：i.i.d. 数据只能识别马尔可夫等价类（Markov Equivalence Class, MEC），任意（对抗性）分布变化下学习不可能；介于两端的 SMS 假设能否使整个因果结构非参数可识别，变化的多寡如何影响学习速率。
+
+设定（§2）：多环境数据 $\mathcal D=\{D_e\}_{e=1}^{n_E}$，各环境 i.i.d. 于 $P_X^e$。因果图模型（Def 2.1）$P_X=\prod_j P_X(X_j\mid \mathrm{PA}_j)$，隐含因果充分性。核心假设：Asm 2.2 因果忠实性（作用于增广图）；Asm 2.3 共享机制（各环境由对共享 CGM 的未知「软」干预生成，$I^e\subseteq[d]$ 中机制被替换，式 2.3）；Asm 2.4 独立因果机制（ICM：一个机制的改变不携带其他机制的信息）；Def 2.5 增广 CGM（加环境变量 $E$，机制改变处连边 $E\to X_j$，Huang et al. 2020 工具）；Asm 2.6 伪因果充分性（未观测混杂只能是 $E$ 的函数）；Asm 2.7 SMS：$0<|I^e|<d$。
+
+## 识别或主要命题
+
+理论链条（§4–§5）：**Prop. 4.1**（双变量 $X_1\to X_2$）任一因果机制（$P(X_1)$ 或 $P(X_2\mid X_1)$）改变，则反向因子化的 $P(X_1\mid X_2)$ 与 $P(X_2)$ 都改变——证明用忠实性反证，经增广图 d-连通论证（Fig. 2）；**Cor. 4.2** 只有一个机制改变（稀疏性）时双变量因果方向非参数可识别。**Lemma 4.3** $P(X_j\mid Z)$ 改变当且仅当增广图中 $X_j\not\perp_{\mathcal G_{X\cup E}} E\mid Z$；**Cor. 4.4** 把 MEC 内情形分解为三种 d-连通情形；**Cor. 4.5** 真父集下机制的改变蕴含任何其他 DAG 父集下条件分布的改变。
+
+评分定义：$\mathrm{MSS}_j(G;\mathcal P)=\sum_{e'>e}\mathbf 1[P^e(X_j\mid \mathrm{PA}_j^G)\neq P^{e'}(X_j\mid \mathrm{PA}_j^G)]$，$\mathrm{MSS}=\sum_j \mathrm{MSS}_j$。**Prop. 5.1** 真 DAG $G^*$ 逐变量且整体最小化 MSS（最小变化原理的非参数推广）。**Lemma 5.2**（父集可识别）设机制 $i$ 跨环境改变概率 $\rho_i\in[\rho_i^{\mathrm{LB}},\rho_i^{\mathrm{UB}}]$，则 $\Pr[\mathrm{MSS}_j(G^*)<\mathrm{MSS}_j(G)]\ge 1-\big(1-(1-\rho_j^{\mathrm{UB}})\min_i\rho_i^{\mathrm{LB}}\big)^{\lfloor n_E/2\rfloor}$；**Theorem 5.3**（图可识别）$\Pr[\mathcal G_{\mathrm{MEC}}^{\min}=\{G^*\}]\ge 1-|\mathcal G_{\mathrm{MEC}}|\big(1-(1-\min_i\rho_i^{\mathrm{UB}})\min_i\rho_i^{\mathrm{LB}}\big)^{\lfloor n_E/2\rfloor}$；**Cor. 5.4** 各 $\rho_i$ 有界离开 0 与 1 时 $n_E\to\infty$ 依概率 1 唯一识别真 DAG。速率同样适用于 ICP 与 Ghassami/Huang 等既有方法（此前缺稀疏性分析）；$\mathcal G_{\mathrm{MEC}}^{\min}$ 是一种 $\Psi$-MEC（Jaber et al.）。
+
+## 估计/经验
+
+实现（§5–§6）：先由标准方法得 MEC，再在其中最小化 MSS；评分可分解，共享机制只需检验一次；条件分布变化检验可任取（Fisher-Z、核条件独立性检验 KCI、GAM 不变残差检验），阈值 $\alpha=0.05/d$（Bonferroni），另有对环境对求和 $1-p$ 值的「软」评分。oracle 实验（6 变量、边密度 0.3、5 环境、半数机制改变、50 次重复，Fig. 4）证实环境数增加时 MSS 恢复完整 DAG 而池化 PC 停留于 MEC，变化过稀或过密都降低速率（恰如 Thm 5.3 预测）。估计器比较（3 环境、每环境 500 样本、每环境 2 个变化，Fig. 5A）：KCI 兼顾精度与召回最优，Fisher-Z 因参数假设不符最差，软评分提高召回、损失精度。方法比较（Fig. 5B）：MSS（硬 KCI）优于线性最小变化法 MC 与池化 PC 两阶段法——后者精度高但召回不高于基础 MEC。Sachs 蛋白流式数据（9 环境、11 蛋白）：从 Sachs MEC 出发用 KCI 得唯一最小化 DAG，多数边取向与已知网络一致，不符边（PIP2→PIP3、Mek→Raf、PKA–PKC–P38 三角）恰为文献中涉环路或方向歧异者。
+
+## 开放问题
+
+1. **计算瓶颈（自认）**：需先准确获得完整 MEC 并逐对做分布变化检验，大样本与多环境是瓶颈，朴素复杂度 $O(|\mathcal G_{\mathrm{MEC}}|\,d\,n_E^2)$。
+2. **假设强且难验证（自认）**：伪因果充分性 stringent；SMS「是关于因果系统的假设而非事实」，必要却无从检验。
+3. **环境划分已知（自认）**：可借环境推断技术放松，未做。
+4. **猜想未证（自认）**：oracle「硬」MSS 等价于逐对环境的池化 PC。
+5. **理论与经验的间隙（自认+我识别）**：变化稠密但只有少数幅度大到经验可辨时方法仍可能有效——「经验可辨」的稀疏性与 $|I^e|$ 稀疏性是两个概念，理论只覆盖后者。
+6. **速率未含统计误差（我识别）**：Thm 5.3 的速率只关于环境数 $n_E$ 与机制改变概率，条件分布检验的有限样本误差（每环境样本量 $n_e$）未进入界。
+7. **只能纠向、不处理环（我识别）**：搜索限于 MEC 之内，骨架错误无法纠正；Sachs 应用中的不符边被归因于环路，而方法本身不能表示环。
+8. **不变机制无法定向（我识别）**：$\rho_i\to 0$ 的变量父集不可识别，哪些变量「值得收集更多环境」无主动采样式分析。
+
+## 文献谱系
+
+前作（角色）：Schölkopf et al. 2021（SMS 假设出处）与 Peters et al. 2017 / Schölkopf et al. 2012（ICM 原理，Asm 2.4 的依据，即站内 1112.2738、1206.6471 的稳健性与因果/反因果脉络）；Huang et al. 2020——增广 CGM 工具与被比较的池化 PC 两阶段法（本文证明其第一阶段学不出 MEC 之外的结构）；Peters et al. 2016 / Heinze-Deml et al. 2018（ICP 及其非线性版本与检验套件，GAM 检验取自后者）；Ghassami et al.（线性多域最小变化法 MC——MSS 是其非参数推广与对比对象）；Jaber et al.（$\Psi$-MEC 刻画 $\mathcal G_{\mathrm{MEC}}^{\min}$）；Tian & Pearl、Simon 不变性准则——历史前驱；Zhang et al.（KCI）与 Park et al.——估计器来源；Sachs et al. 2005——案例数据。后续：作者明确展望 MSS 作为因果表示学习的归纳偏置（类比 ICP 启发 IRM），属「因果用于应对分布偏移」主线的中枢一环。
+
+## 明确不覆盖
+
+不处理环或非 DAG 结构；不修正骨架错误（只在 MEC 内定向）；不做主动干预（环境是自然软干预）；不假设干预目标已知；隐混杂只允许为 $E$ 的函数；不学机制参数与分布本身；不做环境划分推断。
+
+## 阅读路径
+
+先读 §1 与 Fig. 1（「稀疏变化给出可识别性、池化致密化」的全文直觉）；§2 的 Asm 2.2–2.7 与 Def 2.5 是所有定理的开关；§4 按 Prop 4.1→Cor 4.2→Lemma 4.3→Cor 4.4/4.5 顺序读，双变量证明是全部技术的原型；§5 的 MSS 定义、Prop 5.1 与 Thm 5.3 是主结果；§6 按 Fig. 4（oracle 验证理论）→Fig. 5A（估计器）→Fig. 5B（方法比较）→Sachs 案例读；§7 含全部自认局限与展望。姊妹篇对照：站内 1112.2738（ICM/稳健性纲领的原始表述，Asm 2.4 的思想源头）与 1206.6471（因果/反因果学习：另一条用因果方向解释学习难度的路线）；2205.12934 AVICI（对照：用模拟器先验而非 SMS 获得定向能力）与 2206.01665 BaCaDI（对照：显式干预但目标未知，稀疏干预先验同样援引 SMS）。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 稀疏机制转移假设 | sparse mechanism shift (SMS) hypothesis |
+| 机制转移评分 | Mechanism Shift Score (MSS) |
+| 增广因果图模型 | augmented causal graphical model |
+| 伪因果充分性 | pseudo causal sufficiency |
+| 共享机制 | shared mechanisms |
+| 马尔可夫等价类 | Markov equivalence class (MEC) |
+| 忠实性 | (causal) faithfulness |
+| 池化数据 | pooled data |
+| 核条件独立性检验 | kernel conditional independence (KCI) test |
+| 不变因果预测 | invariant causal prediction (ICP) |
+
+## 来源定位
+
+`papers/2206.02013.pdf`（26 页）。关键内容：Def 2.1–Asm 2.7（§2, pp.3–4，其中 Asm 2.3 式 2.3、Asm 2.7 式 2.4）；Prop 4.1 与 Cor 4.2（§4, p.5）；Lemma 4.3、Cor 4.4（三种情形 Fig. 3）、Cor 4.5（§4, pp.5–6）；MSS 定义与 Prop 5.1（§5, p.6）；Lemma 5.2 与 Theorem 5.3、Cor 5.4（§5, p.7，证明在附录 B）；软评分定义（§6, p.8）；oracle 实验 Fig. 4（§6, p.8）；估计器与方法比较及 Sachs 案例 Fig. 5（§6, p.9）；局限与展望（§7, p.10）。

@@ -1,0 +1,104 @@
+---
+title: "反因果学习中的泛化"
+subtitle: "Niki Kilbertus et al., arXiv:1812.00524 (2018)"
+description: "立场文：监督学习大多是由效果反推原因的反因果任务，直接求逆在支撑集之外（强泛化）先天困难；若能查询因果模型，则在原因空间上搜索并用因果模型验证即可保证强泛化（Proposition 1），对抗鲁棒性、编解码器与解耦皆可读成该范式的注脚。"
+date: 2018-12-03
+categories: [因果推断, 分布偏移]
+paper-id: 1812.00524
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Niki Kilbertus（MPI for Intelligent Systems, Tübingen / University of Cambridge）、Giambattista Parascandolo（MPI IS / MPI ETH Center for Learning Systems）、Bernhard Schölkopf（MPI IS）；按字母序署名 |
+| 出处 | arXiv:1812.00524v1 [cs.LG]；短版曾报告于 NeurIPS 2018 workshop "Critiquing and correcting trends in machine learning" |
+| 日期 | 2018-12-03 |
+| 页数 | 12 页（正文 8 页 + 文献） |
+
+一句话定位：承 1206.6471 的因果/反因果学习之分，把「为何 i.i.d. 之外的强泛化如此困难」归因于反因果方向，并论证出路不是更好的求逆器，而是「反因果模型驱动搜索 + 因果模型验证」的新范式。
+
+## 问题与模型
+
+研究问题：为何同一套「足够数据 + 大模型即可学会任何东西」的信念在迁移学习、域适应（domain adaptation）、协变量偏移（covariate shift）下系统性失效？因果方向与反因果方向（anti-causal，由效果 $Y$ 反推原因 $X$）的学习难度差异何在，后者可否补救？
+
+模型与定义（§1–2）：标准学习设定由四条组成——(C1) 可测空间 $(\mathcal X,\Sigma_{\mathcal X})$、$(\mathcal Y,\Sigma_{\mathcal Y})$；(C2) 未知抽样分布 $P(X)$（不必满支撑）；(C3) 未知固定条件分布 $P(Y|X)$；(C4) 从 $P(X,Y)=P(Y|X)P(X)$ 的 i.i.d. 有限样本 $S$。据此定义：
+
+- **弱泛化（weak generalization）**：在 (C1)–(C4) 下泛化到同一 $P(X,Y)$ 的未见样本。由 Glivenko–Cantelli 一致收敛，样本最终覆盖 $\mathrm{supp}(P(X))$，故弱泛化本质是**插值（interpolation）**，ERM 一致性即可覆盖。
+- **强泛化（strong generalization）**：外推到 $\mathrm{supp}(P(X))$ 之外。文中自明这是非正式术语（脚注 2：与强普遍一致性无关）。
+
+支撑强泛化的是两条非形式前提：**连续性法则（law of continuity）**（自然由连续普适的机制治理，「Natura non facit saltus」，Leibniz）与「识别的直觉信念」——拟合训练数据的模型不只是模仿机制，而是（近似地）识别了它。在因果方向上，这两条与独立因果机制（Independent Causal Mechanisms, ICM）原则相容：机制 $P(Y|X)$ 对原因分布 $P(X)$ 的变化不变，而 $P(X)$ 可以换支撑（域适应的典型情形），故可望强泛化。反因果方向上 $P(X|Y)$ 一般不随 $P(Y)$ 的变化不变——这正是 (C3) 中「固定机制」只安放在因果方向的不对称。为简化，全文排除混杂（脚注 3：$X,Y$ 同为某因之果的混杂情形与反因果情形性质相近）。
+
+MNIST 例子（§2，Fig 1）给出支撑结构：原因是书写意图的脑状态，效应是像素图像；标签 $l\in L$ 是宏观性质，界定原因子集 $S_l\subset\mathcal X$，$\mathrm{supp}(P(X))\subset\bigcup_{l\in L}S_l$ 但 $S_l\setminus\mathrm{supp}(P(X))$ 可非空（训练只见过无横线的 7，仍能给带横线的 7 以标签），甚至支撑之外还有可自然延拓标签的原因（手写字母）——强泛化的期望正是来自这种支撑延拓。
+
+## 识别或主要命题
+
+全文是立场文，唯一编号结果是构造性命题，其余为论证链。
+
+**第 3 节：反因果方向本质困难的证据链**（好行为的函数可以没有好行为的逆）：
+
+1. 病态逆问题（ill-posed inverse problem）：从数据识别机制（Vapnik 意义下的 identification，区别于模仿）是逆问题，效应的微扰（测量噪声）可致推断原因的任意偏差；Hilbert 空间之间有界线性算子的 Moore–Penrose 广义逆可不连续。
+2. 描述复杂度：因果方向的 Kolmogorov 复杂度描述更短（Janzing & Schölkopf 2010 的算法马尔可夫条件），基于 MDL 的实用方法能从数据判向——反因果方向表达复杂度更高的实证证据。
+3. 密码学单向函数（one-way function）：素因子分解、离散对数、二次剩余——多项式时间可算、任何随机算法求逆可忽略，即求逆只能穷举。
+4. NP 完全：子集和（subset sum，找 $\alpha\in\{0,1\}^d$ 使 $x^\top\alpha=s$）正向易（点积易学易执行、对任意取值一致），逆向无多项式算法；$\ell_0$ 稀疏重构本质上是子集和，故 NP 完全。
+5. 输入域限制：正向定义域天然可延拓（整数乘法），限制到素数元组后逆（分解）才变难——正向域的收缩即逆问题的解空间收缩，与 $\mathrm{supp}(P(X))\subset\mathcal X$ 的观察同构。
+6. 表达层面：Abel–Ruffini 定理——五次以上一般多项式方程无代数解；$f(x)=x+\sin(x)$ 是初等双射却无初等逆。
+
+作者随即自答「为何反因果学习实践上常有效」：并非所有逆都病态；只恢复原因的高层性质（标签而非脑状态）可大幅降低难度；弱泛化域内近似保证本就覆盖复杂逆函数——但强泛化域内这些安慰全部失效。
+
+**Proposition 1（构造性反因果学习，§4.1）**：假设可无限次查询有限域 $\mathcal X$ 上的确定性因果模型 $f:\mathcal X\to\mathcal Y$，则在反因果方向，对每个 $y\in\mathcal Y$ 都能判定它是否有合法原因，若有则找出 $x\in\mathcal X$ 使 $y$ 为 $x$ 之效应。证明即枚举 $\mathcal X$ 并检验 $f(x)=y$。可数无限域上数学成立但可能不停机；一般无限域的问题化为寻找高效**搜索启发式**——i.i.d. 下训练的监督模型恰是最有希望的候选启发式（驱动搜索），因果模型负责验证与外推。文中明示该命题假设因果模型及其全部适用域已知，实践中模型本身也要学。
+
+**Corollary（§4.2）**：构造性反因果学习不可被欺骗——因每个原因只有单一标签与单一效应，程序要么给出合法匹配要么拒绝分类，故对抗样本对它无效。渲染任何茶壶都不会产生「猫加小噪声」的图像；穷尽原因仍无匹配（图像被大幅篡改）则（正确地）拒绝分类。
+
+**领域映射（§4.2，论证链的展开）**：前馈网络计算步数有上界，不能实现迭代搜索，需 RNN 等自适应计算模型；对抗样本=强泛化失败，生成式防御（Defense-GAN、PixelDefend 等）即构造性反因果学习；编解码器中解码器对应因果机制、编码器对应反因果求逆，仅前者可望跨任务泛化、训练中充当验证器与正则项；解耦（disentangling，站内术语表的解耦表示）拆成「发现好的潜维度（定因果机制的定义域）」与「逐例反因果推断」两个子任务，现有方法只解前者；贝叶斯推断 $P(X|Y)=P(Y|X)P(X)/P(Y)$ 即先验采样驱动、正向机制验证的内置搜索（贝叶斯网络推断/MAP/结构学习的 NP 难结果与第 3 节呼应）；引力波参数估计（GW150914：MCMC 模拟数十万组参数的波形再匹配观测）、ABC、vision as inverse graphics、AlphaGo（在博弈的真实因果模型上搜索、网络引导）均为「搜索+验证」的既有实例；Feynman 的「猜想—计算—对比」科学方法与 Kahneman 系统 1/系统 2 被引为同构。
+
+## 估计/经验
+
+本文无自己的实验；所有证据均为文献指认（§4.2 各段 "Experiments:"）：Eslami et al. 2016 与 Putzky & Welling 2017 用 RNN 在已知生成模型上迭代推断，测试时能识别训练中从未同时出现的多物体（强泛化的征兆）；对抗防御四篇（Wang 2017、Samangouei 2018、Song 2017、Ilyas 2017）以生成模型合成匹配提升鲁棒性；Lake et al. 2015 用笔画组合的概率程序生成模型做字符的少样本学习。这些数字属被引文献，本篇未提供新基准。
+
+## 开放问题
+
+1. **自列**：因果模型本身未知时须先学之，"might be hard in itself"——本文对「学到的因果模型不完美时验证环节如何退化」完全未分析；渲染引擎的不完美可被攻击利用（文中自己承认），Corollary 的「不可欺骗」依赖理想模型。
+2. **自列（隐含）**：Proposition 1 只覆盖有限域，可数域可能不停机；连续域 $\mathcal X$ 上 $f(x)=y$ 的精确验证在测量噪声下无意义，引入容差 $\|f(x)-y\|<\epsilon$ 后小扰动仍可能造成匹配出的 $x$ 剧烈跳动——病态性以另一形式回流，文中未处理。
+3. **理论缺口**：第 3 节的证据链是类比而非归约——没有任何定理把「反因果学习的强泛化困难」形式化（单向函数存在性本身未证；「识别的直觉信念」无定义无度量）。强泛化自称非正式术语，全文缺少可证伪的刻画。
+4. **搜索效率无保证**：无限域上依赖启发式引导搜索，但对启发式好坏（反因果模型捕获原因空间结构的程度）没有任何界；渲染引擎分类被自认「随机搜索可能极慢」。
+5. **标签的宏观性未建模**：标签是低层原因的宏观性质（多对一商），Proposition 1 找到的是某个合法原因 $x$，未说明如何从 $x$ 恢复宏观标签；「发现潜维度」与「逐例推断」二分中的第二任务被明示为难点而未解。
+6. **经验验证空白**：全文无自己的实验，「搜索+验证优于直接求逆」这一核心主张没有对照基准的定量检验；后续文献（如 von Kügelgen et al. 2021 对自监督学习的因果分析、Schölkopf et al. 2021 因果表示学习纲领 2012.07398）沿此方向推进，也侧面说明本篇停留在纲领层。
+
+## 文献谱系
+
+前作：Schölkopf et al. 2012（站内 1206.6471）与 Janzing & Schölkopf 2010——因果/反因果之分与算法马尔可夫条件，本文的直接地基；Daniusis et al. 2010、Shajarisales et al. 2015——ICM 原则的可操作化；Peters, Janzing & Schölkopf 2017《Elements of Causal Inference》——机制不变性与 MNIST 例子出处；Vapnik 1998——模仿/识别之别与病态逆问题；Kurková 2004、Rosasco et al. 2005、Bertero et al. 1988——逆问题与学习理论的接口；Mukherjee et al. 2006、Bousquet & Elisseeff 2002、Feldman & Vondrak 2018——稳定性与泛化的等价，被引以连接可学习性与稳定性；Szegedy et al. 2013——对抗样本现象；Weichwald et al. 2014、Besserve et al. 2017/2018——解码器因果、编码器反因果的实证刻画；Kos et al. 2017——VAE 对抗攻击被重释为对编码器（反因果部件）的攻击；Eslami et al. 2016、Putzky & Welling 2017、Graves 2016、Figurnov et al. 2017——自适应计算时间的证据与工具；Lake et al. 2013/2015/2016——因果生成模型做单样本/少样本学习；Abbott et al. 2016、Rubin 1984、Beaumont——物理模型可解时的搜索式推断（引力波、ABC）；Loper & Black 2014、Tassa et al. 2012、Silver et al. 2016、Balog et al. 2017——逆图形、在线规划、AlphaGo、程序归纳的搜索实例；Kahneman 2011、Griffiths & Tenenbaum 2009、Ullman et al. 2010——认知层的同构。后续：本文「搜索+验证」纲领由因果表示学习（Schölkopf et al., arXiv:2012.07398）与自监督学习的因果分析等线继承；站内 1509.08056/1903.01672 则代表「用分布变化学习因果结构」的互补路线。
+
+## 明确不覆盖
+
+不处理混杂情形（脚注 3 只顺带指出其与反因果相似）；不给「强泛化」形式定义也不证任何困难性定理；不提出新算法、新基准或新实验；不分析半监督/协变量偏移的具体可行性条件（那是 1112.2738 与 1206.6471 的任务）；不给解耦一个公认定义（只指出其缺失）；不讨论学因果模型本身的方法；不涉及多变量/循环因果结构。
+
+## 阅读路径
+
+先读 §1 的 C1–C4、弱/强泛化之别与连续性法则（全文立论的裂缝正在「直觉信念」的非形式性上）；§2 精读 ICM 不对称与 MNIST 支撑结构（$S_l$、$\mathrm{supp}(P(X))$、Fig 1–2）；§3 是证据链，可按「病态性→复杂度→计算复杂性→表达」的顺序快读；§4.1 的 Proposition 1 与 Corollary 是全文唯一编号结果，务必与 Fig 2 的「搜索+验证」回路对照；§4.2 各段可按兴趣选读。姊妹篇对照：站内 1206.6471（因果/反因果学习的原始纲领，本文是其强泛化篇）；站内 1112.2738（同一框架下协变量偏移/半监督的逐任务分析，先读它有助于理解 ICM 不对称如何落到具体场景）。阅读本文时建议带着一个疑问：Proposition 1 的「已知因果模型」假设在多大程度上把问题搬到了别处。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 反因果学习 | anti-causal learning |
+| 弱泛化 | weak generalization |
+| 强泛化 | strong generalization |
+| 连续性法则 | law of continuity |
+| 识别的直觉信念 | intuitive belief (of identification) |
+| 病态逆问题 | ill-posed inverse problem |
+| Moore–Penrose 广义逆 | Moore–Penrose generalized inverse |
+| 单向函数 | one-way function |
+| 子集和问题 | subset sum |
+| 算法马尔可夫条件 | algorithmic Markov condition |
+| 构造性反因果学习 | constructive anti-causal learning |
+| 搜索启发式 | search heuristic |
+| 变化解耦 | disentangling (factors of variation) |
+| 视觉即逆图形 | vision as inverse graphics |
+| 近似贝叶斯计算 | approximate Bayesian computation (ABC) |
+| 自适应计算时间 | adaptive computation time |
+
+## 来源定位
+
+`papers/1812.00524.pdf`（12 页）。关键内容：C1–C4 与弱/强泛化、连续性法则（p.1–2）；ICM 不对称与 MNIST 的 $S_l$ 支撑结构、Fig 1–2（p.3–4）；§3 六类困难（病态逆问题、MDL、单向函数、子集和/$\ell_0$、输入域限制、Abel–Ruffini）（p.4–5）；Proposition 1（p.5）；Corollary 与各领域推论（p.6–8）；§5 相关工作、§6 结论（p.8）。

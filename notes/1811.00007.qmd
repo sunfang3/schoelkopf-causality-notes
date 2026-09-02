@@ -1,0 +1,93 @@
+---
+title: "干预稳健性分数：用 do-算子验证解耦表示"
+subtitle: "Raphael Suter et al., arXiv:1811.00007 (2018)"
+description: "给解耦（disentanglement）一个因果定义——生成因子互无因果效应的 C→G→X 结构因果模型——并据此定义可从观测数据 O(N) 估计的干预稳健性分数 IRS，把解耦与域偏移稳健性统一为同一度量的特例；dSprites 上五模型评测发现互信息类指标漏检的脆弱维度。"
+date: 2018-10-31
+categories: [因果推断, 表示学习]
+paper-id: 1811.00007
+lang: zh-CN
+---
+
+## 导览
+
+| 项目 | 内容 |
+|---|---|
+| 作者 | Raphael Suter（ETH Zurich 计算机系）、Đorđe Miladinović（ETH）、Bernhard Schölkopf（MPI IS, Tübingen）、Stefan Bauer（MPI IS；ETH） |
+| 出处 | arXiv:1811.00007 [stat.ML]；v1 2018-10-31，站内 PDF 为 v2（2019-05-13）；ICML 2019（PMLR 97） |
+| 日期 | 2018-10-31 |
+| 页数 | 24 页（正文与文献 8 页 + 附录 16 页） |
+
+一句话定位：在解耦表示学习缺乏公认定义与验证程序之际（Higgins et al. 2018 的呼吁），把「解耦」从潜空间的启发式性质移到数据生成因果过程上，用 do-算子定义编码的干预效应，得到可计算的稳健性度量——与 1806.01094 同属「分组/干预下稳健表示」脉络的度量论一极。
+
+## 问题与模型
+
+研究问题：下游任务只需特征的稳定子集（抓取要知道形状与位置、无需颜色），故表示须对冗余因子（nuisance factor）的干预不变；但现有指标（特征重要性、互信息）建立在「一个 $Z_i$ 捕捉一个 $G_k$」的配对直觉上，无法发现编码对冗余因子的脆弱性，且无监督验证至今不可行，社区退而用 latent traversal 目测。
+
+**Definition 1（解耦因果过程，§3.1）**：$X$ 由 $K$ 个生成因子 $G$ 驱动（$G\to X$），$G$ 可受 $L$ 个混杂 $C$ 影响，SCM 为
+$$C\leftarrow N_c,\quad G_i\leftarrow f_i(\mathrm{PA}^C_i,N_i),\quad X\leftarrow g(G,N_x),$$
+噪声联合独立，且 $\forall i\neq j:\ G_i\not\to G_j$（因子间无总因果效应）。这样的 $G_i$ 称基本成分（elementary ingredients），体现独立机制（IM）原则（Schölkopf et al. 2012；Peters et al. 2017），实践中假设 $L\ll K$。编码 $E:X\to Z$（如 VAE 后验均值，$K'\geq K$ 维）是逆向代理；干预对编码的影响定义为 $p(z_L\mid do(G_J\leftarrow g'_J))=\int q_\varphi(z_L\mid x)\,p(x\mid do(G_J\leftarrow g'_J))\,dx$。与条件化的区别：混杂（如 3D 打印能力限制形状×颜色组合）下 $p(z\mid g'_J)$ 混入形状效应，do- 算子按定义隔离因果效应。
+
+## 识别或主要命题
+
+**Proposition 1（解耦因果过程的七条性质，§3.1，证明附录 B）**：(a) $p(x\mid g)$ 是对 $p(g_i)$ 变化不变的因果机制；(b) 一般 $G_i\cancel\perp G_j$，但条件于混杂独立 $G_i\perp G_j\mid C$；(c) 观测到 $X$ 反使因子相依 $G_i\cancel\perp G_j\mid X$（解释了为何仅靠统计独立性正则的解耦法在原理上错位）；(d) $I(X;G)=I(X;(G,C))$——$G$ 已含 $C$ 中与 $X$ 相关的信息；(e) 干预 $G_j$ 不改变 $G_i$；(f) $G_{\setminus j}$ 是有效调整集，后门准则成立：$p(x\mid do(G_j\leftarrow g'_j))=\int p(x\mid g'_j,g_{\setminus j})p(g_{\setminus j})\,dg_{\setminus j}$，观测数据即可估计干预效应；(g) 无混杂时 $p(x\mid do(G_j\leftarrow g'_j))=p(x\mid g'_j)$。
+
+度量链（§4）：**Definition 2** PIDA（干预后分歧）$=d\big(\mathbb{E}[Z_L\mid do(G_I\leftarrow g_I)],\ \mathbb{E}[Z_L\mid do(G_I\leftarrow g_I,G_J\leftarrow g'_J)]\big)$；取 $\sup_{g'_J}$ 得最坏情形 MPIDA，再对 $g_I$ 取期望得 EMPIDA——固定关心的因子 $G_I$、扰动冗余因子 $G_J$ 时期望编码的最大漂移。**Definition 3** 归一化：
+$$\mathrm{IRS}(L\mid I,J)=1-\frac{\mathrm{EMPIDA}(L\mid I,J)}{\mathrm{EMPIDA}(L\mid\varnothing,\{1,\dots,K\})},$$
+1 为完全稳健、0 为无稳健性（解释类似回归的 $R^2$）。两个特例：解耦分数 $D_l=\max_i \mathrm{IRS}(\{l\}\mid\{i\},\{1,\dots,K\}\setminus\{i\})$（式 3，最大化子 $i^\ast$ 即 $Z_l$ 稳健捕捉的因子）；域偏移稳健性 $\mathrm{IRS}(L\mid K\setminus S,S)$（$G_S$ 为域变量）——解耦与域偏移稳健性由此统一为同一度量的特例。
+
+## 估计/经验
+
+**Proposition 2 + Algorithm 1（§5，证明附录 C）**：由 Prop 1(f) 后门准则，干预期望经重要性加权 $w_i\propto p(g_{\setminus(I\cup J)})/p(g^{(i)})$（式 7）从观测数据估计（常出现的 $g_I,g_J$ 组合被降权以校正混杂）；散列表两次划分数据集，预处理与求和各一趟，总复杂度 $O(N)$。附录 A.1：dSprites 类完全交叉无噪数据集上 $|D^{(k,l)}_{I,J}|=1$ 且无混杂，直接用条件均值即可。
+
+实验（§6，dSprites 五因子 shape/scale/orientation/posX/posY；五模型 × 10 维：VAE、Annealed β-VAE、DIP-VAE、FactorVAE、β-TCVAE，均用原始发表超参；已并入 disentanglement lib）：Table 1 中 IRS 排名 β-TCVAE 0.72 最优、普通 VAE 0.33 最差，与 FI（Eastwood & Williams）/MI（Ridgeway & Mozer）总体正相关（Figure 3）且与 Locatello et al.（2018）大规模评测一致。关键发现：MI 判为高解耦的维度可仍不稳健——DIP 模型的 $Z_6$ 对 scale 近乎线性（FI 前 18%、MI 前 33%）但 IRS 居末 4%，因为 posX/pose 的改变仍会大幅移动其取值（Figure 4 下行）；互信息类指标对高噪声关系与多因子累积效应（罕见事件）造成的脆弱性失明，IRS 专查这些情形。可视化技术（§6.3）：对每个 $Z_l$ 画 $\mathbb{E}[Z_l\mid g_{i^\ast},do(G_j\leftarrow g'_j)]$ 随 $g'_j$ 的曲线族，稳健解耦的签名是除第 $i^\ast$ 列外全为水平线。
+
+## 开放问题
+
+1. **混杂情形留作未来（作者自列，§7）**：结论明言「特别是含混杂的探索留给未来研究」；实验只用无混杂、完全交叉的 dSprites，重要性加权估计器（式 7）在真实混杂数据上的偏差–方差行为未验证。
+2. **需要生成因子真值标签（我识别）**：Algorithm 1 输入是 $\{(x^{(i)},g^{(i)})\}$——IRS 是有监督验证度量，对「无监督验证解耦」这一核心难题没有推进（作者亦承认）。
+3. **离散化与组合爆炸（作者自认，附录 C 末）**：连续因子须离散化，$|D^{(k,l)}_{I,J}|$ 随 $|I|,|J|$ 指数衰减；$|I|,|J|=1,2,3$ 之外估计不可行，等价于只能查低阶交互，而多因子联合脆弱恰是 MPIDA 上界想抓的对象。
+4. **定义依赖强因果假设（我识别）**：Definition 1 要求因子互无总因果效应且 $L\ll K$、$p(x\mid g)$ 机制不变——真实数据上均不可检验；若因子间确有因果，Prop 1(f) 的后门论证失效，IRS 的干预语义随之落空。
+5. **最坏情形度量的统计脆弱性（我识别）**：MPIDA 取 sup，样本下由最大经验偏离决定；作者辩称「期望值距离对离群点不敏感」仅部分成立——期望本身稳健，但 sup 选出的组合仍受尾部噪声支配。
+6. **与配对式指标的系统偏差未解释（我识别）**：β-TCVAE 在 FI 上倒数第一（0.16）却 IRS 第一（0.72），作者归因于未把 shape 计入调参与死维度的平均方式，此类口径差异说明各指标的「解耦」定义实际不可通约，本文未给调和原则。
+7. **后续定位（后续文献）**：Locatello et al.（2019, ICML）表明无偏置则解耦不可能且指标间相关性弱，IRS 作为验证度量同样继承「对生成过程族的外部效度」问题；作者设想以 IRS 为目标的稳健解耦训练算法，本文未实现。
+
+## 文献谱系
+
+前作：Schölkopf et al.（2012, 站内 1206.6471）与 Peters et al.（2017）——IM/自主性假设来源，Definition 1 的直接依据；Pearl（2009）/Spirtes et al.（1993）——do-算子与后门准则（Prop 1(f) 的工具）。被评估方法：β-VAE（Higgins et al. 2017）、FactorVAE（Kim & Mnih 2018）、β-TCVAE（Chen et al. 2018）、DIP-VAE（Kumar et al. 2018）、Esmaeili et al.（2018）层级解耦（Prop 1(b) 使其在有混杂时成为问题）；被比较指标：FI/informativeness（Eastwood & Williams 2018）、MI（Ridgeway & Mozer 2018）——本文证明其盲区。概念近邻：Besserve et al.（2018）——定义了但未使用的 extrinsic disentanglement，PIDA 是其可计算化；Locatello et al.（2018, arXiv:1811.12359）——不可能定理与 disentanglement lib（实验基建与排名佐证）；Rojas-Carulla et al.（2018）——按不变性选特征的思想来源；Thomas et al.（2017）——独立可控特征；Hyvarinen et al.（2018）——非线性 ICA 可辨识性亦依赖类似「独立机制」假设。后续：干预稳健性被用于域偏移与迁移场景化；与站内 1806.01094 相互映照——coroICA 用组间协方差不变性稳健化解混，本文用干预不变性度量编码稳健性。
+
+## 明确不覆盖
+
+不给无监督验证方案（需因子标签）；不含混杂数据集的实验（尽管估计器支持）；不提出或改进解耦训练算法（仅验证）；不处理因子间存在因果效应的生成过程；不用 dSprites 之外的基准；不定义「解耦表示」本身的充分条件（只定义生成过程解耦 + 编码稳健性）；不做指标的统计不确定性刻画；不讨论 $K'<K$ 的欠完备编码。
+
+## 阅读路径
+
+先读 §1（动机与贡献列表）与记号段；§2 记住 FI/MI 两个对照指标（附录 D 有详版）；§3 是理论地基——Definition 1、Figure 1–2 与 Prop 1 的 (c)(f)(g) 三条尤其重要（(c) 解释独立性正则的错位，(f) 是估计的合法性来源）；§4 按定义链 PIDA→MPIDA→EMPIDA→IRS（式 2）读，两个特例（式 3 与域偏移）说明统一性；§5 的 Algorithm 1 配附录 A 的式 (6)–(7)（重要性加权推导）一起读；§6 从 Table 1 到 Figure 3（IRS–MI 相关与红框离群点）再到 Figure 4（$Z_6$ 案例，全文价值浓缩），附录 E/F 按需。姊妹篇对照：站内 1806.01094（coroICA：同一「分组稳健表示」目标的统计估计路线，vs 本文的干预度量路线）；站内 1712.00961 与 1804.11130（同承 IM 原则，但用作训练偏置而非验证语义）；Besserve et al.（2018, arXiv:1812.03253，反事实模块性，PIDA 的概念前身）。
+
+## 术语对照
+
+| 中文 | English |
+|---|---|
+| 解耦（解纠缠） | disentanglement |
+| 解耦因果过程 | disentangled causal process |
+| 生成因子 | generative factors |
+| 基本成分 | elementary ingredients |
+| 干预后分歧 | post interventional disagreement (PIDA) |
+| 最大干预后分歧 | maximal post interventional disagreement (MPIDA) |
+| 期望最大干预后分歧 | expected MPIDA (EMPIDA) |
+| 干预稳健性分数 | interventional robustness score (IRS) |
+| 干预效应 | interventional effect |
+| 后门准则 | backdoor criterion |
+| 调整集 | adjustment set |
+| 有效调整 | adjusted estimation / importance weighting |
+| 冗余因子 | nuisance factor |
+| 域偏移稳健性 | domain shift robustness |
+| 潜空间遍历 | latent traversal |
+| 特征重要性（指标） | feature importance (FI) score |
+| 互信息（指标） | mutual information (MI) score |
+| 信息量分数 | informativeness score |
+| 完全交叉数据集 | (fully) crossed dataset |
+| 死维度/非活跃分量 | inactive components |
+
+## 来源定位
+
+`papers/1811.00007.pdf`（24 页）。关键内容：动机与贡献 §1（p.1–2）；Definition 1 与 Figure 1–2（p.2–3）；Proposition 1 (a)–(g)（p.3）；PIDA/MPIDA/EMPIDA 定义 §4（p.4）、IRS 定义式 (2) 与解耦特例式 (3)（p.4–5）；Algorithm 1 与 Proposition 2（p.5）；Table 1 五模型四指标（p.6）；Figure 3 IRS–MI 关系与红框案例（p.6）；Figure 4 可视化技术与 $Z_6$ 案例（p.7）；结论 §7（p.8）；重要性加权推导式 (6)–(7) 与交叉数据集简化附录 A/A.1（p.9–10）；Prop 1/2 证明附录 B/C（p.11–12）；FI/MI 指标细节与模型超参附录 D（p.13–14）；可视化附录 E/F（p.15 起）。
